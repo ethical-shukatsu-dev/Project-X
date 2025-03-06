@@ -11,7 +11,7 @@ import { RecommendationResult } from '@/lib/openai/client';
 
 export default function RecommendationsContent() {
   const searchParams = useSearchParams();
-  const userId = searchParams.get('userId');
+  const userId = searchParams?.get('userId') || '';
   
   const [recommendations, setRecommendations] = useState<(RecommendationResult & { id?: string; feedback?: 'interested' | 'not_interested' })[]>([]);
   const [loading, setLoading] = useState(true);

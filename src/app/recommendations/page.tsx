@@ -1,8 +1,6 @@
-"use client";
-
 import {Suspense} from "react";
 import {Skeleton} from "@/components/ui/skeleton";
-import RecommendationsContent from "@/components/recommendations/RecommendationsContent";
+import dynamic from 'next/dynamic';
 
 // Loading fallback component
 function RecommendationsLoading() {
@@ -19,11 +17,20 @@ function RecommendationsLoading() {
   );
 }
 
+// Dynamically import the content component with SSR disabled
+const DynamicRecommendationsContent = dynamic(
+  () => import('@/components/recommendations/RecommendationsContent'),
+  { 
+    ssr: false,
+    loading: () => <RecommendationsLoading />
+  }
+);
+
 // Main page component with Suspense boundary
 export default function RecommendationsPage() {
   return (
     <Suspense fallback={<RecommendationsLoading />}>
-      <RecommendationsContent />
+      <DynamicRecommendationsContent />
     </Suspense>
   );
 }
