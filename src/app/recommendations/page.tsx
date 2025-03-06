@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import CompanyCard from '@/components/recommendations/CompanyCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RecommendationResult } from '@/lib/openai/client';
 
-export default function RecommendationsPage() {
+// Component that uses useSearchParams
+function RecommendationsContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId');
   
@@ -192,5 +193,14 @@ export default function RecommendationsPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function RecommendationsPage() {
+  return (
+    <Suspense fallback={<div>Loading recommendations...</div>}>
+      <RecommendationsContent />
+    </Suspense>
   );
 } 
