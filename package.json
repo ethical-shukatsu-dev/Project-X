@@ -47,6 +47,5 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "bun-vercel": "^1.0.0-alpha.4"
-  },
-  "buildCommand": "bun run build"
+  }
 }
