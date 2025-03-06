@@ -1,8 +1,11 @@
-import OpenAI from 'openai';
-import { Company, UserValues } from '../supabase/client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import OpenAI from "openai";
+import {Company, UserValues} from "../supabase/client";
+import {v4 as uuid} from "uuid";
+import {getOrCreateCompany} from "../companies/client";
 
 // Initialize the OpenAI client
-const openai = new OpenAI({
+const openaiClient = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -12,81 +15,181 @@ export type RecommendationResult = {
   score: number;
 };
 
-// Type for the OpenAI response
+// Define type for recommendation response from OpenAI
 type OpenAIRecommendation = {
-  companyId: string;
-  score: number;
+  name: string;
+  industry: string;
   matchingPoints: string[];
+};
+
+type OpenAIRecommendationResponse = {
+  recommendations: OpenAIRecommendation[];
+};
+
+// Define type for company data from OpenAI
+type OpenAICompanyData = {
+  name: string;
+  industry: string;
+  description: string;
+  size: string;
+  values: Record<string, number>;
+  headquarters?: string;
+  japan_presence?: string;
 };
 
 /**
  * Generate company recommendations based on user values
  */
 export async function generateRecommendations(
-  userValues: UserValues,
-  companies: Company[],
-  count: number = 10
+  userData: UserValues
 ): Promise<RecommendationResult[]> {
-  try {
-    // Prepare the prompt for OpenAI
-    const prompt = `
-      I have a user with the following values and interests:
-      Values: ${JSON.stringify(userValues.values)}
-      Interests: ${userValues.interests.join(', ')}
-      
-      I also have a list of companies:
-      ${JSON.stringify(companies, null, 2)}
-      
-      Please recommend the top ${count} companies that match this user's values and interests.
-      For each recommendation, provide:
-      1. The company ID
-      2. A score from 0-100 indicating how well it matches
-      3. 2-3 specific points explaining why this company matches the user's values
-      
-      Return the results as a JSON array with objects containing: 
-      { companyId, score, matchingPoints }
-    `;
+  const prompt = `
+    Based on the user's values and interests, recommend 5 real companies in Japan 
+    that would be good matches for a university student seeking employment.
+    
+    User values and interests:
+    ${JSON.stringify(userData.values)}
+    ${JSON.stringify(userData.interests)}
+    
+    For each company, provide:
+    - Company name
+    - Industry
+    - 3-5 specific points explaining why this company matches the user's values
+    
+    Format as JSON with this structure: 
+    {
+      "recommendations": [
+        { 
+          "name": "Company Name", 
+          "industry": "Industry", 
+          "matchingPoints": ["point1", "point2", ...] 
+        },
+        // more companies...
+      ]
+    }
+  `;
 
-    // Call OpenAI API
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+  try {
+    const response = await openaiClient.chat.completions.create({
+      model: "gpt-4-turbo",
       messages: [
         {
-          role: 'system',
-          content: 'You are a helpful assistant that recommends companies based on user values and interests.',
+          role: "system",
+          content:
+            "You are a helpful assistant that recommends Japanese companies to university students based on their values and interests.",
         },
-        {
-          role: 'user',
-          content: prompt,
-        },
+        {role: "user", content: prompt},
       ],
-      response_format: { type: 'json_object' },
+      response_format: {type: "json_object"},
     });
 
-    // Parse the response
     const content = response.choices[0].message.content;
     if (!content) {
-      throw new Error('No content in OpenAI response');
+      throw new Error("Empty response from OpenAI");
     }
 
-    const parsedResponse = JSON.parse(content);
-    const recommendations = parsedResponse.recommendations || [];
+    const parsedResponse = JSON.parse(content) as OpenAIRecommendationResponse;
+    const recommendations = parsedResponse.recommendations;
 
-    // Map the recommendations to our format
-    return recommendations.map((rec: OpenAIRecommendation) => {
-      const company = companies.find(c => c.id === rec.companyId);
-      if (!company) {
-        throw new Error(`Company with ID ${rec.companyId} not found`);
-      }
-      
-      return {
-        company,
-        matchingPoints: rec.matchingPoints,
-        score: rec.score,
-      };
-    });
+    // Fetch or create company data for each recommendation
+    const enhancedRecommendations = await Promise.all(
+      recommendations.map(async (rec) => {
+        const company = await getOrCreateCompany(rec.name, rec.industry);
+
+        return {
+          company,
+          matchingPoints: rec.matchingPoints,
+          score: calculateMatchScore(userData, company, rec.matchingPoints),
+        };
+      })
+    );
+
+    return enhancedRecommendations;
   } catch (error) {
-    console.error('Error generating recommendations:', error);
-    throw error;
+    console.error("Error processing recommendations:", error);
+    throw new Error("Failed to generate recommendations");
   }
-} 
+}
+
+// Helper function to calculate match score
+function calculateMatchScore(
+  userData: UserValues,
+  company: Company,
+  matchingPoints: string[]
+): number {
+  // Simple scoring algorithm - can be enhanced
+  return matchingPoints.length * 20; // 20 points per matching point, max 100
+}
+
+export async function fetchCompanyData(
+  companyName: string,
+  industry?: string
+): Promise<Company> {
+  const prompt = `
+    Provide detailed information about "${companyName}" ${
+    industry ? `in the ${industry} industry` : ""
+  } 
+    that would be relevant for university students in Japan seeking employment.
+    
+    Include the following information in JSON format:
+    - name: Full company name
+    - industry: Primary industry
+    - description: A detailed description (100-150 words)
+    - size: Company size (Small/Medium/Large with employee count range)
+    - values: JSON object with company values as numeric ratings from 1-10, such as:
+      {
+        "work_life_balance": 8,
+        "remote_work": 7,
+        "innovation": 9,
+        "social_impact": 6
+      }
+    - headquarters: Headquarters location
+    - japan_presence: Details about their presence in Japan
+    
+    Format the response as valid JSON only.
+  `;
+
+  try {
+    const response = await openaiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a helpful assistant that provides accurate information about companies in Japan for university students seeking employment. Provide information in JSON format only.",
+        },
+        {role: "user", content: prompt},
+      ],
+      response_format: {type: "json_object"},
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("Empty response from OpenAI");
+    }
+
+    const companyData = JSON.parse(content) as OpenAICompanyData;
+
+    // Ensure values are numbers
+    const numericValues: Record<string, number> = {};
+    Object.entries(companyData.values).forEach(([key, value]) => {
+      numericValues[key] =
+        typeof value === "number" ? value : parseInt(value as string, 10);
+    });
+
+    return {
+      id: uuid(), // Generate a UUID for the new company
+      name: companyData.name,
+      industry: companyData.industry,
+      description: companyData.description,
+      size: companyData.size,
+      values: numericValues,
+      logo_url: null, // We could add logo fetching in the future
+      data_source: "openai",
+      last_updated: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error("Error parsing OpenAI response:", error);
+    throw new Error("Failed to parse company data from OpenAI");
+  }
+}
