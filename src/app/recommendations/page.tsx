@@ -4,6 +4,9 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import CompanyCard from '@/components/recommendations/CompanyCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RecommendationResult } from '@/lib/openai/client';
 
 // Component that uses useSearchParams
@@ -80,8 +83,10 @@ function RecommendationsContent() {
           <p className="text-lg mb-8">
             We&apos;re analyzing your values and preferences to find the best company matches for you.
           </p>
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="flex flex-col items-center gap-4 w-full max-w-md mx-auto">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
           </div>
         </div>
       </div>
@@ -91,15 +96,18 @@ function RecommendationsContent() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-8">Oops!</h1>
-          <p className="text-lg mb-8">{error}</p>
-          <button
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
-            onClick={() => window.location.href = '/questionnaire'}
-          >
-            Try Again
-          </button>
+        <div className="max-w-4xl mx-auto">
+          <Card className="mx-auto max-w-md">
+            <CardHeader>
+              <CardTitle className="text-center">Oops!</CardTitle>
+              <CardDescription className="text-center">{error}</CardDescription>
+            </CardHeader>
+            <CardFooter className="flex justify-center">
+              <Button onClick={() => window.location.href = '/questionnaire'}>
+                Try Again
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     );
@@ -199,7 +207,12 @@ function RecommendationsContent() {
 // Main page component with Suspense boundary
 export default function RecommendationsPage() {
   return (
-    <Suspense fallback={<div>Loading recommendations...</div>}>
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8 text-center">
+        <Skeleton className="h-8 w-1/3 mx-auto mb-4" />
+        <Skeleton className="h-4 w-1/2 mx-auto" />
+      </div>
+    }>
       <RecommendationsContent />
     </Suspense>
   );
