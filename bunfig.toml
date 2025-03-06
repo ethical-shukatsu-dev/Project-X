@@ -1,0 +1,22 @@
+# Bun configuration file
+# See https://bun.sh/docs/runtime/bunfig for more information
+
+[install]
+# Use exact versions for dependencies
+exact = true
+
+# Cache dependencies for faster installs
+cache = true
+
+# Automatically update lockfile
+lockfile = true
+
+[dev]
+# Open browser automatically when running dev server
+open = true
+
+# Use hot module replacement
+hot = true
+
+# Set the port for the dev server
+port = 3000 
