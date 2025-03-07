@@ -14,10 +14,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {RecommendationResult} from "@/lib/openai/client";
+import {useTranslation} from "@/i18n-client";
 
-export default function RecommendationsContent() {
+interface RecommendationsContentProps {
+  lng: string;
+}
+
+export default function RecommendationsContent({lng}: RecommendationsContentProps) {
   const searchParams = useSearchParams();
   const userId = searchParams?.get("userId") || "";
+  const {t, loaded} = useTranslation(lng, 'ai');
 
   const [recommendations, setRecommendations] = useState<
     (RecommendationResult & {
@@ -31,30 +37,32 @@ export default function RecommendationsContent() {
   useEffect(() => {
     const fetchRecommendations = async () => {
       if (!userId) {
-        setError("User ID is required");
+        setError(t('recommendations.errors.missing_user_id'));
         setLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`/api/recommendations?userId=${userId}`);
+        const response = await fetch(`/api/recommendations?userId=${userId}&locale=${lng}`);
 
         if (!response.ok) {
-          throw new Error("Failed to fetch recommendations");
+          throw new Error(t('recommendations.errors.fetch_failed'));
         }
 
         const data = await response.json();
         setRecommendations(data.recommendations);
       } catch (err) {
         console.error("Error fetching recommendations:", err);
-        setError("Failed to load recommendations. Please try again.");
+        setError(t('recommendations.errors.general'));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRecommendations();
-  }, [userId]);
+    if (loaded) {
+      fetchRecommendations();
+    }
+  }, [userId, t, loaded, lng]);
 
   const handleFeedback = async (
     recommendationId: string,
@@ -74,7 +82,7 @@ export default function RecommendationsContent() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit feedback");
+        throw new Error(t('recommendations.errors.feedback_failed'));
       }
 
       // Update local state
@@ -89,14 +97,25 @@ export default function RecommendationsContent() {
     }
   };
 
+  // Show loading state while translations are loading
+  if (!loaded) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <Skeleton className="h-8 w-1/3 mx-auto mb-4" />
+          <Skeleton className="h-4 w-1/2 mx-auto mb-8" />
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-8">Finding Your Matches...</h1>
+          <h1 className="text-3xl font-bold mb-8">{t('recommendations.loading.title')}</h1>
           <p className="text-lg mb-8">
-            We&apos;re analyzing your values and preferences to find the best
-            company matches for you.
+            {t('recommendations.loading.description')}
           </p>
           <div className="flex flex-col items-center gap-4 w-full max-w-md mx-auto">
             <Skeleton className="h-12 w-12 rounded-full" />
@@ -114,12 +133,12 @@ export default function RecommendationsContent() {
         <div className="max-w-4xl mx-auto">
           <Card className="mx-auto max-w-md">
             <CardHeader>
-              <CardTitle className="text-center">Oops!</CardTitle>
+              <CardTitle className="text-center">{t('recommendations.errors.title')}</CardTitle>
               <CardDescription className="text-center">{error}</CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-center">
-              <Button onClick={() => (window.location.href = "/questionnaire")}>
-                Try Again
+              <Button onClick={() => (window.location.href = `/${lng}/questionnaire`)}>
+                {t('recommendations.errors.try_again')}
               </Button>
             </CardFooter>
           </Card>
@@ -140,91 +159,118 @@ export default function RecommendationsContent() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8">
-          Your Company Matches
+          {t('recommendations.title')}
         </h1>
         <p className="text-lg text-center mb-8">
-          Based on your values and interests, we&apos;ve found these companies
-          that might be a good fit for you.
+          {t('recommendations.description')}
         </p>
 
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="flex flex-wrap gap-2 h-full">
             <TabsTrigger value="all">
-              All ({recommendations.length})
+              {t('recommendations.tabs.all')} ({recommendations.length})
             </TabsTrigger>
             <TabsTrigger value="pending">
-              Pending ({pendingRecommendations.length})
+              {t('recommendations.tabs.pending')} ({pendingRecommendations.length})
             </TabsTrigger>
             <TabsTrigger value="interested">
-              Interested ({interestedRecommendations.length})
+              {t('recommendations.tabs.interested')} ({interestedRecommendations.length})
             </TabsTrigger>
             <TabsTrigger value="not-interested">
-              Not Interested ({notInterestedRecommendations.length})
+              {t('recommendations.tabs.not_interested')} ({notInterestedRecommendations.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="mt-6 space-y-6">
-            {recommendations.map((recommendation) => (
-              <CompanyCard
-                key={recommendation.id || recommendation.company.id}
-                company={recommendation.company}
-                matchingPoints={recommendation.matchingPoints}
-                score={recommendation.score}
-                feedback={recommendation.feedback}
-                onFeedback={(feedback) =>
-                  recommendation.id &&
-                  handleFeedback(recommendation.id, feedback)
-                }
-              />
-            ))}
+            {recommendations.length > 0 ? (
+              recommendations.map((recommendation) => (
+                <CompanyCard
+                  key={recommendation.id || recommendation.company.id}
+                  company={recommendation.company}
+                  matchingPoints={recommendation.matchingPoints}
+                  score={recommendation.score}
+                  feedback={recommendation.feedback}
+                  onFeedback={(feedback) =>
+                    recommendation.id &&
+                    handleFeedback(recommendation.id, feedback)
+                  }
+                  lng={lng}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p>{t('recommendations.no_matches')}</p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="pending" className="mt-6 space-y-6">
-            {pendingRecommendations.map((recommendation) => (
-              <CompanyCard
-                key={recommendation.id || recommendation.company.id}
-                company={recommendation.company}
-                matchingPoints={recommendation.matchingPoints}
-                score={recommendation.score}
-                feedback={recommendation.feedback}
-                onFeedback={(feedback) =>
-                  recommendation.id &&
-                  handleFeedback(recommendation.id, feedback)
-                }
-              />
-            ))}
+            {pendingRecommendations.length > 0 ? (
+              pendingRecommendations.map((recommendation) => (
+                <CompanyCard
+                  key={recommendation.id || recommendation.company.id}
+                  company={recommendation.company}
+                  matchingPoints={recommendation.matchingPoints}
+                  score={recommendation.score}
+                  feedback={recommendation.feedback}
+                  onFeedback={(feedback) =>
+                    recommendation.id &&
+                    handleFeedback(recommendation.id, feedback)
+                  }
+                  lng={lng}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p>{t('recommendations.no_pending')}</p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="interested" className="mt-6 space-y-6">
-            {interestedRecommendations.map((recommendation) => (
-              <CompanyCard
-                key={recommendation.id || recommendation.company.id}
-                company={recommendation.company}
-                matchingPoints={recommendation.matchingPoints}
-                score={recommendation.score}
-                feedback={recommendation.feedback}
-                onFeedback={(feedback) =>
-                  recommendation.id &&
-                  handleFeedback(recommendation.id, feedback)
-                }
-              />
-            ))}
+            {interestedRecommendations.length > 0 ? (
+              interestedRecommendations.map((recommendation) => (
+                <CompanyCard
+                  key={recommendation.id || recommendation.company.id}
+                  company={recommendation.company}
+                  matchingPoints={recommendation.matchingPoints}
+                  score={recommendation.score}
+                  feedback={recommendation.feedback}
+                  onFeedback={(feedback) =>
+                    recommendation.id &&
+                    handleFeedback(recommendation.id, feedback)
+                  }
+                  lng={lng}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p>{t('recommendations.no_interested')}</p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="not-interested" className="mt-6 space-y-6">
-            {notInterestedRecommendations.map((recommendation) => (
-              <CompanyCard
-                key={recommendation.id || recommendation.company.id}
-                company={recommendation.company}
-                matchingPoints={recommendation.matchingPoints}
-                score={recommendation.score}
-                feedback={recommendation.feedback}
-                onFeedback={(feedback) =>
-                  recommendation.id &&
-                  handleFeedback(recommendation.id, feedback)
-                }
-              />
-            ))}
+            {notInterestedRecommendations.length > 0 ? (
+              notInterestedRecommendations.map((recommendation) => (
+                <CompanyCard
+                  key={recommendation.id || recommendation.company.id}
+                  company={recommendation.company}
+                  matchingPoints={recommendation.matchingPoints}
+                  score={recommendation.score}
+                  feedback={recommendation.feedback}
+                  onFeedback={(feedback) =>
+                    recommendation.id &&
+                    handleFeedback(recommendation.id, feedback)
+                  }
+                  lng={lng}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p>{t('recommendations.no_not_interested')}</p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

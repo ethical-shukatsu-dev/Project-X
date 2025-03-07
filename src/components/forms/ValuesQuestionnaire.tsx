@@ -8,77 +8,83 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { UserValues } from '@/lib/supabase/client';
+import { useTranslation } from '@/i18n-client';
 
 // Define the questions for the questionnaire
 const QUESTIONS = [
   {
     id: 'work_environment',
-    question: 'What type of work environment do you prefer?',
+    questionKey: 'questionnaire.questions.work_environment.question',
     options: [
-      { value: 'collaborative', label: 'Collaborative and team-oriented' },
-      { value: 'autonomous', label: 'Autonomous and independent' },
-      { value: 'structured', label: 'Structured and organized' },
-      { value: 'flexible', label: 'Flexible and adaptable' },
+      { value: 'collaborative', labelKey: 'questionnaire.questions.work_environment.options.collaborative' },
+      { value: 'autonomous', labelKey: 'questionnaire.questions.work_environment.options.autonomous' },
+      { value: 'structured', labelKey: 'questionnaire.questions.work_environment.options.structured' },
+      { value: 'flexible', labelKey: 'questionnaire.questions.work_environment.options.flexible' },
     ],
   },
   {
     id: 'company_culture',
-    question: 'What company culture aspects are most important to you?',
+    questionKey: 'questionnaire.questions.company_culture.question',
     options: [
-      { value: 'innovation', label: 'Innovation and creativity' },
-      { value: 'work_life_balance', label: 'Work-life balance' },
-      { value: 'growth', label: 'Professional growth opportunities' },
-      { value: 'social_impact', label: 'Social impact and purpose' },
+      { value: 'innovation', labelKey: 'questionnaire.questions.company_culture.options.innovation' },
+      { value: 'work_life_balance', labelKey: 'questionnaire.questions.company_culture.options.work_life_balance' },
+      { value: 'growth', labelKey: 'questionnaire.questions.company_culture.options.growth' },
+      { value: 'social_impact', labelKey: 'questionnaire.questions.company_culture.options.social_impact' },
     ],
   },
   {
     id: 'leadership_style',
-    question: 'What leadership style do you work best with?',
+    questionKey: 'questionnaire.questions.leadership_style.question',
     options: [
-      { value: 'mentorship', label: 'Mentorship and guidance' },
-      { value: 'empowerment', label: 'Empowerment and autonomy' },
-      { value: 'transparent', label: 'Transparent and open communication' },
-      { value: 'results_oriented', label: 'Results-oriented and direct' },
+      { value: 'mentorship', labelKey: 'questionnaire.questions.leadership_style.options.mentorship' },
+      { value: 'empowerment', labelKey: 'questionnaire.questions.leadership_style.options.empowerment' },
+      { value: 'transparent', labelKey: 'questionnaire.questions.leadership_style.options.transparent' },
+      { value: 'results_oriented', labelKey: 'questionnaire.questions.leadership_style.options.results_oriented' },
     ],
   },
   {
     id: 'company_size',
-    question: 'What size of company do you prefer?',
+    questionKey: 'questionnaire.questions.company_size.question',
     options: [
-      { value: 'startup', label: 'Startup (1-50 employees)' },
-      { value: 'small', label: 'Small (51-200 employees)' },
-      { value: 'medium', label: 'Medium (201-1000 employees)' },
-      { value: 'large', label: 'Large (1000+ employees)' },
+      { value: 'startup', labelKey: 'questionnaire.questions.company_size.options.startup' },
+      { value: 'small', labelKey: 'questionnaire.questions.company_size.options.small' },
+      { value: 'medium', labelKey: 'questionnaire.questions.company_size.options.medium' },
+      { value: 'large', labelKey: 'questionnaire.questions.company_size.options.large' },
     ],
   },
   {
     id: 'work_priorities',
-    question: 'What are your top priorities in a job?',
+    questionKey: 'questionnaire.questions.work_priorities.question',
     options: [
-      { value: 'compensation', label: 'Competitive compensation' },
-      { value: 'learning', label: 'Learning and skill development' },
-      { value: 'impact', label: 'Making a meaningful impact' },
-      { value: 'stability', label: 'Job stability and security' },
+      { value: 'compensation', labelKey: 'questionnaire.questions.work_priorities.options.compensation' },
+      { value: 'learning', labelKey: 'questionnaire.questions.work_priorities.options.learning' },
+      { value: 'impact', labelKey: 'questionnaire.questions.work_priorities.options.impact' },
+      { value: 'stability', labelKey: 'questionnaire.questions.work_priorities.options.stability' },
     ],
   },
 ];
 
 // Define the interest areas
 const INTERESTS = [
-  { value: 'technology', label: 'Technology' },
-  { value: 'healthcare', label: 'Healthcare' },
-  { value: 'finance', label: 'Finance' },
-  { value: 'education', label: 'Education' },
-  { value: 'sustainability', label: 'Sustainability' },
-  { value: 'retail', label: 'Retail' },
-  { value: 'manufacturing', label: 'Manufacturing' },
-  { value: 'media', label: 'Media & Entertainment' },
-  { value: 'consulting', label: 'Consulting' },
-  { value: 'nonprofit', label: 'Nonprofit' },
+  { value: 'technology', labelKey: 'questionnaire.interests.technology' },
+  { value: 'healthcare', labelKey: 'questionnaire.interests.healthcare' },
+  { value: 'finance', labelKey: 'questionnaire.interests.finance' },
+  { value: 'education', labelKey: 'questionnaire.interests.education' },
+  { value: 'sustainability', labelKey: 'questionnaire.interests.sustainability' },
+  { value: 'retail', labelKey: 'questionnaire.interests.retail' },
+  { value: 'manufacturing', labelKey: 'questionnaire.interests.manufacturing' },
+  { value: 'media', labelKey: 'questionnaire.interests.media' },
+  { value: 'consulting', labelKey: 'questionnaire.interests.consulting' },
+  { value: 'nonprofit', labelKey: 'questionnaire.interests.nonprofit' },
 ];
 
-export default function ValuesQuestionnaire() {
+interface ValuesQuestionnaireProps {
+  lng: string;
+}
+
+export default function ValuesQuestionnaire({ lng }: ValuesQuestionnaireProps) {
   const router = useRouter();
+  const { t, loaded } = useTranslation(lng, 'ai');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [values, setValues] = useState<Record<string, string>>({});
   const [interests, setInterests] = useState<string[]>([]);
@@ -143,8 +149,8 @@ export default function ValuesQuestionnaire() {
 
       const data = await response.json();
       
-      // Redirect to recommendations page
-      router.push(`/recommendations?userId=${data.userId}`);
+      // Redirect to recommendations page with locale and userId
+      router.push(`/${lng}/recommendations?userId=${data.userId}&locale=${lng}`);
     } catch (error) {
       console.error('Error submitting values:', error);
       // Handle error (show toast, etc.)
@@ -153,6 +159,17 @@ export default function ValuesQuestionnaire() {
     }
   };
 
+  // If translations are not loaded yet, show a loading state
+  if (!loaded) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle className="text-xl">Loading...</CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   // Render the current question
   const renderQuestion = () => {
     if (currentQuestion < QUESTIONS.length) {
@@ -160,8 +177,10 @@ export default function ValuesQuestionnaire() {
       return (
         <>
           <CardHeader>
-            <CardTitle className="text-xl">Question {currentQuestion + 1} of {QUESTIONS.length}</CardTitle>
-            <CardDescription className="text-lg">{question.question}</CardDescription>
+            <CardTitle className="text-xl">
+              {t('questionnaire.progress', { current: currentQuestion + 1, total: QUESTIONS.length })}
+            </CardTitle>
+            <CardDescription className="text-lg">{t(question.questionKey)}</CardDescription>
           </CardHeader>
           <CardContent>
             <RadioGroup
@@ -173,7 +192,7 @@ export default function ValuesQuestionnaire() {
                 <div key={option.value} className="flex items-center space-x-2">
                   <RadioGroupItem value={option.value} id={option.value} />
                   <Label htmlFor={option.value} className="text-base">
-                    {option.label}
+                    {t(option.labelKey)}
                   </Label>
                 </div>
               ))}
@@ -185,13 +204,13 @@ export default function ValuesQuestionnaire() {
               onClick={handlePrevious}
               disabled={currentQuestion === 0}
             >
-              Previous
+              {t('questionnaire.previous')}
             </Button>
             <Button 
               onClick={handleNext}
               disabled={!values[question.id]}
             >
-              Next
+              {t('questionnaire.next')}
             </Button>
           </CardFooter>
         </>
@@ -201,9 +220,9 @@ export default function ValuesQuestionnaire() {
       return (
         <>
           <CardHeader>
-            <CardTitle className="text-xl">Select Your Interests</CardTitle>
+            <CardTitle className="text-xl">{t('questionnaire.interests.title')}</CardTitle>
             <CardDescription className="text-lg">
-              Choose industries or areas you&apos;re interested in exploring.
+              {t('questionnaire.interests.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -218,7 +237,7 @@ export default function ValuesQuestionnaire() {
                     }
                   />
                   <Label htmlFor={interest.value} className="text-base">
-                    {interest.label}
+                    {t(interest.labelKey)}
                   </Label>
                 </div>
               ))}
@@ -229,13 +248,13 @@ export default function ValuesQuestionnaire() {
               variant="outline" 
               onClick={handlePrevious}
             >
-              Previous
+              {t('questionnaire.previous')}
             </Button>
             <Button 
               onClick={handleSubmit}
               disabled={interests.length === 0 || isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Get Recommendations'}
+              {isSubmitting ? t('questionnaire.submitting') : t('questionnaire.submit')}
             </Button>
           </CardFooter>
         </>
