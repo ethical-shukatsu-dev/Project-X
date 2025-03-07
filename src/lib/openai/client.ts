@@ -10,11 +10,10 @@ const openaiClient = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export type RecommendationResult = {
+interface RecommendationResult {
   company: Company;
   matchingPoints: string[];
-  score: number;
-};
+}
 
 // Define type for recommendation response from OpenAI
 type OpenAIRecommendation = {
@@ -144,7 +143,6 @@ export async function generateRecommendations(
         return {
           company,
           matchingPoints: rec.matchingPoints,
-          score: calculateMatchScore(userData, company, rec.matchingPoints),
         };
       })
     );
@@ -154,64 +152,6 @@ export async function generateRecommendations(
     console.error("Error processing recommendations:", error);
     throw new Error("Failed to generate recommendations");
   }
-}
-
-// Enhanced function to calculate match score
-function calculateMatchScore(
-  userData: UserValues,
-  company: Company,
-  matchingPoints: string[]
-): number {
-  // Base score from matching points (10 points per match)
-  const matchingPointsScore = matchingPoints.length * 10;
-  
-  // Calculate value alignment score
-  let valueAlignmentScore = 0;
-  let valuesCompared = 0;
-  
-  // Compare shared values between user and company
-  if (userData.values && company.values) {
-    Object.keys(userData.values).forEach(key => {
-      if (company.values[key] !== undefined) {
-        // Calculate similarity (0-10 scale)
-        const userValue = userData.values[key];
-        const companyValue = company.values[key];
-        const similarity = 10 - Math.abs(userValue - companyValue);
-        
-        valueAlignmentScore += similarity;
-        valuesCompared++;
-      }
-    });
-  }
-  
-  // Normalize value alignment score (0-50 scale)
-  const normalizedValueScore = valuesCompared > 0 
-    ? (valueAlignmentScore / valuesCompared) * 5 
-    : 0;
-  
-  // Interest match bonus (up to 20 points)
-  let interestMatchScore = 0;
-  if (userData.interests && userData.interests.length > 0) {
-    // Check if company description or industry contains any user interests
-    const companyText = `${company.industry} ${company.description || ''}`.toLowerCase();
-    
-    userData.interests.forEach(interest => {
-      if (companyText.includes(interest.toLowerCase())) {
-        interestMatchScore += 5; // 5 points per matched interest
-      }
-    });
-    
-    // Cap interest match score at 20
-    interestMatchScore = Math.min(interestMatchScore, 20);
-  }
-  
-  // Calculate final score (max 100)
-  const totalScore = Math.min(
-    matchingPointsScore + normalizedValueScore + interestMatchScore,
-    100
-  );
-  
-  return Math.round(totalScore);
 }
 
 /**
