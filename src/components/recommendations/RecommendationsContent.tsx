@@ -20,10 +20,12 @@ interface RecommendationsContentProps {
   lng: string;
 }
 
-export default function RecommendationsContent({lng}: RecommendationsContentProps) {
+export default function RecommendationsContent({
+  lng,
+}: RecommendationsContentProps) {
   const searchParams = useSearchParams();
   const userId = searchParams?.get("userId") || "";
-  const {t, loaded} = useTranslation(lng, 'ai');
+  const {t, loaded} = useTranslation(lng, "ai");
 
   const [recommendations, setRecommendations] = useState<
     (RecommendationResult & {
@@ -37,23 +39,25 @@ export default function RecommendationsContent({lng}: RecommendationsContentProp
   useEffect(() => {
     const fetchRecommendations = async () => {
       if (!userId) {
-        setError(t('recommendations.errors.missing_user_id'));
+        setError(t("recommendations.errors.missing_user_id"));
         setLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`/api/recommendations?userId=${userId}&locale=${lng}`);
+        const response = await fetch(
+          `/api/recommendations?userId=${userId}&locale=${lng}`
+        );
 
         if (!response.ok) {
-          throw new Error(t('recommendations.errors.fetch_failed'));
+          throw new Error(t("recommendations.errors.fetch_failed"));
         }
 
         const data = await response.json();
         setRecommendations(data.recommendations);
       } catch (err) {
         console.error("Error fetching recommendations:", err);
-        setError(t('recommendations.errors.general'));
+        setError(t("recommendations.errors.general"));
       } finally {
         setLoading(false);
       }
@@ -82,7 +86,7 @@ export default function RecommendationsContent({lng}: RecommendationsContentProp
       });
 
       if (!response.ok) {
-        throw new Error(t('recommendations.errors.feedback_failed'));
+        throw new Error(t("recommendations.errors.feedback_failed"));
       }
 
       // Update local state
@@ -113,14 +117,16 @@ export default function RecommendationsContent({lng}: RecommendationsContentProp
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-8">{t('recommendations.loading.title')}</h1>
+          <h1 className="text-3xl font-bold mb-8">
+            {t("recommendations.loading.title")}
+          </h1>
           <p className="text-lg mb-8">
-            {t('recommendations.loading.description')}
+            {t("recommendations.loading.description")}
           </p>
-          <div className="flex flex-col items-center gap-4 w-full max-w-md mx-auto">
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
+          <div className="max-w-4xl mx-auto">
+            <Skeleton className="h-[200px] w-full mb-4" />
+            <Skeleton className="h-[200px] w-full mb-4" />
+            <Skeleton className="h-[200px] w-full" />
           </div>
         </div>
       </div>
@@ -133,12 +139,16 @@ export default function RecommendationsContent({lng}: RecommendationsContentProp
         <div className="max-w-4xl mx-auto">
           <Card className="mx-auto max-w-md">
             <CardHeader>
-              <CardTitle className="text-center">{t('recommendations.errors.title')}</CardTitle>
+              <CardTitle className="text-center">
+                {t("recommendations.errors.title")}
+              </CardTitle>
               <CardDescription className="text-center">{error}</CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-center">
-              <Button onClick={() => (window.location.href = `/${lng}/questionnaire`)}>
-                {t('recommendations.errors.try_again')}
+              <Button
+                onClick={() => (window.location.href = `/${lng}/questionnaire`)}
+              >
+                {t("recommendations.errors.try_again")}
               </Button>
             </CardFooter>
           </Card>
@@ -159,25 +169,28 @@ export default function RecommendationsContent({lng}: RecommendationsContentProp
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8">
-          {t('recommendations.title')}
+          {t("recommendations.title")}
         </h1>
         <p className="text-lg text-center mb-8">
-          {t('recommendations.description')}
+          {t("recommendations.description")}
         </p>
 
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="flex flex-wrap gap-2 h-full">
             <TabsTrigger value="all">
-              {t('recommendations.tabs.all')} ({recommendations.length})
+              {t("recommendations.tabs.all")} ({recommendations.length})
             </TabsTrigger>
             <TabsTrigger value="pending">
-              {t('recommendations.tabs.pending')} ({pendingRecommendations.length})
+              {t("recommendations.tabs.pending")} (
+              {pendingRecommendations.length})
             </TabsTrigger>
             <TabsTrigger value="interested">
-              {t('recommendations.tabs.interested')} ({interestedRecommendations.length})
+              {t("recommendations.tabs.interested")} (
+              {interestedRecommendations.length})
             </TabsTrigger>
             <TabsTrigger value="not-interested">
-              {t('recommendations.tabs.not_interested')} ({notInterestedRecommendations.length})
+              {t("recommendations.tabs.not_interested")} (
+              {notInterestedRecommendations.length})
             </TabsTrigger>
           </TabsList>
 
@@ -199,7 +212,7 @@ export default function RecommendationsContent({lng}: RecommendationsContentProp
               ))
             ) : (
               <div className="text-center py-8">
-                <p>{t('recommendations.no_matches')}</p>
+                <p>{t("recommendations.no_matches")}</p>
               </div>
             )}
           </TabsContent>
@@ -222,7 +235,7 @@ export default function RecommendationsContent({lng}: RecommendationsContentProp
               ))
             ) : (
               <div className="text-center py-8">
-                <p>{t('recommendations.no_pending')}</p>
+                <p>{t("recommendations.no_pending")}</p>
               </div>
             )}
           </TabsContent>
@@ -245,7 +258,7 @@ export default function RecommendationsContent({lng}: RecommendationsContentProp
               ))
             ) : (
               <div className="text-center py-8">
-                <p>{t('recommendations.no_interested')}</p>
+                <p>{t("recommendations.no_interested")}</p>
               </div>
             )}
           </TabsContent>
@@ -268,7 +281,7 @@ export default function RecommendationsContent({lng}: RecommendationsContentProp
               ))
             ) : (
               <div className="text-center py-8">
-                <p>{t('recommendations.no_not_interested')}</p>
+                <p>{t("recommendations.no_not_interested")}</p>
               </div>
             )}
           </TabsContent>
