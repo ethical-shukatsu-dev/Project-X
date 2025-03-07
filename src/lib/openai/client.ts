@@ -10,7 +10,7 @@ const openaiClient = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-interface RecommendationResult {
+export type RecommendationResult = {
   company: Company;
   matchingPoints: string[];
 }

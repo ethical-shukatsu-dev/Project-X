@@ -201,7 +201,6 @@ export default function RecommendationsContent({
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
                   matchingPoints={recommendation.matchingPoints}
-                  score={recommendation.score}
                   feedback={recommendation.feedback}
                   onFeedback={(feedback) =>
                     recommendation.id &&
@@ -224,7 +223,6 @@ export default function RecommendationsContent({
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
                   matchingPoints={recommendation.matchingPoints}
-                  score={recommendation.score}
                   feedback={recommendation.feedback}
                   onFeedback={(feedback) =>
                     recommendation.id &&
@@ -247,7 +245,6 @@ export default function RecommendationsContent({
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
                   matchingPoints={recommendation.matchingPoints}
-                  score={recommendation.score}
                   feedback={recommendation.feedback}
                   onFeedback={(feedback) =>
                     recommendation.id &&
@@ -270,7 +267,6 @@ export default function RecommendationsContent({
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
                   matchingPoints={recommendation.matchingPoints}
-                  score={recommendation.score}
                   feedback={recommendation.feedback}
                   onFeedback={(feedback) =>
                     recommendation.id &&

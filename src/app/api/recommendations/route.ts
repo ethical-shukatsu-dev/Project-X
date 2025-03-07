@@ -70,7 +70,6 @@ export async function GET(request: Request) {
       user_id: userId,
       company_id: rec.company.id,
       matching_points: rec.matchingPoints,
-      score: rec.score,
     }));
 
     const {error: insertError} = await supabase
