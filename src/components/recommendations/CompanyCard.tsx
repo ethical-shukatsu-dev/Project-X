@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,6 +23,7 @@ export default function CompanyCard({
   lng,
 }: CompanyCardProps) {
   const { t, loaded } = useTranslation(lng, 'ai');
+  const [logoError, setLogoError] = useState(false);
   
   // Get company initials for avatar fallback
   const getInitials = (name: string) => {
@@ -43,8 +44,12 @@ export default function CompanyCard({
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center gap-4">
         <Avatar className="h-14 w-14">
-          {company.logo_url ? (
-            <AvatarImage src={company.logo_url} alt={company.name} />
+          {company.logo_url && !logoError ? (
+            <AvatarImage 
+              src={company.logo_url} 
+              alt={company.name} 
+              onError={() => setLogoError(true)}
+            />
           ) : null}
           <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
         </Avatar>
