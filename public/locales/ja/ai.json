@@ -1,0 +1,125 @@
+{
+  "prompt": {
+    "placeholder": "質問を入力してください...",
+    "submit": "送信"
+  },
+  "response": {
+    "loading": "考え中...",
+    "error": "エラーが発生しました"
+  },
+  "questionnaire": {
+    "title": "企業マッチングアンケート",
+    "description": "いくつかの質問に答えて、あなたの価値観や興味に合った企業を見つけましょう。",
+    "submit": "おすすめを取得",
+    "submitting": "送信中...",
+    "next": "次へ",
+    "previous": "前へ",
+    "progress": "質問 {{current}} / {{total}}",
+    "complete": "アンケート完了",
+    "thankyou": "アンケートにご回答いただきありがとうございます。最適な企業マッチングを分析しています。",
+    "interests": {
+      "title": "興味のある分野を選択",
+      "description": "興味のある業界や分野を選んでください。",
+      "technology": "テクノロジー",
+      "healthcare": "ヘルスケア",
+      "finance": "金融",
+      "education": "教育",
+      "sustainability": "サステナビリティ",
+      "retail": "小売",
+      "manufacturing": "製造",
+      "media": "メディア・エンターテイメント",
+      "consulting": "コンサルティング",
+      "nonprofit": "非営利団体"
+    },
+    "questions": {
+      "work_environment": {
+        "question": "どのような職場環境が好ましいですか？",
+        "options": {
+          "collaborative": "協力的でチーム志向",
+          "autonomous": "自律的で独立的",
+          "structured": "構造化された組織的な環境",
+          "flexible": "柔軟で適応性のある環境"
+        }
+      },
+      "company_culture": {
+        "question": "会社の文化で最も重要な側面は何ですか？",
+        "options": {
+          "innovation": "イノベーションと創造性",
+          "work_life_balance": "ワークライフバランス",
+          "growth": "専門的な成長の機会",
+          "social_impact": "社会的影響と目的"
+        }
+      },
+      "leadership_style": {
+        "question": "どのようなリーダーシップスタイルが最も合いますか？",
+        "options": {
+          "mentorship": "メンターシップとガイダンス",
+          "empowerment": "エンパワーメントと自律性",
+          "transparent": "透明性とオープンなコミュニケーション",
+          "results_oriented": "結果重視の直接的なスタイル"
+        }
+      },
+      "company_size": {
+        "question": "どのような規模の会社が好ましいですか？",
+        "options": {
+          "startup": "スタートアップ（1-50人）",
+          "small": "小規模（51-200人）",
+          "medium": "中規模（201-1000人）",
+          "large": "大規模（1000人以上）"
+        }
+      },
+      "work_priorities": {
+        "question": "仕事で最も優先することは何ですか？",
+        "options": {
+          "compensation": "競争力のある報酬",
+          "learning": "学習とスキル開発",
+          "impact": "意義のある影響を与えること",
+          "stability": "仕事の安定性とセキュリティ"
+        }
+      }
+    }
+  },
+  "recommendations": {
+    "title": "あなたにマッチする企業",
+    "description": "あなたの価値観や興味に基づいて、あなたに合うかもしれない企業を見つけました。",
+    "matchScore": "マッチ度",
+    "viewDetails": "詳細を見る",
+    "noMatches": "マッチする企業が見つかりませんでした。設定を調整してみてください。",
+    "noMatchingPoints": "具体的なマッチングポイントはありません",
+    "about": "企業について",
+    "whyMatch": "マッチする理由",
+    "no_matches": "マッチする企業が見つかりませんでした",
+    "no_pending": "保留中の推薦はありません",
+    "no_interested": "興味ありとマークした企業はありません",
+    "no_not_interested": "興味なしとマークした企業はありません",
+    "regenerate": "おすすめを再生成",
+    "loading": {
+      "title": "マッチを検索中...",
+      "description": "あなたの価値観と好みを分析して、最適な企業マッチを見つけています。"
+    },
+    "tabs": {
+      "all": "すべて",
+      "pending": "保留中",
+      "interested": "興味あり",
+      "not_interested": "興味なし"
+    },
+    "feedback": {
+      "interested": "興味あり",
+      "notInterested": "興味なし",
+      "markedInterested": "興味ありとマークしました",
+      "markedNotInterested": "興味なしとマークしました"
+    },
+    "errors": {
+      "title": "エラーが発生しました",
+      "general": "推薦の読み込みに失敗しました。もう一度お試しください。",
+      "missing_user_id": "ユーザーIDが必要です",
+      "fetch_failed": "推薦の取得に失敗しました",
+      "feedback_failed": "フィードバックの送信に失敗しました",
+      "try_again": "再試行"
+    }
+  },
+  "systemPrompt": {
+    "questionnaire": "あなたはユーザーが自分の価値観や興味に合った企業を見つけるのを手伝うAIアシスタントです。日本語で応答してください。",
+    "recommendations": "あなたはユーザーの好みに基づいて企業の推薦を提供するAIアシスタントです。日本語で応答してください。"
+  }
+} 

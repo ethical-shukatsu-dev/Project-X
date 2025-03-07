@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Company } from '@/lib/supabase/client';
+import { useTranslation } from '@/i18n-client';
 
 interface CompanyCardProps {
   company: Company;
@@ -10,6 +11,7 @@ interface CompanyCardProps {
   score: number;
   onFeedback: (feedback: 'interested' | 'not_interested') => void;
   feedback?: 'interested' | 'not_interested';
+  lng: string;
 }
 
 export default function CompanyCard({
@@ -18,7 +20,10 @@ export default function CompanyCard({
   score,
   onFeedback,
   feedback,
+  lng,
 }: CompanyCardProps) {
+  const { t, loaded } = useTranslation(lng, 'ai');
+  
   // Get company initials for avatar fallback
   const getInitials = (name: string) => {
     return name
@@ -28,6 +33,11 @@ export default function CompanyCard({
       .toUpperCase()
       .substring(0, 2);
   };
+
+  // If translations are not loaded yet, show a loading state
+  if (!loaded) {
+    return <Card className="w-full p-6">Loading...</Card>;
+  }
 
   return (
     <Card className="w-full">
@@ -46,23 +56,23 @@ export default function CompanyCard({
         </div>
         <div className="ml-auto flex flex-col items-center">
           <span className="text-2xl font-bold">{score}%</span>
-          <span className="text-xs text-muted-foreground">Match</span>
+          <span className="text-xs text-muted-foreground">{t('recommendations.matchScore')}</span>
         </div>
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <h3 className="text-sm font-medium mb-2">About</h3>
+          <h3 className="text-sm font-medium mb-2">{t('recommendations.about')}</h3>
           <p className="text-sm text-muted-foreground">{company.description}</p>
         </div>
         <div>
-          <h3 className="text-sm font-medium mb-2">Why it&apos;s a match</h3>
+          <h3 className="text-sm font-medium mb-2">{t('recommendations.whyMatch')}</h3>
           <ul className="list-disc pl-5 text-sm text-muted-foreground">
             {matchingPoints && matchingPoints.length > 0 ? (
               matchingPoints.map((point, index) => (
                 <li key={index}>{point}</li>
               ))
             ) : (
-              <li>No specific matching points available</li>
+              <li>{t('recommendations.noMatchingPoints')}</li>
             )}
           </ul>
         </div>
@@ -70,7 +80,9 @@ export default function CompanyCard({
       <CardFooter className="flex justify-between">
         {feedback ? (
           <div className="w-full text-center text-sm text-muted-foreground">
-            You marked this as {feedback === 'interested' ? 'interesting' : 'not interesting'}
+            {feedback === 'interested' 
+              ? t('recommendations.feedback.markedInterested') 
+              : t('recommendations.feedback.markedNotInterested')}
           </div>
         ) : (
           <>
@@ -78,12 +90,12 @@ export default function CompanyCard({
               variant="outline"
               onClick={() => onFeedback('not_interested')}
             >
-              Not Interested
+              {t('recommendations.feedback.notInterested')}
             </Button>
             <Button
               onClick={() => onFeedback('interested')}
             >
-              Interested
+              {t('recommendations.feedback.interested')}
             </Button>
           </>
         )}

@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const userId = url.searchParams.get("userId");
     const forceRefresh = url.searchParams.get("refresh") === "true";
+    const locale = url.searchParams.get("locale") || "en";
 
     if (!userId) {
       return NextResponse.json({error: "User ID is required"}, {status: 400});
@@ -58,8 +59,8 @@ export async function GET(request: Request) {
       }
     }
 
-    // Generate new recommendations with real company data
-    const recommendations = await generateRecommendations(userData);
+    // Generate new recommendations with real company data, passing the locale
+    const recommendations = await generateRecommendations(userData, locale as 'en' | 'ja');
 
     // Save recommendations to Supabase
     const recommendationsToInsert = recommendations.map((rec) => ({

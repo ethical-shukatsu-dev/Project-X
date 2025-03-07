@@ -1,0 +1,30 @@
+{
+  "title": "Project X",
+  "description": "Your AI Assistant",
+  "buttons": {
+    "submit": "Submit",
+    "cancel": "Cancel"
+  },
+  "homepage": {
+    "title": "Find Your Perfect Company Match",
+    "description": "Discover companies that align with your values and interests. Take a quick questionnaire and get personalized recommendations.",
+    "getStarted": "Get Started"
+  },
+  "features": {
+    "quick": {
+      "title": "Quick & Easy",
+      "description": "Complete a short questionnaire in under 3 minutes to get started."
+    },
+    "values": {
+      "title": "Values-Based Matching",
+      "description": "Our AI analyzes your values and interests to find companies that align with what matters to you."
+    },
+    "insights": {
+      "title": "Personalized Insights",
+      "description": "See exactly why each company is a good match for you with detailed matching points."
+    }
+  },
+  "footer": {
+    "copyright": "© 2023 Project X. All rights reserved."
+  }
+} 
