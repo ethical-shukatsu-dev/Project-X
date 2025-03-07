@@ -31,18 +31,26 @@ const loadLocaleAsync = async (language: string, namespace: string) => {
 
 export function useTranslation(lng: string, ns: string, options: { keyPrefix?: string } = {}) {
   const [loaded, setLoaded] = useState(false);
+  
   const ret = useTranslationOrg(ns, options);
   const { i18n } = ret;
 
   useEffect(() => {
-    // Change language and load resources
-    if (i18n.resolvedLanguage === lng) return;
+    // Reset loaded state when dependencies change
+    setLoaded(false);
     
     const handleChange = async () => {
+      // Always check if we need to load the resource bundle
       if (!i18n.hasResourceBundle(lng, ns)) {
         await loadLocaleAsync(lng, ns);
       }
-      i18n.changeLanguage(lng);
+      
+      // Only change language if it's different
+      if (i18n.resolvedLanguage !== lng) {
+        i18n.changeLanguage(lng);
+      }
+      
+      // Always set loaded to true after processing
       setLoaded(true);
     };
 
