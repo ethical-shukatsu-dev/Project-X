@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import OpenAI from "openai";
 import {Company, UserValues} from "../supabase/client";
 import {v4 as uuid} from "uuid";

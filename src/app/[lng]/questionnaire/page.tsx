@@ -50,30 +50,37 @@ function QuestionnaireLoadingSkeleton() {
   );
 }
 
-export default async function QuestionnairePage({
-  params: { lng }
+export default function QuestionnairePage({
+  params
 }: {
-  params: { lng: string }
+  params: Promise<{ lng: string }>
 }) {
-  const { t } = await getTranslation(lng, 'ai');
+  // Use an async IIFE to handle the Promise
+  const QuestionnairePageContent = async () => {
+    const resolvedParams = await params;
+    const lng = resolvedParams.lng;
+    const { t } = await getTranslation(lng, 'ai');
 
-  return (
-    <Suspense fallback={<QuestionnaireLoadingSkeleton />}>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <Card className="mb-8 text-center">
-            <CardHeader>
-              <CardTitle className="text-3xl">
-                {t('questionnaire.title')}
-              </CardTitle>
-              <CardDescription className="text-lg">
-                {t('questionnaire.description')}
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <ValuesQuestionnaire lng={lng} />
+    return (
+      <Suspense fallback={<QuestionnaireLoadingSkeleton />}>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto">
+            <Card className="mb-8 text-center">
+              <CardHeader>
+                <CardTitle className="text-3xl">
+                  {t('questionnaire.title')}
+                </CardTitle>
+                <CardDescription className="text-lg">
+                  {t('questionnaire.description')}
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <ValuesQuestionnaire lng={lng} />
+          </div>
         </div>
-      </div>
-    </Suspense>
-  );
+      </Suspense>
+    );
+  };
+
+  return QuestionnairePageContent();
 } 

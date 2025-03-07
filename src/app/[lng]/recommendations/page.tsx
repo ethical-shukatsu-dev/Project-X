@@ -21,14 +21,22 @@ async function RecommendationsLoading({ lng }: { lng: string }) {
 }
 
 // Main page component with Suspense boundary
-export default async function RecommendationsPage({
-  params: { lng }
+export default function RecommendationsPage({
+  params
 }: {
-  params: { lng: string }
+  params: Promise<{ lng: string }>
 }) {
-  return (
-    <Suspense fallback={<RecommendationsLoading lng={lng} />}>
-      <RecommendationsContent lng={lng} />
-    </Suspense>
-  );
+  // Use an async IIFE to handle the Promise
+  const RecommendationsPageContent = async () => {
+    const resolvedParams = await params;
+    const lng = resolvedParams.lng;
+    
+    return (
+      <Suspense fallback={<RecommendationsLoading lng={lng} />}>
+        <RecommendationsContent lng={lng} />
+      </Suspense>
+    );
+  };
+
+  return RecommendationsPageContent();
 } 

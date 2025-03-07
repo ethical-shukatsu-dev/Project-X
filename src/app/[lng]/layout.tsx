@@ -4,6 +4,7 @@ import "../globals.css";
 import { dir } from 'i18next';
 import { languages } from '../../i18n-config';
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { ReactNode } from 'react';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,22 +17,30 @@ export async function generateStaticParams() {
   return languages.map((lng) => ({ lng }));
 }
 
-export default function RootLayout({
+// Define the component with the expected structure
+export default function RootLayout({ 
   children,
-  params: { lng }
+  params
 }: {
-  children: React.ReactNode;
-  params: { lng: string };
+  children: ReactNode;
+  params: Promise<{ lng: string }>;
 }) {
-  return (
-    <html lang={lng} dir={dir(lng)} className={inter.className}>
-      <body>
-        <header className="flex items-center justify-between p-4 border-b">
-          <div className="text-xl font-bold">Project X</div>
-          <LanguageSwitcher />
-        </header>
-        {children}
-      </body>
-    </html>
-  );
+  // Use an async IIFE to handle the Promise
+  const RootLayoutContent = async () => {
+    const resolvedParams = await params;
+    
+    return (
+      <html lang={resolvedParams.lng} dir={dir(resolvedParams.lng)} className={inter.className}>
+        <body>
+          <header className="flex items-center justify-between p-4 border-b">
+            <div className="text-xl font-bold">Project X</div>
+            <LanguageSwitcher />
+          </header>
+          {children}
+        </body>
+      </html>
+    );
+  };
+
+  return RootLayoutContent();
 } 
