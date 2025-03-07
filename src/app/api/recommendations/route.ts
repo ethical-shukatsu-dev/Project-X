@@ -60,7 +60,10 @@ export async function GET(request: Request) {
     }
 
     // Generate new recommendations with real company data, passing the locale
-    const recommendations = await generateRecommendations(userData, locale as 'en' | 'ja');
+    const recommendations = await generateRecommendations(
+      userData,
+      locale as "en" | "ja"
+    );
 
     // Save recommendations to Supabase
     const recommendationsToInsert = recommendations.map((rec) => ({
