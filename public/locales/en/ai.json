@@ -1,0 +1,125 @@
+{
+  "prompt": {
+    "placeholder": "Ask me anything...",
+    "submit": "Send"
+  },
+  "response": {
+    "loading": "Thinking...",
+    "error": "An error occurred"
+  },
+  "questionnaire": {
+    "title": "Company Matching Questionnaire",
+    "description": "Answer a few questions to find companies that match your values and interests.",
+    "submit": "Get Recommendations",
+    "submitting": "Submitting...",
+    "next": "Next",
+    "previous": "Previous",
+    "progress": "Question {{current}} of {{total}}",
+    "complete": "Questionnaire Complete",
+    "thankyou": "Thank you for completing the questionnaire. We're analyzing your answers to find the best company matches.",
+    "interests": {
+      "title": "Select Your Interests",
+      "description": "Choose industries or areas you're interested in exploring.",
+      "technology": "Technology",
+      "healthcare": "Healthcare",
+      "finance": "Finance",
+      "education": "Education",
+      "sustainability": "Sustainability",
+      "retail": "Retail",
+      "manufacturing": "Manufacturing",
+      "media": "Media & Entertainment",
+      "consulting": "Consulting",
+      "nonprofit": "Nonprofit"
+    },
+    "questions": {
+      "work_environment": {
+        "question": "What type of work environment do you prefer?",
+        "options": {
+          "collaborative": "Collaborative and team-oriented",
+          "autonomous": "Autonomous and independent",
+          "structured": "Structured and organized",
+          "flexible": "Flexible and adaptable"
+        }
+      },
+      "company_culture": {
+        "question": "What company culture aspects are most important to you?",
+        "options": {
+          "innovation": "Innovation and creativity",
+          "work_life_balance": "Work-life balance",
+          "growth": "Professional growth opportunities",
+          "social_impact": "Social impact and purpose"
+        }
+      },
+      "leadership_style": {
+        "question": "What leadership style do you work best with?",
+        "options": {
+          "mentorship": "Mentorship and guidance",
+          "empowerment": "Empowerment and autonomy",
+          "transparent": "Transparent and open communication",
+          "results_oriented": "Results-oriented and direct"
+        }
+      },
+      "company_size": {
+        "question": "What size of company do you prefer?",
+        "options": {
+          "startup": "Startup (1-50 employees)",
+          "small": "Small (51-200 employees)",
+          "medium": "Medium (201-1000 employees)",
+          "large": "Large (1000+ employees)"
+        }
+      },
+      "work_priorities": {
+        "question": "What are your top priorities in a job?",
+        "options": {
+          "compensation": "Competitive compensation",
+          "learning": "Learning and skill development",
+          "impact": "Making a meaningful impact",
+          "stability": "Job stability and security"
+        }
+      }
+    }
+  },
+  "recommendations": {
+    "title": "Your Company Matches",
+    "description": "Based on your values and interests, we've found these companies that might be a good fit for you.",
+    "matchScore": "Match",
+    "viewDetails": "View Details",
+    "noMatches": "No matches found. Please try adjusting your preferences.",
+    "noMatchingPoints": "No specific matching points available",
+    "about": "About",
+    "whyMatch": "Why it's a match",
+    "no_matches": "No matches found",
+    "no_pending": "No pending recommendations",
+    "no_interested": "No companies marked as interested",
+    "no_not_interested": "No companies marked as not interested",
+    "regenerate": "Regenerate Recommendations",
+    "loading": {
+      "title": "Finding Your Matches...",
+      "description": "We're analyzing your values and preferences to find the best company matches for you."
+    },
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "interested": "Interested",
+      "not_interested": "Not Interested"
+    },
+    "feedback": {
+      "interested": "Interested",
+      "notInterested": "Not Interested",
+      "markedInterested": "You marked this as interesting",
+      "markedNotInterested": "You marked this as not interesting"
+    },
+    "errors": {
+      "title": "Oops!",
+      "general": "Failed to load recommendations. Please try again.",
+      "missing_user_id": "User ID is required",
+      "fetch_failed": "Failed to fetch recommendations",
+      "feedback_failed": "Failed to submit feedback",
+      "try_again": "Try Again"
+    }
+  },
+  "systemPrompt": {
+    "questionnaire": "You are an AI assistant helping users find companies that match their values and interests. Please respond in {{language}}.",
+    "recommendations": "You are an AI assistant providing company recommendations based on user preferences. Please respond in {{language}}."
+  }
+} 

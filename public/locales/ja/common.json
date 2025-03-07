@@ -1,0 +1,30 @@
+{
+  "title": "プロジェクトX",
+  "description": "AIアシスタント",
+  "buttons": {
+    "submit": "送信",
+    "cancel": "キャンセル"
+  },
+  "homepage": {
+    "title": "あなたにぴったりの企業を見つけよう",
+    "description": "あなたの価値観や興味に合った企業を発見しましょう。簡単なアンケートに答えて、パーソナライズされたおすすめを受け取りましょう。",
+    "getStarted": "始める"
+  },
+  "features": {
+    "quick": {
+      "title": "簡単＆迅速",
+      "description": "3分以内で短いアンケートを完了して始めましょう。"
+    },
+    "values": {
+      "title": "価値観ベースのマッチング",
+      "description": "私たちのAIはあなたの価値観と興味を分析し、あなたにとって重要なことに合った企業を見つけます。"
+    },
+    "insights": {
+      "title": "パーソナライズされた洞察",
+      "description": "詳細なマッチングポイントで、各企業があなたに合っている理由を正確に確認できます。"
+    }
+  },
+  "footer": {
+    "copyright": "© 2023 プロジェクトX. All rights reserved."
+  }
+} 
