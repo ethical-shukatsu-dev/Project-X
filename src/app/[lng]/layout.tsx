@@ -30,7 +30,6 @@ export default function RootLayout({
   // Use an async IIFE to handle the Promise
   const RootLayoutContent = async () => {
     const resolvedParams = await params;
-
     return (
       <html
         lang={resolvedParams.lng}
