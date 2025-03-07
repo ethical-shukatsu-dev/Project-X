@@ -82,7 +82,6 @@
   "recommendations": {
     "title": "Your Company Matches",
     "description": "Based on your values and interests, we've found these companies that might be a good fit for you.",
-    "matchScore": "Match",
     "viewDetails": "View Details",
     "noMatches": "No matches found. Please try adjusting your preferences.",
     "noMatchingPoints": "No specific matching points available",

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Company } from '@/lib/supabase/client';
@@ -8,7 +8,6 @@ import { useTranslation } from '@/i18n-client';
 interface CompanyCardProps {
   company: Company;
   matchingPoints: string[];
-  score: number;
   onFeedback: (feedback: 'interested' | 'not_interested') => void;
   feedback?: 'interested' | 'not_interested';
   lng: string;
@@ -17,7 +16,6 @@ interface CompanyCardProps {
 export default function CompanyCard({
   company,
   matchingPoints,
-  score,
   onFeedback,
   feedback,
   lng,
@@ -48,15 +46,9 @@ export default function CompanyCard({
           ) : null}
           <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
         </Avatar>
-        <div>
-          <CardTitle>{company.name}</CardTitle>
-          <CardDescription>
-            {company.industry} • {company.size}
-          </CardDescription>
-        </div>
-        <div className="ml-auto flex flex-col items-center">
-          <span className="text-2xl font-bold">{score}%</span>
-          <span className="text-xs text-muted-foreground">{t('recommendations.matchScore')}</span>
+        <div className="flex flex-col">
+          <span className="font-medium">{company.name}</span>
+          <span className="text-xs text-muted-foreground">{company.industry}</span>
         </div>
       </CardHeader>
       <CardContent>
