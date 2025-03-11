@@ -33,6 +33,5 @@ export type Recommendation = {
   company_id: string;
   created_at: string;
   matching_points: string[]; // Array of matching value points
-  score: number; // Match score
   feedback?: "interested" | "not_interested"; // User feedback
 };

@@ -69,7 +69,7 @@ export default function CompanyCard({
                 <li key={index}>{point}</li>
               ))
             ) : (
-              <li>{t('recommendations.noMatchingPoints')}</li>
+              <li>{t('recommendations.nomatching_points')}</li>
             )}
           </ul>
         </div>
