@@ -69,7 +69,7 @@ export async function GET(request: Request) {
     const recommendationsToInsert = recommendations.map((rec) => ({
       user_id: userId,
       company_id: rec.company.id,
-      matching_points: rec.matchingPoints,
+      matching_points: rec.matchingPoints
     }));
 
     const {error: insertError} = await supabase
