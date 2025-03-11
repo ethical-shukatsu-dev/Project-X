@@ -68,6 +68,8 @@ export async function generateRecommendations(
   const promptTemplate = locale === 'ja' 
     ? `
     ユーザーの価値観と興味に基づいて、就職を考えている大学生に適した日本の企業5社を推薦してください。
+
+    重要: すべての回答は必ず日本語で提供してください。英語の混在は避けてください。
     
     ユーザーの価値観と興味:
     ${JSON.stringify(userData.values)}
@@ -93,6 +95,8 @@ export async function generateRecommendations(
     : `
     Based on the user's values and interests, recommend 5 real companies in Japan 
     that would be good matches for a university student seeking employment.
+
+    Important: All responses must be in English. Do not mix Japanese with English.
     
     User values and interests:
     ${JSON.stringify(userData.values)}
@@ -257,6 +261,8 @@ export async function fetchCompanyData(
     ? `
     "${companyName}" ${industry ? `（${industry}業界）` : ""} に関する詳細情報を提供してください。
     この情報は日本で就職活動をしている大学生に関連するものであるべきです。
+
+    重要: すべての回答は必ず日本語で提供してください。英語の混在は避けてください。
     
     以下の情報をJSONフォーマットで含めてください:
     - name: 会社の正式名称
@@ -280,6 +286,8 @@ export async function fetchCompanyData(
     industry ? `in the ${industry} industry` : ""
     } 
     that would be relevant for university students in Japan seeking employment.
+
+    Important: All responses must be in English. Do not mix Japanese with English.
     
     Include the following information in JSON format:
     - name: Full company name
