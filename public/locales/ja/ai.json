@@ -92,6 +92,8 @@
     "no_interested": "興味ありとマークした企業はありません",
     "no_not_interested": "興味なしとマークした企業はありません",
     "regenerate": "おすすめを再生成",
+    "refresh": "おすすめを更新",
+    "refreshing": "更新中...",
     "loading": {
       "title": "マッチを検索中...",
       "description": "あなたの価値観と好みを分析して、最適な企業マッチを見つけています。"
