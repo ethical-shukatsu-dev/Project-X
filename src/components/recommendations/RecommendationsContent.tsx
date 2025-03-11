@@ -29,7 +29,6 @@ export default function RecommendationsContent({
 
   const [recommendations, setRecommendations] = useState<
     (RecommendationResult & {
-      id?: string;
       feedback?: "interested" | "not_interested";
     })[]
   >([]);
@@ -255,19 +254,19 @@ export default function RecommendationsContent({
 
           <TabsContent value="all" className="mt-6 space-y-6">
             {recommendations.length > 0 ? (
-              recommendations.map((recommendation) => (
-                <CompanyCard
-                  key={recommendation.id || recommendation.company.id}
-                  company={recommendation.company}
-                  matchingPoints={recommendation.matchingPoints}
-                  feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
-                    recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
-                  }
-                  lng={lng}
-                />
-              ))
+              recommendations.map((recommendation) => {
+                console.log('recommendation', recommendation);
+                return (
+                  <CompanyCard
+                    key={recommendation.id || recommendation.company.id}
+                    company={recommendation.company}
+                    matchingPoints={recommendation.matching_points}
+                    feedback={recommendation.feedback}
+                    onFeedback={(feedback) => recommendation.id &&
+                      handleFeedback(recommendation.id, feedback)}
+                    lng={lng} />
+                );
+              })
             ) : (
               <div className="text-center py-8">
                 <p>{t("recommendations.no_matches")}</p>
@@ -281,7 +280,7 @@ export default function RecommendationsContent({
                 <CompanyCard
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
-                  matchingPoints={recommendation.matchingPoints}
+                  matchingPoints={recommendation.matching_points}
                   feedback={recommendation.feedback}
                   onFeedback={(feedback) =>
                     recommendation.id &&
@@ -303,7 +302,7 @@ export default function RecommendationsContent({
                 <CompanyCard
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
-                  matchingPoints={recommendation.matchingPoints}
+                  matchingPoints={recommendation.matching_points}
                   feedback={recommendation.feedback}
                   onFeedback={(feedback) =>
                     recommendation.id &&
@@ -325,7 +324,7 @@ export default function RecommendationsContent({
                 <CompanyCard
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
-                  matchingPoints={recommendation.matchingPoints}
+                  matchingPoints={recommendation.matching_points}
                   feedback={recommendation.feedback}
                   onFeedback={(feedback) =>
                     recommendation.id &&

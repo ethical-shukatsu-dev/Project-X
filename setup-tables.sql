@@ -29,6 +29,5 @@ CREATE TABLE recommendations (
   company_id UUID REFERENCES companies(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   matching_points TEXT[] NOT NULL,
-  score INTEGER NOT NULL,
   feedback TEXT
 );

@@ -69,19 +69,34 @@ export async function GET(request: Request) {
     const recommendationsToInsert = recommendations.map((rec) => ({
       user_id: userId,
       company_id: rec.company.id,
-      matching_points: rec.matchingPoints,
+      matching_points: rec.matching_points,
     }));
 
-    const {error: insertError} = await supabase
+    const {data: insertedRecommendations, error: insertError} = await supabase
       .from("recommendations")
-      .insert(recommendationsToInsert);
+      .insert(recommendationsToInsert)
+      .select("*");
 
-    if (insertError) {
-      console.error("Error saving recommendations:", insertError);
+    if (!insertError) {
       // Continue anyway to return recommendations to the user
+      const recommendationsWithCompanies = await Promise.all(
+        insertedRecommendations.map(async (rec) => {
+          const {data: company} = await supabase
+            .from("companies")
+            .select("*")
+            .eq("id", rec.company_id)
+            .single();
+          return {
+            ...rec,
+            company,
+          };
+        })
+      );
+      return NextResponse.json({recommendations: recommendationsWithCompanies});
+    } else {
+      console.error("Error saving recommendations:", insertError);
+      return NextResponse.json({error: "Failed to save recommendations"}, {status: 500});
     }
-
-    return NextResponse.json({recommendations});
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json({error: "Internal server error"}, {status: 500});
