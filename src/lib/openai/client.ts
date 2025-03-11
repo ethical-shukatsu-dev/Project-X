@@ -11,15 +11,17 @@ const openaiClient = new OpenAI({
 });
 
 export type RecommendationResult = {
+  id: string;
   company: Company;
-  matchingPoints: string[];
+  matching_points: string[];
 }
 
 // Define type for recommendation response from OpenAI
 type OpenAIRecommendation = {
+  id: string;
   name: string;
   industry: string;
-  matchingPoints: string[];
+  matching_points: string[];
 };
 
 type OpenAIRecommendationResponse = {
@@ -82,7 +84,7 @@ export async function generateRecommendations(
         { 
           "name": "企業名", 
           "industry": "業界", 
-          "matchingPoints": ["ポイント1", "ポイント2", ...] 
+          "matching_points": ["ポイント1", "ポイント2", ...] 
         },
         // 他の企業...
       ]
@@ -107,7 +109,7 @@ export async function generateRecommendations(
         { 
           "name": "Company Name", 
           "industry": "Industry", 
-          "matchingPoints": ["point1", "point2", ...] 
+          "matching_points": ["point1", "point2", ...] 
         },
         // more companies...
       ]
@@ -141,8 +143,9 @@ export async function generateRecommendations(
         const company = await getOrCreateCompany(rec.name, rec.industry);
 
         return {
+          id: rec.id,
           company,
-          matchingPoints: rec.matchingPoints,
+          matching_points: rec.matching_points,
         };
       })
     );
