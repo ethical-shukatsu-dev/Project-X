@@ -47,23 +47,18 @@ export default function ImageValueSelector({
 
 // Component for displaying a grid of image questions
 interface ImageQuestionGridProps {
-  questionKey: string;
   images: ValueImage[];
   onSelect: (imageId: string) => void;
   selectedImageId?: string;
-  t: (key: string) => string;
 }
 
 export function ImageQuestionGrid({
-  questionKey,
   images,
   onSelect,
   selectedImageId,
-  t
 }: ImageQuestionGridProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">{t(questionKey)}</h3>
       <ImageValueSelector
         images={images}
         onSelect={onSelect}
