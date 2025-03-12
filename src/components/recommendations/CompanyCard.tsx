@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import Link from "next/link";
 
 interface CompanyCardProps {
   company: Company;
@@ -48,28 +49,32 @@ export default function CompanyCard({
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center gap-4">
-        <Avatar className="h-14 w-14">
-          {company.logo_url && !logoError ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <AvatarImage
-                    src={company.logo_url}
-                    alt={company.name}
-                    onError={() => setLogoError(true)}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t("recommendations.visitWebsite")}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : null}
-          <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
-        </Avatar>
+        <Link href={company.site_url || "/"} target="_blank">
+          <Avatar className="h-14 w-14">
+            {company.logo_url && !logoError ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AvatarImage
+                      src={company.logo_url}
+                      alt={company.name}
+                      onError={() => setLogoError(true)}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("recommendations.visitWebsite")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : null}
+            <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
+          </Avatar>
+        </Link>
+
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
             <span className="font-medium">{company.name}</span>
+
             {company.site_url && (
               <a
                 href={
@@ -86,11 +91,13 @@ export default function CompanyCard({
               </a>
             )}
           </div>
+
           <span className="text-xs text-muted-foreground">
             {company.industry}
           </span>
         </div>
       </CardHeader>
+
       <CardContent>
         <div className="mb-4">
           <h3 className="text-sm font-medium mb-2">
@@ -111,6 +118,7 @@ export default function CompanyCard({
           </ul>
         </div>
       </CardContent>
+
       <CardFooter className="flex justify-between">
         {feedback ? (
           <div className="w-full text-center text-sm text-muted-foreground">
@@ -126,6 +134,7 @@ export default function CompanyCard({
             >
               {t("recommendations.feedback.notInterested")}
             </Button>
+
             <Button onClick={() => onFeedback("interested")}>
               {t("recommendations.feedback.interested")}
             </Button>
