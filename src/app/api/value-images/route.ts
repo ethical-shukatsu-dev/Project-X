@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
-import { supabaseAdmin } from '@/lib/supabase/admin-client';
 import { fetchAndSaveImagesForCategory, fetchAndSaveImagesForAllCategories } from '@/lib/pexels/client';
 
 export async function POST(request: Request) {
@@ -82,7 +81,7 @@ export async function POST(request: Request) {
         
       // Insert the image data into the value_images table using the admin client
       // This bypasses RLS policies
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabase
         .from('value_images')
         .insert({
           category,

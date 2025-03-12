@@ -1,5 +1,4 @@
 import { supabase } from '../supabase/client';
-import { supabaseAdmin } from '../supabase/admin-client';
 import type { ValueImage } from '../supabase/client';
 
 // Define the Pexels API response types
@@ -199,7 +198,7 @@ export async function fetchAndSaveImagesForCategory(
         
         // Insert the image data into the value_images table using the admin client
         // This bypasses RLS policies
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await supabase
           .from('value_images')
           .insert({
             category,
