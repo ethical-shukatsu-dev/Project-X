@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from '@/i18n-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ValueImage } from '@/lib/supabase/client';
 import Image from 'next/image';
-import ErrorBoundary from '@/components/forms/ErrorBoundary';
 
 // Define the categories for value images
 const VALUE_CATEGORIES = [
@@ -19,14 +17,7 @@ const VALUE_CATEGORIES = [
   { value: 'innovation', label: 'Innovation' },
 ];
 
-interface AdminValueImagesPageProps {
-  params: Promise<{ lng: string }>;
-}
-
-// Main content component
-function ValueImagesContent({ language }: { language: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { t } = useTranslation(language, 'admin');
+export default function AdminValueImagesPage() {
   const [images, setImages] = useState<ValueImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -50,14 +41,13 @@ function ValueImagesContent({ language }: { language: string }) {
     try {
       const response = await fetch('/api/value-images');
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
-        throw new Error(errorData.error || `HTTP error ${response.status}`);
+        throw new Error('Failed to fetch images');
       }
       const data = await response.json();
       setImages(data);
     } catch (error) {
       console.error('Error fetching images:', error);
-      setError(error instanceof Error ? error.message : 'Failed to fetch images');
+      setError('Failed to fetch images');
     } finally {
       setIsLoading(false);
     }
@@ -112,8 +102,8 @@ function ValueImagesContent({ language }: { language: string }) {
       });
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
-        throw new Error(errorData.error || `HTTP error ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload image');
       }
       
       // Reset form
@@ -285,29 +275,5 @@ function ValueImagesContent({ language }: { language: string }) {
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-export default function AdminValueImagesPage({ params }: AdminValueImagesPageProps) {
-  const [language, setLanguage] = useState<string>('en');
-
-  // Resolve the params Promise to get the language
-  useEffect(() => {
-    const resolveParams = async () => {
-      try {
-        const resolvedParams = await params;
-        setLanguage(resolvedParams.lng);
-      } catch (error) {
-        console.error('Error resolving params:', error);
-      }
-    };
-    
-    resolveParams();
-  }, [params]);
-
-  return (
-    <ErrorBoundary>
-      {language && <ValueImagesContent language={language} />}
-    </ErrorBoundary>
   );
 } 
