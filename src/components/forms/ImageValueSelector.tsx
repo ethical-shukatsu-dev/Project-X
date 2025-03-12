@@ -36,6 +36,9 @@ export default function ImageValueSelector({
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
+          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-2 text-sm">
+            {image.value_name}
+          </div>
         </div>
       ))}
     </div>

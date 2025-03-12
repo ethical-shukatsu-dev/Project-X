@@ -337,6 +337,7 @@ export default function ValuesQuestionnaire({ lng }: ValuesQuestionnaireProps) {
     else if (currentQuestion < totalQuestions) {
       const imageQuestionIndex = currentQuestion - totalTextQuestions;
       const question = IMAGE_QUESTIONS[imageQuestionIndex];
+      // Each category has 4 random images selected during initial load
       const images = imageQuestions[question.category] || [];
 
       return (

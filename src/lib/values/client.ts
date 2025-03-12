@@ -54,7 +54,22 @@ export async function getImageQuestions(): Promise<Record<string, ValueImage[]>>
     imagesByCategory[image.category].push(image);
   });
   
-  return imagesByCategory;
+  // Select only 4 random images per category
+  const limitedImagesByCategory: Record<string, ValueImage[]> = {};
+  
+  Object.entries(imagesByCategory).forEach(([category, images]) => {
+    // Shuffle the images array using Fisher-Yates algorithm
+    const shuffled = [...images];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    // Take only the first 4 images (or fewer if less than 4 are available)
+    limitedImagesByCategory[category] = shuffled.slice(0, 4);
+  });
+  
+  return limitedImagesByCategory;
 }
 
 /**
