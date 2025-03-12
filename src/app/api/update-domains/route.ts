@@ -10,14 +10,13 @@ const openaiClient = new OpenAI({
 /**
  * Updates existing companies in the database with domain URLs if they don't have one
  */
-async function updateCompanyDomains(batchSize: number = 10): Promise<{ updated: number, failed: number }> {
+async function updateCompanyDomains(): Promise<{ updated: number, failed: number }> {
   try {
     // Get companies without domain URLs
     const { data: companies, error } = await supabase
       .from('companies')
       .select('*')
       .is('site_url', null)
-      .limit(batchSize);
 
     if (error) {
       console.error('Error fetching companies without domain URLs:', error);
@@ -109,13 +108,8 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Get batch size from query parameters
-    const url = new URL(request.url);
-    const batchSizeParam = url.searchParams.get('batchSize');
-    const batchSize = batchSizeParam ? parseInt(batchSizeParam, 10) : 10;
-    
     // Update company domain URLs
-    const result = await updateCompanyDomains(batchSize);
+    const result = await updateCompanyDomains();
     
     return NextResponse.json(
       { 
