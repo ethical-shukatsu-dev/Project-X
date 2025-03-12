@@ -42,34 +42,65 @@ export async function getAllValueImages(): Promise<ValueImage[]> {
  * @returns An object with image questions by category
  */
 export async function getImageQuestions(): Promise<Record<string, ValueImage[]>> {
-  const allImages = await getAllValueImages();
-  
-  // Group images by category
+  // First, get all categories by selecting distinct categories
+  const { data: categoriesData, error: categoriesError } = await supabase
+    .from('value_images')
+    .select('category');
+
+  if (categoriesError) {
+    console.error('Error fetching image categories:', categoriesError);
+    throw new Error('Failed to fetch image categories');
+  }
+
+  // Extract unique categories
+  const categories = [...new Set(categoriesData.map(item => item.category))];
+
+  // Initialize the result object
   const imagesByCategory: Record<string, ValueImage[]> = {};
-  
-  allImages.forEach(image => {
-    if (!imagesByCategory[image.category]) {
-      imagesByCategory[image.category] = [];
-    }
-    imagesByCategory[image.category].push(image);
-  });
-  
-  // Select only 4 random images per category
-  const limitedImagesByCategory: Record<string, ValueImage[]> = {};
-  
-  Object.entries(imagesByCategory).forEach(([category, images]) => {
-    // Shuffle the images array using Fisher-Yates algorithm
-    const shuffled = [...images];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    
-    // Take only the first 4 images (or fewer if less than 4 are available)
-    limitedImagesByCategory[category] = shuffled.slice(0, 4);
-  });
-  
-  return limitedImagesByCategory;
+
+  // For each category, fetch all images and then randomly select 4
+  await Promise.all(
+    categories.map(async (category: string) => {
+      // Fetch all images for this category
+      const { data: allImages, error: imagesError } = await supabase
+        .from('value_images')
+        .select('*')
+        .eq('category', category)
+        .limit(20);
+
+      if (imagesError) {
+        console.error(`Error fetching images for category ${category}:`, imagesError);
+        return;
+      }
+
+      if (!allImages || allImages.length === 0) {
+        imagesByCategory[category] = [];
+        return;
+      }
+
+      // Randomly select 4 images (or fewer if there aren't enough)
+      const randomImages = shuffleArray(allImages).slice(0, 4);
+      
+      // Add the images to the result object
+      imagesByCategory[category] = randomImages;
+    })
+  );
+
+  return imagesByCategory;
+}
+
+/**
+ * Shuffle an array using the Fisher-Yates algorithm
+ * @param array The array to shuffle
+ * @returns A new shuffled array
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
 }
 
 /**
