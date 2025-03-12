@@ -28,7 +28,7 @@ export async function updateCompanyLogos(): Promise<void> {
     // Update each company with a new logo
     for (const company of companies) {
       // Fetch just the logo instead of all company data
-      const logoUrl = await fetchCompanyLogo(company.name, company.domain_url);
+      const logoUrl = await fetchCompanyLogo(company.name, company.site_url);
       
       if (!logoUrl) {
         console.log(`Could not find logo for company ${company.name}`);
