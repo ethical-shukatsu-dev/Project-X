@@ -66,6 +66,11 @@ export async function generateRecommendations(
   const systemPrompt = translations?.systemPrompt?.recommendations?.replace('{{language}}', locale === 'ja' ? '日本語' : 'English') 
     || `You are a helpful assistant that recommends Japanese companies to university students based on their values and interests. Please respond in ${locale === 'ja' ? 'Japanese' : 'English'}.`;
 
+  // Add expertise in image-based value interpretation
+  const enhancedSystemPrompt = systemPrompt + (locale === 'ja' 
+    ? `\n\nあなたは画像ベースの価値観評価の専門家でもあります。ユーザーが選択した画像から価値観を抽出し、それを企業の推薦に活用できます。`
+    : `\n\nYou are also an expert in image-based value assessment. You can extract values from images selected by users and incorporate them into company recommendations.`);
+
   const promptTemplate = locale === 'ja' 
     ? `
     ユーザーの価値観と興味に基づいて、就職を考えている大学生に適した日本の企業5社を推薦してください。
@@ -75,6 +80,13 @@ export async function generateRecommendations(
     ユーザーの価値観と興味:
     ${JSON.stringify(userData.values)}
     ${JSON.stringify(userData.interests)}
+    ${userData.selected_image_values ? `
+    
+    ユーザーが選択した画像ベースの価値観:
+    ${JSON.stringify(userData.selected_image_values)}
+    
+    これらの画像ベースの価値観は、ユーザーが視覚的に選択した価値観を表しています。テキストベースの価値観と同様に重要視してください。
+    ` : ''}
     
     各企業について、以下の情報を提供してください:
     - 企業名
@@ -102,6 +114,13 @@ export async function generateRecommendations(
     User values and interests:
     ${JSON.stringify(userData.values)}
     ${JSON.stringify(userData.interests)}
+    ${userData.selected_image_values ? `
+    
+    User's image-based values:
+    ${JSON.stringify(userData.selected_image_values)}
+    
+    These image-based values represent the values that the user selected visually. Please consider them as important as the text-based values.
+    ` : ''}
     
     For each company, provide:
     - Company name
@@ -127,7 +146,7 @@ export async function generateRecommendations(
       messages: [
         {
           role: "system",
-          content: systemPrompt,
+          content: enhancedSystemPrompt,
         },
         {role: "user", content: promptTemplate},
       ],
