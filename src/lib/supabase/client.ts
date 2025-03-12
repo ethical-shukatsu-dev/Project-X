@@ -23,6 +23,7 @@ export type Company = {
   size: string;
   values: Record<string, number>; // Company values as key-value pairs
   logo_url?: string | null;
+  site_url?: string | null;
   data_source: string;
   last_updated: string;
 };
