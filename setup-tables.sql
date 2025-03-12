@@ -18,6 +18,7 @@ CREATE TABLE companies (
   size TEXT NOT NULL,
   values JSONB NOT NULL,
   logo_url TEXT,
+  site_url TEXT,
   data_source TEXT DEFAULT 'manual',
   last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

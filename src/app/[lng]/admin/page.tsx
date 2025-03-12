@@ -54,6 +54,41 @@ export default function AdminPage() {
     }
   };
 
+  const updateDomains = async () => {
+    if (!apiKey) {
+      setStatus("error");
+      setMessage("API key is required");
+      return;
+    }
+
+    try {
+      setStatus("loading");
+      setMessage("Updating company site URLs...");
+
+      const response = await fetch("/api/update-domains", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus("success");
+        setMessage(`Company site URLs update completed. Updated: ${data.updated}, Failed: ${data.failed}`);
+      } else {
+        setStatus("error");
+        setMessage(`Error: ${data.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      setStatus("error");
+      setMessage(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
+  };
+
   return (
     <div className="container mx-auto py-10">
       <Card className="max-w-md mx-auto">
@@ -87,13 +122,20 @@ export default function AdminPage() {
             </div>
           )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-3">
           <Button
             onClick={updateLogos}
             disabled={status === "loading"}
             className="w-full"
           >
-            {status === "loading" ? "Updating..." : "Update Company Logos"}
+            {status === "loading" && message.includes("logos") ? "Updating..." : "Update Company Logos"}
+          </Button>
+          <Button
+            onClick={updateDomains}
+            disabled={status === "loading"}
+            className="w-full"
+          >
+            {status === "loading" && message.includes("site URLs") ? "Updating..." : "Update Company Site URLs"}
           </Button>
         </CardFooter>
       </Card>

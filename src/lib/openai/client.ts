@@ -37,6 +37,7 @@ type OpenAICompanyData = {
   values: Record<string, number>;
   headquarters?: string;
   japan_presence?: string;
+  site_url?: string;
 };
 
 // Function to load AI translations
@@ -159,10 +160,11 @@ export async function generateRecommendations(
 
 /**
  * Fetch a company logo URL using the BrandFetch Logo Link API
- * @param companyName The name of the company
+ * @param companyName The company name
+ * @param companySiteUrl The company site url
  * @returns A URL to the company logo or null if not found
  */
-export async function fetchCompanyLogo(companyName: string): Promise<string | null> {
+export async function fetchCompanyLogo(companyName: string, companySiteUrl?: string): Promise<string | null> {
   try {
     // Get the BrandFetch client ID from environment variables
     const clientId = process.env.BRANDFETCH_CLIENT_ID;
@@ -172,21 +174,38 @@ export async function fetchCompanyLogo(companyName: string): Promise<string | nu
       return generateFallbackLogo(companyName);
     }
     
-    // Format company name for domain (remove spaces, special chars)
-    const formattedName = companyName
-      .toLowerCase()
-      .replace(/[^\w\s]/gi, '')
-      .replace(/\s+/g, '-');
+    let domains: string[] = [];
     
-    // Try common domain extensions
-    const domains = [
-      `${formattedName}.com`,
-      `${formattedName}.co.jp`,
-      `${formattedName}.jp`,
-      `${formattedName}.io`,
-      `${formattedName}.org`,
-      `${formattedName}.net`
-    ];
+    // Use companySiteUrl if provided
+    if (companySiteUrl) {
+      try {
+        // Extract domain from URL
+        const url = new URL(companySiteUrl.startsWith('http') ? companySiteUrl : `https://${companySiteUrl}`);
+        domains = [url.hostname];
+      } catch (error) {
+        console.warn(`Invalid URL format for companySiteUrl: ${companySiteUrl}`, error);
+        // Fall back to domain generation logic
+      }
+    }
+    
+    // If no valid domain from companySiteUrl, use the original domain generation logic
+    if (domains.length === 0) {
+      // Format company name for domain (remove spaces, special chars)
+      const formattedName = companyName
+        .toLowerCase()
+        .replace(/[^\w\s]/gi, '')
+        .replace(/\s+/g, '-');
+      
+      // Try common domain extensions
+      domains = [
+        `${formattedName}.com`,
+        `${formattedName}.co.jp`,
+        `${formattedName}.jp`,
+        `${formattedName}.io`,
+        `${formattedName}.org`,
+        `${formattedName}.net`
+      ];
+    }
     
     // Try to find a valid logo using BrandFetch Logo Link
     for (const domain of domains) {
@@ -272,6 +291,7 @@ export async function fetchCompanyData(
       }
     - headquarters: 本社所在地
     - japan_presence: 日本での存在感に関する詳細
+    - site_url: 会社の公式ウェブサイトのURL（わかる場合）。不明な場合はnullを返してください。
     
     有効なJSONフォーマットのみで回答してください。
     `
@@ -295,6 +315,7 @@ export async function fetchCompanyData(
       }
     - headquarters: Headquarters location
     - japan_presence: Details about their presence in Japan
+    - site_url: The company's official website URL if known. Return null if unknown.
     
     Format the response as valid JSON only.
     `;
@@ -327,7 +348,7 @@ export async function fetchCompanyData(
     });
 
     // Fetch company logo
-    const logoUrl = await fetchCompanyLogo(companyData.name);
+    const logoUrl = await fetchCompanyLogo(companyData.name, companyData.site_url);
 
     return {
       id: uuid(), // Generate a UUID for the new company
@@ -337,6 +358,7 @@ export async function fetchCompanyData(
       size: companyData.size,
       values: numericValues,
       logo_url: logoUrl, // Use the fetched logo URL instead of null
+      site_url: companyData.site_url || null, // Include domain URL if available
       data_source: "openai",
       last_updated: new Date().toISOString(),
     };

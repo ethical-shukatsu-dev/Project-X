@@ -92,6 +92,7 @@
     "no_interested": "No companies marked as interested",
     "no_not_interested": "No companies marked as not interested",
     "regenerate": "Regenerate Recommendations",
+    "visitWebsite": "Visit company website",
     "refresh": "Refresh Recommendations",
     "refreshing": "Refreshing...",
     "loading": {
@@ -121,6 +122,6 @@
   },
   "systemPrompt": {
     "questionnaire": "You are an AI assistant helping users find companies that match their values and interests. Please respond in {{language}}.",
-    "recommendations": "You are an AI assistant providing company recommendations based on user preferences. Please respond in {{language}}."
+    "recommendations": "You are an AI assistant providing company recommendations based on user preferences. Please include company domain URLs when available. Please respond in {{language}}."
   }
 } 
