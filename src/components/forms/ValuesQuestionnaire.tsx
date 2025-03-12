@@ -69,6 +69,11 @@ const QUESTIONS = [
 // Define the image-based questions
 const IMAGE_QUESTIONS = [
   {
+    id: 'visual_hobbies',
+    category: 'hobbies',
+    questionKey: 'questionnaire.image_questions.hobbies.question',
+  },
+  {
     id: 'visual_work_values',
     category: 'work_values',
     questionKey: 'questionnaire.image_questions.work_values.question',
@@ -83,6 +88,46 @@ const IMAGE_QUESTIONS = [
     category: 'company_culture',
     questionKey: 'questionnaire.image_questions.company_culture.question',
   },
+  {
+    id: 'visual_work_environment',
+    category: 'work_environment',
+    questionKey: 'questionnaire.image_questions.work_environment.question',
+  },
+  {
+    id: 'visual_innovation',
+    category: 'innovation',
+    questionKey: 'questionnaire.image_questions.innovation.question',
+  },
+  {
+    id: 'visual_personal_professional_growth',
+    category: 'personal_professional_growth',
+    questionKey: 'questionnaire.image_questions.personal_professional_growth.question',
+  },
+  {
+    id: 'visual_work_life_balance',
+    category: 'work_life_balance',
+    questionKey: 'questionnaire.image_questions.work_life_balance.question',
+  },
+  {
+    id: 'visual_financial_job_security',
+    category: 'financial_job_security',
+    questionKey: 'questionnaire.image_questions.financial_job_security.question',
+  },
+  {
+    id: 'visual_impact_purpose',
+    category: 'impact_purpose',
+    questionKey: 'questionnaire.image_questions.impact_purpose.question',
+  },
+  {
+    id: 'visual_communication_transparency',
+    category: 'communication_transparency',
+    questionKey: 'questionnaire.image_questions.communication_transparency.question',
+  },
+  {
+    id: 'visual_recognition_appreciation',
+    category: 'recognition_appreciation',
+    questionKey: 'questionnaire.image_questions.recognition_appreciation.question',
+  }
 ];
 
 // Define the interest areas

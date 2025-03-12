@@ -17,6 +17,45 @@
     "progress": "質問 {{current}} / {{total}}",
     "complete": "アンケート完了",
     "thankyou": "アンケートにご回答いただきありがとうございます。最適な企業マッチングを分析しています。",
+    "no_images": "この質問に利用可能な画像がありません。次の質問に進んでください。",
+    "image_questions": {
+      "work_values": {
+        "question": "あなたの仕事の価値観を最もよく表す画像を選んでください："
+      },
+      "leadership_values": {
+        "question": "あなたの理想のリーダーシップスタイルを反映する画像を選んでください："
+      },
+      "company_culture": {
+        "question": "あなたの理想の企業文化を表す画像を選んでください："
+      },
+      "work_environment": {
+        "question": "どの職場環境があなたに最も魅力的ですか？"
+      },
+      "innovation": {
+        "question": "あなたにとってのイノベーションを表す画像を選んでください："
+      },
+      "personal_professional_growth": {
+        "question": "あなたの成長への願望を表す画像を選んでください："
+      },
+      "work_life_balance": {
+        "question": "あなたの理想的なワークライフバランスを表す画像を選んでください："
+      },
+      "financial_job_security": {
+        "question": "あなたにとっての経済的安定を最もよく表す画像はどれですか？"
+      },
+      "impact_purpose": {
+        "question": "あなたにとって意義のある影響を表す画像を選んでください："
+      },
+      "communication_transparency": {
+        "question": "理想的なコミュニケーションを表す画像を選んでください："
+      },
+      "recognition_appreciation": {
+        "question": "認識と感謝を表す画像を選んでください："
+      },
+      "hobbies": {
+        "question": "仕事以外のあなたのお気に入りの趣味や興味を表す画像を選んでください："
+      }
+    },
     "interests": {
       "title": "興味のある分野を選択",
       "description": "興味のある業界や分野を選んでください。",

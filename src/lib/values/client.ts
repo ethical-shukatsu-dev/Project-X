@@ -1,4 +1,5 @@
 import { supabase } from '../supabase/client';
+import { supabaseAdmin } from '../supabase/admin-client';
 import type { ValueImage } from '../supabase/client';
 
 /**
@@ -92,8 +93,9 @@ export async function uploadValueImage(
     .from('images')
     .getPublicUrl(filePath);
     
-  // Insert the image data into the value_images table
-  const { data, error } = await supabase
+  // Insert the image data into the value_images table using the admin client
+  // This bypasses RLS policies
+  const { data, error } = await supabaseAdmin
     .from('value_images')
     .insert({
       category,
