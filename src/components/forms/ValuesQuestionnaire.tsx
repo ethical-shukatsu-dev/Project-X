@@ -19,6 +19,9 @@ import {useTranslation} from "@/i18n-client";
 import {ImageQuestionGrid} from "./ImageValueSelector";
 import {getImageQuestions} from "@/lib/values/client";
 
+// A/B Testing Toggle - Set to false to use text-based questions, true to use only image-based questions
+const USE_ONLY_IMAGE_QUESTIONS = false;
+
 // Define the questions for the questionnaire
 const QUESTIONS = [
   {
@@ -241,10 +244,10 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
   >({});
   const [isLoadingImages, setIsLoadingImages] = useState(true);
 
-  // Calculate total questions (text + image + interests)
+  // Calculate total questions based on A/B testing toggle
   const totalTextQuestions = QUESTIONS.length;
   const totalImageQuestions = IMAGE_QUESTIONS.length;
-  const totalQuestions = totalTextQuestions + totalImageQuestions;
+  const totalQuestions = USE_ONLY_IMAGE_QUESTIONS ? totalImageQuestions : totalTextQuestions;
 
   // Fetch image questions on component mount
   useEffect(() => {
@@ -261,10 +264,6 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
 
     fetchImageQuestions();
   }, []);
-
-  const handleValueChange = (questionId: string, value: string) => {
-    setValues((prev) => ({...prev, [questionId]: value}));
-  };
 
   const handleImageValueChange = (questionId: string, imageId: string) => {
     setSelectedImageValues((prev) => ({...prev, [questionId]: imageId}));
@@ -298,34 +297,41 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
     try {
       // Convert values to numeric format for better AI processing
       const numericValues: Record<string, number> = {};
-      Object.values(values).forEach((value) => {
-        // Assign a value of 5 (on a scale of 1-5) to indicate strong preference
-        numericValues[value] = 5;
-      });
+      
+      // Only process text-based values if we're in text-only mode
+      if (!USE_ONLY_IMAGE_QUESTIONS) {
+        Object.values(values).forEach((value) => {
+          // Assign a value of 5 (on a scale of 1-5) to indicate strong preference
+          numericValues[value] = 5;
+        });
+      }
 
-      // Prepare selected image values
+      // Prepare selected image values - only if we're in image-only mode
       const selectedImages: Record<string, string[]> = {};
-      Object.entries(selectedImageValues).forEach(([questionId, imageId]) => {
-        // Find the corresponding image question
-        const imageQuestion = IMAGE_QUESTIONS.find((q) => q.id === questionId);
-        if (imageQuestion) {
-          // Get the category
-          const category = imageQuestion.category;
+      
+      if (USE_ONLY_IMAGE_QUESTIONS) {
+        Object.entries(selectedImageValues).forEach(([questionId, imageId]) => {
+          // Find the corresponding image question
+          const imageQuestion = IMAGE_QUESTIONS.find((q) => q.id === questionId);
+          if (imageQuestion) {
+            // Get the category
+            const category = imageQuestion.category;
 
-          // Find the image details
-          const image = imageQuestions[category]?.find(
-            (img) => img.id === imageId
-          );
+            // Find the image details
+            const image = imageQuestions[category]?.find(
+              (img) => img.id === imageId
+            );
 
-          if (image) {
-            // Add the value_name to the selected images
-            if (!selectedImages[category]) {
-              selectedImages[category] = [];
+            if (image) {
+              // Add the value_name to the selected images
+              if (!selectedImages[category]) {
+                selectedImages[category] = [];
+              }
+              selectedImages[category].push(image.value_name);
             }
-            selectedImages[category].push(image.value_name);
           }
-        }
-      });
+        });
+      }
 
       // Create user values object
       const userValues: Partial<UserValues> = {
@@ -361,6 +367,10 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
     }
   };
 
+  const handleValueChange = (questionId: string, value: string) => {
+    setValues((prev) => ({...prev, [questionId]: value}));
+  };
+
   // If translations are not loaded yet, show a loading state
   if (!loaded || isLoadingImages) {
     return (
@@ -374,8 +384,8 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
 
   // Render the current question
   const renderQuestion = () => {
-    // Text-based questions
-    if (currentQuestion < totalTextQuestions) {
+    // Text-based questions - only shown if USE_ONLY_IMAGE_QUESTIONS is false
+    if (!USE_ONLY_IMAGE_QUESTIONS && currentQuestion < totalTextQuestions) {
       const question = QUESTIONS[currentQuestion];
       return (
         <>
@@ -383,7 +393,7 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
             <CardTitle className="text-xl">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
-                total: totalQuestions + 1,
+                total: totalTextQuestions + 1, // +1 for interests
               })}
             </CardTitle>
             <CardDescription className="text-lg">
@@ -396,7 +406,7 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
               onValueChange={(value) => handleValueChange(question.id, value)}
               className="space-y-3"
             >
-              {question.options.map((option) => (
+              {question.options.map((option: { value: string; labelKey: string }) => (
                 <div key={option.value} className="flex items-center space-x-2">
                   <RadioGroupItem value={option.value} id={option.value} />
                   <Label htmlFor={option.value} className="text-base">
@@ -421,9 +431,9 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
         </>
       );
     }
-    // Image-based questions
-    else if (currentQuestion < totalQuestions) {
-      const imageQuestionIndex = currentQuestion - totalTextQuestions;
+    // Image-based questions - only shown if USE_ONLY_IMAGE_QUESTIONS is true
+    else if (USE_ONLY_IMAGE_QUESTIONS && currentQuestion < totalImageQuestions) {
+      const imageQuestionIndex = currentQuestion;
       const question = IMAGE_QUESTIONS[imageQuestionIndex];
       // Each category has 4 random images selected during initial load
       const images = imageQuestions[question.category] || [];
@@ -434,7 +444,7 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
             <CardTitle className="text-xl">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
-                total: totalQuestions + 1,
+                total: totalImageQuestions + 1, // +1 for interests
               })}
             </CardTitle>
             <CardDescription className="text-lg">
@@ -455,7 +465,11 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
             )}
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={handlePrevious}>
+            <Button 
+              variant="outline" 
+              onClick={handlePrevious}
+              disabled={currentQuestion === 0}
+            >
               {t("questionnaire.previous")}
             </Button>
             <Button
