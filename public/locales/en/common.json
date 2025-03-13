@@ -8,7 +8,10 @@
   "homepage": {
     "title": "Find Your Perfect Company Match",
     "description": "Discover companies that align with your values and interests. Take a quick questionnaire and get personalized recommendations.",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "selectQuestionnaireType": "Choose your questionnaire type:",
+    "textQuestionnaire": "Text-Based",
+    "imageQuestionnaire": "Image-Based"
   },
   "features": {
     "quick": {

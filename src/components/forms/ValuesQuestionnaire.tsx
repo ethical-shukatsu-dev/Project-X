@@ -19,8 +19,8 @@ import {useTranslation} from "@/i18n-client";
 import {ImageQuestionGrid} from "./ImageValueSelector";
 import {getImageQuestions} from "@/lib/values/client";
 
-// A/B Testing Toggle - Set to false to use text-based questions, true to use only image-based questions
-const USE_ONLY_IMAGE_QUESTIONS = false;
+// A/B Testing Toggle - This will be overridden by the questionnaireType prop if provided
+const DEFAULT_QUESTIONNAIRE_TYPE = "text"; // "text" or "image"
 
 // Number of random image questions to select
 const NUM_RANDOM_IMAGE_QUESTIONS = 5;
@@ -240,9 +240,10 @@ const INTERESTS = [
 
 interface ValuesQuestionnaireProps {
   lng: string;
+  questionnaireType?: string; // New prop to control which type of questionnaire to show
 }
 
-export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
+export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QUESTIONNAIRE_TYPE}: ValuesQuestionnaireProps) {
   const router = useRouter();
   const {t, loaded} = useTranslation(lng, "ai");
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -258,6 +259,9 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
   const [isLoadingImages, setIsLoadingImages] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   
+  // Determine if we should use only image questions based on the prop
+  const useOnlyImageQuestions = questionnaireType === "image";
+  
   // Randomly select a subset of image questions on component mount
   const [randomImageQuestions, setRandomImageQuestions] = useState<typeof ALL_IMAGE_QUESTIONS>([]);
   
@@ -268,10 +272,10 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
     setIsInitialized(true);
   }, []);
 
-  // Calculate total questions based on A/B testing toggle
+  // Calculate total questions based on questionnaire type
   const totalTextQuestions = QUESTIONS.length;
   const totalImageQuestions = randomImageQuestions.length;
-  const totalQuestions = USE_ONLY_IMAGE_QUESTIONS ? totalImageQuestions : totalTextQuestions;
+  const totalQuestions = useOnlyImageQuestions ? totalImageQuestions : totalTextQuestions;
 
   // Fetch image questions on component mount
   useEffect(() => {
@@ -323,7 +327,7 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
       const numericValues: Record<string, number> = {};
       
       // Only process text-based values if we're in text-only mode
-      if (!USE_ONLY_IMAGE_QUESTIONS) {
+      if (!useOnlyImageQuestions) {
         Object.values(values).forEach((value) => {
           // Assign a value of 5 (on a scale of 1-5) to indicate strong preference
           numericValues[value] = 5;
@@ -333,7 +337,7 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
       // Prepare selected image values - only if we're in image-only mode
       const selectedImages: Record<string, string[]> = {};
       
-      if (USE_ONLY_IMAGE_QUESTIONS) {
+      if (useOnlyImageQuestions) {
         Object.entries(selectedImageValues).forEach(([questionId, imageId]) => {
           // Find the corresponding image question from our random selection
           const imageQuestion = randomImageQuestions.find((q) => q.id === questionId);
@@ -362,6 +366,7 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
         values: numericValues,
         interests: interests,
         selected_image_values: selectedImages,
+        questionnaire_type: questionnaireType, // Add the questionnaire type to the user values
       };
 
       // Submit to API
@@ -408,8 +413,8 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
 
   // Render the current question
   const renderQuestion = () => {
-    // Text-based questions - only shown if USE_ONLY_IMAGE_QUESTIONS is false
-    if (!USE_ONLY_IMAGE_QUESTIONS && currentQuestion < totalTextQuestions) {
+    // Text-based questions - only shown if useOnlyImageQuestions is false
+    if (!useOnlyImageQuestions && currentQuestion < totalTextQuestions) {
       const question = QUESTIONS[currentQuestion];
       return (
         <>
@@ -455,8 +460,8 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
         </>
       );
     }
-    // Image-based questions - only shown if USE_ONLY_IMAGE_QUESTIONS is true
-    else if (USE_ONLY_IMAGE_QUESTIONS && currentQuestion < totalImageQuestions) {
+    // Image-based questions - only shown if useOnlyImageQuestions is true
+    else if (useOnlyImageQuestions && currentQuestion < totalImageQuestions) {
       const imageQuestionIndex = currentQuestion;
       const question = randomImageQuestions[imageQuestionIndex];
       // Each category has 4 random images selected during initial load

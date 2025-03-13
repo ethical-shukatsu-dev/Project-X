@@ -8,7 +8,10 @@
   "homepage": {
     "title": "あなたにぴったりの企業を見つけよう",
     "description": "あなたの価値観や興味に合った企業を発見しましょう。簡単なアンケートに答えて、パーソナライズされたおすすめを受け取りましょう。",
-    "getStarted": "始める"
+    "getStarted": "始める",
+    "selectQuestionnaireType": "アンケートタイプを選択してください：",
+    "textQuestionnaire": "テキストベース",
+    "imageQuestionnaire": "画像ベース"
   },
   "features": {
     "quick": {
