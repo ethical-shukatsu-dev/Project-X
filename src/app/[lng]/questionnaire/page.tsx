@@ -57,16 +57,17 @@ export default function QuestionnairePage({
   searchParams,
 }: {
   params: Promise<{lng: string}>;
-  searchParams: {type?: string};
+  searchParams: Promise<{type?: string}>;
 }) {
   // Use an async IIFE to handle the Promise
   const QuestionnairePageContent = async () => {
     const resolvedParams = await params;
+    const resolvedSearchParams = await searchParams;
     const lng = resolvedParams.lng;
     const {t} = await getTranslation(lng, "ai");
 
     // Get the questionnaire type from the URL query parameters
-    const questionnaireType = searchParams.type || "text"; // Default to text if not specified
+    const questionnaireType = resolvedSearchParams.type || "text"; // Default to text if not specified
 
     return (
       <Suspense fallback={<QuestionnaireLoadingSkeleton />}>
