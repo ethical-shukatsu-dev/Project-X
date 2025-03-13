@@ -20,7 +20,10 @@ import {ImageQuestionGrid} from "./ImageValueSelector";
 import {getImageQuestions} from "@/lib/values/client";
 
 // A/B Testing Toggle - Set to false to use text-based questions, true to use only image-based questions
-const USE_ONLY_IMAGE_QUESTIONS = false;
+const USE_ONLY_IMAGE_QUESTIONS = true;
+
+// Number of random image questions to select
+const NUM_RANDOM_IMAGE_QUESTIONS = 5;
 
 // Define the questions for the questionnaire
 const QUESTIONS = [
@@ -143,8 +146,8 @@ const QUESTIONS = [
   },
 ];
 
-// Define the image-based questions
-const IMAGE_QUESTIONS = [
+// Define all available image-based questions
+const ALL_IMAGE_QUESTIONS = [
   {
     id: "visual_hobbies",
     category: "hobbies",
@@ -211,6 +214,16 @@ const IMAGE_QUESTIONS = [
   },
 ];
 
+// Helper function to shuffle an array (Fisher-Yates algorithm)
+function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
 // Define the interest areas
 const INTERESTS = [
   {value: "technology", labelKey: "questionnaire.interests.technology"},
@@ -243,10 +256,21 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
     Record<string, string>
   >({});
   const [isLoadingImages, setIsLoadingImages] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Randomly select a subset of image questions on component mount
+  const [randomImageQuestions, setRandomImageQuestions] = useState<typeof ALL_IMAGE_QUESTIONS>([]);
+  
+  useEffect(() => {
+    // Randomly select NUM_RANDOM_IMAGE_QUESTIONS from ALL_IMAGE_QUESTIONS
+    const randomQuestions = shuffleArray(ALL_IMAGE_QUESTIONS).slice(0, NUM_RANDOM_IMAGE_QUESTIONS);
+    setRandomImageQuestions(randomQuestions);
+    setIsInitialized(true);
+  }, []);
 
   // Calculate total questions based on A/B testing toggle
   const totalTextQuestions = QUESTIONS.length;
-  const totalImageQuestions = IMAGE_QUESTIONS.length;
+  const totalImageQuestions = randomImageQuestions.length;
   const totalQuestions = USE_ONLY_IMAGE_QUESTIONS ? totalImageQuestions : totalTextQuestions;
 
   // Fetch image questions on component mount
@@ -311,8 +335,8 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
       
       if (USE_ONLY_IMAGE_QUESTIONS) {
         Object.entries(selectedImageValues).forEach(([questionId, imageId]) => {
-          // Find the corresponding image question
-          const imageQuestion = IMAGE_QUESTIONS.find((q) => q.id === questionId);
+          // Find the corresponding image question from our random selection
+          const imageQuestion = randomImageQuestions.find((q) => q.id === questionId);
           if (imageQuestion) {
             // Get the category
             const category = imageQuestion.category;
@@ -372,7 +396,7 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
   };
 
   // If translations are not loaded yet, show a loading state
-  if (!loaded || isLoadingImages) {
+  if (!loaded || isLoadingImages || !isInitialized) {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
@@ -434,7 +458,7 @@ export default function ValuesQuestionnaire({lng}: ValuesQuestionnaireProps) {
     // Image-based questions - only shown if USE_ONLY_IMAGE_QUESTIONS is true
     else if (USE_ONLY_IMAGE_QUESTIONS && currentQuestion < totalImageQuestions) {
       const imageQuestionIndex = currentQuestion;
-      const question = IMAGE_QUESTIONS[imageQuestionIndex];
+      const question = randomImageQuestions[imageQuestionIndex];
       // Each category has 4 random images selected during initial load
       const images = imageQuestions[question.category] || [];
 
