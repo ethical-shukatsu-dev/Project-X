@@ -119,7 +119,7 @@ export default function CompanyCard({
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex justify-end gap-4">
         {feedback ? (
           <div className="w-full text-center text-sm text-muted-foreground">
             {feedback === "interested"
