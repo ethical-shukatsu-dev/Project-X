@@ -68,8 +68,8 @@ export async function generateRecommendations(
 
   // Add expertise in image-based value interpretation and company data analysis
   const enhancedSystemPrompt = systemPrompt + (locale === 'ja' 
-    ? `\n\nあなたは画像ベースの価値観評価の専門家でもあります。ユーザーが選択した画像から価値観を抽出し、それを企業の推薦に活用できます。\n\nまた、企業データの分析の専門家でもあります。企業の公式情報（ミッション、ビジョン、価値観）だけでなく、社員レビューや実際の職場環境も考慮して、ユーザーの価値観と企業の価値観の間の真の適合性を評価してください。表面的なマッチングではなく、企業文化と実際の職場環境に基づいた深い分析を提供してください。\n\n重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。`
-    : `\n\nYou are also an expert in image-based value assessment. You can extract values from images selected by users and incorporate them into company recommendations.\n\nYou are also an expert in company data analysis. Consider not just official company information (mission, vision, values) but also employee reviews and actual workplace environment to evaluate the true fit between user values and company values. Provide deep analysis based on company culture and actual workplace environment, not just surface-level matching.\n\nImportant: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.`);
+    ? `\n\nあなたは画像ベースの価値観評価の専門家でもあります。ユーザーが選択した画像から価値観を抽出し、それを企業の推薦に活用できます。\n\nまた、企業データの分析の専門家でもあります。企業の公式情報（ミッション、ビジョン、価値観）だけでなく、社員レビューや実際の職場環境も考慮して、ユーザーの価値観と企業の価値観の間の真の適合性を評価してください。表面的なマッチングではなく、企業文化と実際の職場環境に基づいた深い分析を提供してください。\n\n特に重要なのは、ユーザーの価値観と企業の価値観の間の具体的な一致点を明確に示すことです。「ユーザーと企業の両方が...」という形式で、具体的な例や証拠を含めた詳細な説明を提供してください。\n\n重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。`
+    : `\n\nYou are also an expert in image-based value assessment. You can extract values from images selected by users and incorporate them into company recommendations.\n\nYou are also an expert in company data analysis. Consider not just official company information (mission, vision, values) but also employee reviews and actual workplace environment to evaluate the true fit between user values and company values. Provide deep analysis based on company culture and actual workplace environment, not just surface-level matching.\n\nIt is especially important to clearly show the specific connections between the user's values and the company's values. Use a "Both the user and the company..." format and provide detailed explanations with specific examples or evidence.\n\nImportant: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.`);
 
   const promptTemplate = locale === 'ja' 
     ? `
@@ -92,6 +92,18 @@ export async function generateRecommendations(
     - 企業名: 日本語で表記してください。英語名の場合は日本語での一般的な呼び方を使用してください。
     - 業界: 日本語で表記してください。
     - この企業がユーザーの価値観に合う理由を説明する3〜5つの具体的なポイント: すべて日本語で記述してください。
+    
+    マッチングポイントについては、「ユーザーと企業の両方が...」という形式で、ユーザーの価値観と企業の価値観の具体的な一致点を明確に示してください。表面的な説明ではなく、具体的な例や証拠を含めてください。
+
+    マッチングポイントの良い例:
+    - 「ユーザーと富士通の両方がワークライフバランスを重視しています。ユーザーは柔軟な勤務環境を求めており、富士通はフレックスタイム制度や在宅勤務制度を積極的に導入しています。」
+    - 「ユーザーと楽天の両方がイノベーションを重視しています。ユーザーは創造的な環境で働きたいと考えており、楽天は新しいアイデアを奨励し、社内ベンチャー制度を設けています。」
+    - 「ユーザーと資生堂の両方が社会的影響を重視しています。ユーザーは社会貢献活動に関心があり、資生堂は環境保全活動や女性支援プログラムなど多くの社会貢献活動を行っています。」
+
+    マッチングポイントの悪い例:
+    - 「この企業はイノベーションを重視しています」（ユーザーとの具体的な関連性が示されていない）
+    - 「良い職場環境を提供しています」（具体性に欠ける）
+    - 「ユーザーの価値観に合っています」（具体的な一致点が示されていない）
     
     推薦する企業を選ぶ際は、以下の点を考慮してください:
     - 企業の公式な価値観だけでなく、実際の職場環境や社員の経験も考慮してください
@@ -134,6 +146,18 @@ export async function generateRecommendations(
     - Company name: Use the English name or the commonly used English translation.
     - Industry: Provide in English.
     - 3-5 specific points explaining why this company matches the user's values: All in English.
+    
+    For the matching points, clearly show the specific connections between the user's values and the company's values using a "Both the user and the company..." format. Include specific examples or evidence rather than surface-level explanations.
+
+    Good examples of matching points:
+    - "Both the user and Sony value innovation. The user seeks a creative environment, and Sony encourages new ideas through its innovation programs and dedicated R&D budget."
+    - "Both the user and Toyota prioritize work-life balance. The user values flexible working arrangements, and Toyota has implemented comprehensive flexible work policies and family support programs."
+    - "Both the user and Rakuten emphasize career growth. The user is looking for professional development opportunities, and Rakuten offers structured career advancement paths and extensive training programs."
+
+    Poor examples of matching points:
+    - "The company values innovation" (doesn't show specific connection to user)
+    - "Provides a good work environment" (lacks specificity)
+    - "Aligns with user values" (doesn't identify specific matching points)
     
     When selecting companies to recommend, consider:
     - Not just official company values but also actual workplace environment and employee experiences

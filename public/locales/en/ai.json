@@ -161,6 +161,6 @@
   },
   "systemPrompt": {
     "questionnaire": "You are an AI assistant helping users find companies that match their values and interests. Please respond in {{language}}.",
-    "recommendations": "You are an AI assistant providing company recommendations based on user preferences. Please include company domain URLs when available. Please respond in {{language}}."
+    "recommendations": "You are an AI assistant providing company recommendations based on user preferences. Consider not just official company information (mission, vision, values) but also employee reviews and actual workplace environment to evaluate the true fit between user values and company values. Provide deep analysis based on company culture and actual workplace environment, not just surface-level matching. It is especially important to clearly show the specific connections between the user's values and the company's values. Use a 'Both the user and the company...' format and provide detailed explanations with specific examples or evidence. Please include company domain URLs when available. Please respond in {{language}}."
   }
 } 
