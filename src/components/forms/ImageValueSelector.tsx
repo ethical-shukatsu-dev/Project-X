@@ -4,12 +4,6 @@ import React from "react";
 import Image from "next/image";
 import {cn} from "@/lib/utils";
 import {ValueImage} from "@/lib/supabase/client";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 interface ImageValueSelectorProps {
   images: ValueImage[];
   onSelect: (imageId: string) => void;
@@ -34,22 +28,13 @@ export default function ImageValueSelector({
               : "ring-1 ring-gray-200 hover:ring-gray-300"
           )}
         >
-          <TooltipProvider>
-            <Tooltip delayDuration={3500}>
-              <TooltipTrigger asChild>
-                <Image
-                  src={image.image_url}
-                  alt={image.description || "Value image"}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{image.value_name}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Image
+            src={image.image_url}
+            alt={image.description || "Value image"}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
         </div>
       ))}
     </div>
