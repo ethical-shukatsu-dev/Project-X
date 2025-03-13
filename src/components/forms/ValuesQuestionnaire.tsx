@@ -20,7 +20,7 @@ import {ImageQuestionGrid} from "./ImageValueSelector";
 import {getImageQuestions} from "@/lib/values/client";
 
 // A/B Testing Toggle - Set to false to use text-based questions, true to use only image-based questions
-const USE_ONLY_IMAGE_QUESTIONS = true;
+const USE_ONLY_IMAGE_QUESTIONS = false;
 
 // Number of random image questions to select
 const NUM_RANDOM_IMAGE_QUESTIONS = 5;
