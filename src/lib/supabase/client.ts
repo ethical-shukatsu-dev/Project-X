@@ -13,6 +13,7 @@ export type UserValues = {
   created_at: string;
   values: Record<string, number>; // Store values as key-value pairs
   interests: string[]; // Array of interest keywords
+  selected_image_values?: Record<string, string[]>; // Store selected image IDs by category
 };
 
 export type Company = {
@@ -35,4 +36,15 @@ export type Recommendation = {
   created_at: string;
   matching_points: string[]; // Array of matching value points
   feedback?: "interested" | "not_interested"; // User feedback
+};
+
+// New type for value images
+export type ValueImage = {
+  id: string;
+  created_at: string;
+  category: string; // e.g., 'work_environment', 'leadership_style'
+  value_name: string; // e.g., 'collaborative', 'mentorship'
+  image_url: string;
+  description?: string;
+  tags?: string[];
 };

@@ -66,59 +66,94 @@ export async function generateRecommendations(
   const systemPrompt = translations?.systemPrompt?.recommendations?.replace('{{language}}', locale === 'ja' ? '日本語' : 'English') 
     || `You are a helpful assistant that recommends Japanese companies to university students based on their values and interests. Please respond in ${locale === 'ja' ? 'Japanese' : 'English'}.`;
 
+  // Add expertise in image-based value interpretation and company data analysis
+  const enhancedSystemPrompt = systemPrompt + (locale === 'ja' 
+    ? `\n\nあなたは画像ベースの価値観評価の専門家でもあります。ユーザーが選択した画像から価値観を抽出し、それを企業の推薦に活用できます。\n\nまた、企業データの分析の専門家でもあります。企業の公式情報（ミッション、ビジョン、価値観）だけでなく、社員レビューや実際の職場環境も考慮して、ユーザーの価値観と企業の価値観の間の真の適合性を評価してください。表面的なマッチングではなく、企業文化と実際の職場環境に基づいた深い分析を提供してください。\n\n重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。`
+    : `\n\nYou are also an expert in image-based value assessment. You can extract values from images selected by users and incorporate them into company recommendations.\n\nYou are also an expert in company data analysis. Consider not just official company information (mission, vision, values) but also employee reviews and actual workplace environment to evaluate the true fit between user values and company values. Provide deep analysis based on company culture and actual workplace environment, not just surface-level matching.\n\nImportant: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.`);
+
   const promptTemplate = locale === 'ja' 
     ? `
     ユーザーの価値観と興味に基づいて、就職を考えている大学生に適した日本の企業5社を推薦してください。
 
-    重要: すべての回答は必ず日本語で提供してください。英語の混在は避けてください。
+    重要: すべての回答は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。
     
     ユーザーの価値観と興味:
     ${JSON.stringify(userData.values)}
     ${JSON.stringify(userData.interests)}
+    ${userData.selected_image_values ? `
+    
+    ユーザーが選択した画像ベースの価値観:
+    ${JSON.stringify(userData.selected_image_values)}
+    
+    これらの画像ベースの価値観は、ユーザーが視覚的に選択した価値観を表しています。テキストベースの価値観と同様に重要視してください。
+    ` : ''}
     
     各企業について、以下の情報を提供してください:
-    - 企業名
-    - 業界
-    - この企業がユーザーの価値観に合う理由を説明する3〜5つの具体的なポイント
+    - 企業名: 日本語で表記してください。英語名の場合は日本語での一般的な呼び方を使用してください。
+    - 業界: 日本語で表記してください。
+    - この企業がユーザーの価値観に合う理由を説明する3〜5つの具体的なポイント: すべて日本語で記述してください。
+    
+    推薦する企業を選ぶ際は、以下の点を考慮してください:
+    - 企業の公式な価値観だけでなく、実際の職場環境や社員の経験も考慮してください
+    - 企業の公式声明と実際の行動の間にギャップがある場合は、実際の行動を優先してください
+    - ユーザーの価値観と企業文化の間の本質的な適合性を評価してください
+    - 企業の社会的評判、従業員満足度、業界での評価も考慮してください
     
     以下の構造でJSONフォーマットで回答してください: 
     {
       "recommendations": [
         { 
-          "name": "企業名", 
-          "industry": "業界", 
-          "matching_points": ["ポイント1", "ポイント2", ...] 
+          "name": "企業名（日本語のみ）", 
+          "industry": "業界（日本語のみ）", 
+          "matching_points": ["ポイント1（日本語のみ）", "ポイント2（日本語のみ）", ...] 
         },
         // 他の企業...
       ]
     }
+    
+    再度強調しますが、すべての出力は日本語のみで提供してください。英語の単語や文を混在させないでください。
     `
     : `
     Based on the user's values and interests, recommend 5 real companies in Japan 
     that would be good matches for a university student seeking employment.
 
-    Important: All responses must be in English. Do not mix Japanese with English.
+    Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
     
     User values and interests:
     ${JSON.stringify(userData.values)}
     ${JSON.stringify(userData.interests)}
+    ${userData.selected_image_values ? `
+    
+    User's image-based values:
+    ${JSON.stringify(userData.selected_image_values)}
+    
+    These image-based values represent the values that the user selected visually. Please consider them as important as the text-based values.
+    ` : ''}
     
     For each company, provide:
-    - Company name
-    - Industry
-    - 3-5 specific points explaining why this company matches the user's values
+    - Company name: Use the English name or the commonly used English translation.
+    - Industry: Provide in English.
+    - 3-5 specific points explaining why this company matches the user's values: All in English.
+    
+    When selecting companies to recommend, consider:
+    - Not just official company values but also actual workplace environment and employee experiences
+    - When there's a gap between official company statements and actual practices, prioritize actual practices
+    - Evaluate the intrinsic fit between user values and company culture
+    - Consider the company's social reputation, employee satisfaction, and industry standing
     
     Format as JSON with this structure: 
     {
       "recommendations": [
         { 
-          "name": "Company Name", 
-          "industry": "Industry", 
-          "matching_points": ["point1", "point2", ...] 
+          "name": "Company Name (English only)", 
+          "industry": "Industry (English only)", 
+          "matching_points": ["point1 (English only)", "point2 (English only)", ...] 
         },
         // more companies...
       ]
     }
+    
+    To emphasize again, all output must be in English only. Do not mix Japanese words or sentences.
     `;
 
   try {
@@ -127,7 +162,7 @@ export async function generateRecommendations(
       messages: [
         {
           role: "system",
-          content: systemPrompt,
+          content: enhancedSystemPrompt,
         },
         {role: "user", content: promptTemplate},
       ],
@@ -145,7 +180,7 @@ export async function generateRecommendations(
     // Fetch or create company data for each recommendation
     const enhancedRecommendations = await Promise.all(
       recommendations.map(async (rec) => {
-        const company = await getOrCreateCompany(rec.name, rec.industry);
+        const company = await getOrCreateCompany(rec.name, rec.industry, locale);
 
         return {
           id: rec.id,
@@ -273,33 +308,44 @@ export async function fetchCompanyData(
 ): Promise<Company> {
   // Get the appropriate system prompt based on locale
   const systemPrompt = locale === 'ja'
-    ? "あなたは日本の就職活動をしている大学生向けに、企業に関する正確な情報を提供する役立つアシスタントです。情報はJSONフォーマットでのみ提供してください。"
-    : "You are a helpful assistant that provides accurate information about companies in Japan for university students seeking employment. Provide information in JSON format only.";
+    ? "あなたは日本の就職活動をしている大学生向けに、企業に関する正確な情報を提供する役立つアシスタントです。企業の公式情報、ミッション、ビジョン、価値観、社員レビュー、および職場文化に基づいて、正確で詳細な企業プロファイルを作成してください。各企業の価値観を評価する際は、公式声明だけでなく、実際の職場環境や社員の経験も考慮してください。情報はJSONフォーマットでのみ提供してください。重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。"
+    : "You are a helpful assistant that provides accurate information about companies in Japan for university students seeking employment. Create accurate and detailed company profiles based on official company information, mission statements, vision, values, employee reviews, and workplace culture. When evaluating company values, consider not just official statements but also the actual work environment and employee experiences. Provide information in JSON format only. Important: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.";
 
   const promptTemplate = locale === 'ja'
     ? `
     "${companyName}" ${industry ? `（${industry}業界）` : ""} に関する詳細情報を提供してください。
     この情報は日本で就職活動をしている大学生に関連するものであるべきです。
 
-    重要: すべての回答は必ず日本語で提供してください。英語の混在は避けてください。
+    重要: すべての回答は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。
     
     以下の情報をJSONフォーマットで含めてください:
-    - name: 会社の正式名称
-    - industry: 主要業界
-    - description: 詳細な説明（100〜150語）
-    - size: 会社の規模（従業員数の範囲を含む小/中/大）
-    - values: 1〜10の数値評価による会社の価値観を表すJSONオブジェクト、例えば:
+    - name: 会社の正式名称（日本語で表記）
+    - industry: 主要業界（日本語で表記）
+    - description: 詳細な説明（100〜150語）。会社の歴史、主要製品/サービス、市場での位置づけを含めてください。すべて日本語で記述してください。
+    - size: 会社の規模（従業員数の範囲を含む小/中/大）（日本語で表記）
+    - values: 1〜10の数値評価による会社の価値観を表すJSONオブジェクト。以下の要素を含め、可能な限り正確に評価してください:
       {
-        "work_life_balance": 8,
-        "remote_work": 7,
-        "innovation": 9,
-        "social_impact": 6
+        "work_life_balance": 8, // 実際の労働時間、休暇制度、柔軟な勤務体制に基づく評価
+        "remote_work": 7, // リモートワークの方針と実際の実施状況
+        "innovation": 9, // 新しいアイデアや技術への投資と実際の革新性
+        "social_impact": 6, // 社会貢献活動と実際の影響力
+        "career_growth": 8, // キャリア開発機会と昇進の可能性
+        "compensation": 7, // 業界平均と比較した給与水準
+        "company_stability": 9, // 財務安定性と市場での地位
+        "diversity_inclusion": 6, // 多様性と包括性への取り組みと実際の職場環境
+        "management_quality": 8 // リーダーシップの質と社員との関係
       }
-    - headquarters: 本社所在地
-    - japan_presence: 日本での存在感に関する詳細
+      
+      各評価値には、会社の公式情報だけでなく、社員レビューや実際の職場環境も考慮してください。
+      評価は単なる推測ではなく、入手可能な情報に基づいた根拠のある判断であるべきです。
+      
+    - headquarters: 本社所在地（日本語で表記）
+    - japan_presence: 日本での存在感に関する詳細（オフィス所在地、従業員数、事業内容など）（日本語で表記）
     - site_url: 会社の公式ウェブサイトのURL（わかる場合）。不明な場合はnullを返してください。
     
     有効なJSONフォーマットのみで回答してください。
+    
+    再度強調しますが、すべての出力は日本語のみで提供してください。英語の単語や文を混在させないでください。
     `
     : `
     Provide detailed information about "${companyName}" ${
@@ -307,25 +353,36 @@ export async function fetchCompanyData(
     } 
     that would be relevant for university students in Japan seeking employment.
 
-    Important: All responses must be in English. Do not mix Japanese with English.
+    Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
     
     Include the following information in JSON format:
-    - name: Full company name
-    - industry: Primary industry
-    - description: A detailed description (100-150 words)
-    - size: Company size (Small/Medium/Large with employee count range)
-    - values: JSON object with company values as numeric ratings from 1-10, such as:
+    - name: Full company name (in English)
+    - industry: Primary industry (in English)
+    - description: A detailed description (100-150 words) including company history, main products/services, and market position. All in English.
+    - size: Company size (Small/Medium/Large with employee count range) (in English)
+    - values: JSON object with company values as numeric ratings from 1-10. Include the following elements and rate them as accurately as possible:
       {
-        "work_life_balance": 8,
-        "remote_work": 7,
-        "innovation": 9,
-        "social_impact": 6
+        "work_life_balance": 8, // Based on actual working hours, vacation policies, and flexible work arrangements
+        "remote_work": 7, // Based on remote work policies and actual implementation
+        "innovation": 9, // Based on investment in new ideas and technologies and actual innovation
+        "social_impact": 6, // Based on social contribution activities and actual impact
+        "career_growth": 8, // Based on career development opportunities and promotion possibilities
+        "compensation": 7, // Based on salary levels compared to industry average
+        "company_stability": 9, // Based on financial stability and market position
+        "diversity_inclusion": 6, // Based on diversity and inclusion initiatives and actual workplace environment
+        "management_quality": 8 // Based on leadership quality and relationship with employees
       }
-    - headquarters: Headquarters location
-    - japan_presence: Details about their presence in Japan
+      
+      For each rating, consider not just official company information but also employee reviews and actual workplace environment.
+      Ratings should be evidence-based judgments from available information, not mere guesses.
+      
+    - headquarters: Headquarters location (in English)
+    - japan_presence: Details about their presence in Japan (office locations, employee count, business activities) (in English)
     - site_url: The company's official website URL if known. Return null if unknown.
     
     Format the response as valid JSON only.
+    
+    To emphasize again, all output must be in English only. Do not mix Japanese words or sentences.
     `;
 
   try {

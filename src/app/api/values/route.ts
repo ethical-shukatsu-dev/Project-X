@@ -24,6 +24,7 @@ export async function POST(request: Request) {
         id: userId,
         values: body.values,
         interests: body.interests,
+        selected_image_values: body.selected_image_values || null,
       });
 
     if (error) {

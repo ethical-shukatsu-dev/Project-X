@@ -17,6 +17,45 @@
     "progress": "Question {{current}} of {{total}}",
     "complete": "Questionnaire Complete",
     "thankyou": "Thank you for completing the questionnaire. We're analyzing your answers to find the best company matches.",
+    "no_images": "No images available for this question. Please continue to the next question.",
+    "image_questions": {
+      "work_values": {
+        "question": "Select an image that best represents your work values:"
+      },
+      "leadership_values": {
+        "question": "Choose an image that reflects your ideal leadership style:"
+      },
+      "company_culture": {
+        "question": "Select an image that represents your ideal company culture:"
+      },
+      "work_environment": {
+        "question": "Which work environment appeals to you most?"
+      },
+      "innovation": {
+        "question": "Select an image that represents innovation to you:"
+      },
+      "personal_professional_growth": {
+        "question": "Choose an image that represents your growth aspirations:"
+      },
+      "work_life_balance": {
+        "question": "Select an image that represents your ideal work-life balance:"
+      },
+      "financial_job_security": {
+        "question": "Which image best represents financial security to you?"
+      },
+      "impact_purpose": {
+        "question": "Select an image that represents meaningful impact to you:"
+      },
+      "communication_transparency": {
+        "question": "Choose an image that represents ideal communication:"
+      },
+      "recognition_appreciation": {
+        "question": "Select an image that represents recognition and appreciation:"
+      },
+      "hobbies": {
+        "question": "Select an image that represents your favorite hobbies or interests outside of work:"
+      }
+    },
     "interests": {
       "title": "Select Your Interests",
       "description": "Choose industries or areas you're interested in exploring.",

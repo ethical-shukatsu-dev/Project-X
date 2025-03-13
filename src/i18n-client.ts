@@ -13,18 +13,30 @@ i18next
     lng: undefined, // Let detect the language on client side
     detection: {
       order: ['path', 'htmlTag', 'cookie', 'navigator'],
-    }
+    },
+    fallbackLng: 'ja', // Ensure there's always a fallback
   });
 
 // Load resources on demand
 const loadLocaleAsync = async (language: string, namespace: string) => {
   try {
     const response = await fetch(`/locales/${language}/${namespace}.json`);
+    
+    // Check if the response is ok before trying to parse JSON
+    if (!response.ok) {
+      console.warn(`Translation file for ${language}/${namespace} not found. Status: ${response.status}`);
+      // Add an empty resource bundle to prevent repeated failed requests
+      i18next.addResourceBundle(language, namespace, {});
+      return {};
+    }
+    
     const data = await response.json();
     i18next.addResourceBundle(language, namespace, data);
     return data;
   } catch (error) {
     console.error(`Failed to load ${language}/${namespace}`, error);
+    // Add an empty resource bundle to prevent repeated failed requests
+    i18next.addResourceBundle(language, namespace, {});
     return {};
   }
 };
