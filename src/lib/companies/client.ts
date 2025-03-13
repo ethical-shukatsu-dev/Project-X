@@ -54,7 +54,7 @@ export async function updateCompanyLogos(): Promise<void> {
   }
 }
 
-export async function getOrCreateCompany(companyName: string, industry?: string): Promise<Company> {
+export async function getOrCreateCompany(companyName: string, industry?: string, locale: string = 'en'): Promise<Company> {
   try {
     // Check if company exists in database
     const { data: existingCompany, error } = await supabase
@@ -68,7 +68,7 @@ export async function getOrCreateCompany(companyName: string, industry?: string)
     }
 
     // If company doesn't exist, fetch from OpenAI
-    const companyData = await fetchCompanyData(companyName, industry);
+    const companyData = await fetchCompanyData(companyName, industry, locale);
     
     // Insert into database
     const { data: newCompany, error: insertError } = await supabase
