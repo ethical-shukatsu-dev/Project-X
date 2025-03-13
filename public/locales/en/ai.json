@@ -136,7 +136,8 @@
     "refreshing": "Refreshing...",
     "loading": {
       "title": "Finding Your Matches...",
-      "description": "We're analyzing your values and preferences to find the best company matches for you."
+      "description": "We're analyzing your values and preferences to find the best company matches for you.",
+      "streaming": "Loading more recommendations..."
     },
     "tabs": {
       "all": "All",

@@ -8,6 +8,7 @@ export async function GET(request: Request) {
     const userId = url.searchParams.get("userId");
     const forceRefresh = url.searchParams.get("refresh") === "true";
     const locale = url.searchParams.get("locale") || "en";
+    const streamMode = url.searchParams.get("stream") === "true";
 
     if (!userId) {
       return NextResponse.json({error: "User ID is required"}, {status: 400});
@@ -53,50 +54,137 @@ export async function GET(request: Request) {
           })
         );
 
-        return NextResponse.json({
-          recommendations: recommendationsWithCompanies,
+        // If streaming is not requested, return all recommendations at once
+        if (!streamMode) {
+          return NextResponse.json({
+            recommendations: recommendationsWithCompanies,
+          });
+        }
+
+        // If streaming is requested, return recommendations as a stream
+        const encoder = new TextEncoder();
+        const responseStream = new ReadableStream({
+          async start(controller) {
+            // Send each recommendation individually with a minimal delay
+            for (const recommendation of recommendationsWithCompanies) {
+              controller.enqueue(encoder.encode(JSON.stringify({ recommendation }) + '\n'));
+              // Use a shorter delay to make recommendations appear faster
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            controller.close();
+          }
+        });
+
+        return new Response(responseStream, {
+          headers: {
+            'Content-Type': 'application/x-ndjson',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'Transfer-Encoding': 'chunked'
+          },
         });
       }
     }
 
-    // Generate new recommendations with real company data, passing the locale
-    const recommendations = await generateRecommendations(
-      userData,
-      locale as "en" | "ja"
-    );
-
-    // Save recommendations to Supabase
-    const recommendationsToInsert = recommendations.map((rec) => ({
-      user_id: userId,
-      company_id: rec.company.id,
-      matching_points: rec.matching_points,
-    }));
-
-    const {data: insertedRecommendations, error: insertError} = await supabase
-      .from("recommendations")
-      .insert(recommendationsToInsert)
-      .select("*");
-
-    if (!insertError) {
-      // Continue anyway to return recommendations to the user
-      const recommendationsWithCompanies = await Promise.all(
-        insertedRecommendations.map(async (rec) => {
-          const {data: company} = await supabase
-            .from("companies")
-            .select("*")
-            .eq("id", rec.company_id)
-            .single();
-          return {
-            ...rec,
-            company,
-          };
-        })
+    // If streaming is not requested, generate recommendations and return them all at once
+    if (!streamMode) {
+      // Generate new recommendations with real company data, passing the locale
+      const recommendations = await generateRecommendations(
+        userData,
+        locale as "en" | "ja"
       );
-      return NextResponse.json({recommendations: recommendationsWithCompanies});
-    } else {
-      console.error("Error saving recommendations:", insertError);
-      return NextResponse.json({error: "Failed to save recommendations"}, {status: 500});
+
+      // Save recommendations to Supabase
+      const recommendationsToInsert = recommendations.map((rec) => ({
+        user_id: userId,
+        company_id: rec.company.id,
+        matching_points: rec.matching_points,
+      }));
+
+      const {data: insertedRecommendations, error: insertError} = await supabase
+        .from("recommendations")
+        .insert(recommendationsToInsert)
+        .select("*");
+
+      if (!insertError) {
+        // Continue anyway to return recommendations to the user
+        const recommendationsWithCompanies = await Promise.all(
+          insertedRecommendations.map(async (rec) => {
+            const {data: company} = await supabase
+              .from("companies")
+              .select("*")
+              .eq("id", rec.company_id)
+              .single();
+            return {
+              ...rec,
+              company,
+            };
+          })
+        );
+        return NextResponse.json({recommendations: recommendationsWithCompanies});
+      } else {
+        console.error("Error saving recommendations:", insertError);
+        return NextResponse.json({error: "Failed to save recommendations"}, {status: 500});
+      }
     }
+
+    // If streaming is requested, set up a streaming response
+    const encoder = new TextEncoder();
+    const responseStream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Generate recommendations and stream them as they become available
+          const recommendations = await generateRecommendations(
+            userData,
+            locale as "en" | "ja"
+          );
+
+          // Save recommendations to Supabase and stream them one by one
+          for (const rec of recommendations) {
+            // Insert the recommendation
+            const { data: insertedRec, error: insertError } = await supabase
+              .from("recommendations")
+              .insert({
+                user_id: userId,
+                company_id: rec.company.id,
+                matching_points: rec.matching_points,
+              })
+              .select("*")
+              .single();
+
+            if (insertError) {
+              console.error("Error saving recommendation:", insertError);
+              continue; // Skip this recommendation but continue with others
+            }
+
+            // Stream the recommendation to the client
+            controller.enqueue(encoder.encode(JSON.stringify({ 
+              recommendation: {
+                ...insertedRec,
+                company: rec.company
+              } 
+            }) + '\n'));
+            
+            // Use a shorter delay to make recommendations appear faster
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+
+          controller.close();
+        } catch (error) {
+          console.error("Error in streaming recommendations:", error);
+          controller.error(error);
+        }
+      }
+    });
+
+    return new Response(responseStream, {
+      headers: {
+        'Content-Type': 'application/x-ndjson',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Transfer-Encoding': 'chunked'
+      },
+    });
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json({error: "Internal server error"}, {status: 500});
