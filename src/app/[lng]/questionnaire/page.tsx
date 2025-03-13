@@ -7,9 +7,9 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getTranslation } from "@/i18n-server";
+import {Suspense} from "react";
+import {Skeleton} from "@/components/ui/skeleton";
+import {getTranslation} from "@/i18n-server";
 
 // Loading skeleton component for the questionnaire
 function QuestionnaireLoadingSkeleton() {
@@ -34,8 +34,10 @@ function QuestionnaireLoadingSkeleton() {
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex items-center space-x-2">
-                  <Skeleton className="h-4 w-4 rounded-full" /> {/* Radio button */}
-                  <Skeleton className="h-5 w-full max-w-[250px]" /> {/* Option label */}
+                  <Skeleton className="h-4 w-4 rounded-full" />{" "}
+                  {/* Radio button */}
+                  <Skeleton className="h-5 w-full max-w-[250px]" />{" "}
+                  {/* Option label */}
                 </div>
               ))}
             </div>
@@ -51,15 +53,20 @@ function QuestionnaireLoadingSkeleton() {
 }
 
 export default function QuestionnairePage({
-  params
+  params,
+  searchParams,
 }: {
-  params: Promise<{ lng: string }>
+  params: Promise<{lng: string}>;
+  searchParams: {type?: string};
 }) {
   // Use an async IIFE to handle the Promise
   const QuestionnairePageContent = async () => {
     const resolvedParams = await params;
     const lng = resolvedParams.lng;
-    const { t } = await getTranslation(lng, 'ai');
+    const {t} = await getTranslation(lng, "ai");
+
+    // Get the questionnaire type from the URL query parameters
+    const questionnaireType = searchParams.type || "text"; // Default to text if not specified
 
     return (
       <Suspense fallback={<QuestionnaireLoadingSkeleton />}>
@@ -68,14 +75,17 @@ export default function QuestionnairePage({
             <Card className="mb-8 text-center">
               <CardHeader>
                 <CardTitle className="text-3xl">
-                  {t('questionnaire.title')}
+                  {t("questionnaire.title")}
                 </CardTitle>
                 <CardDescription className="text-lg">
-                  {t('questionnaire.description')}
+                  {t("questionnaire.description")}
                 </CardDescription>
               </CardHeader>
             </Card>
-            <ValuesQuestionnaire lng={lng} />
+            <ValuesQuestionnaire
+              lng={lng}
+              questionnaireType={questionnaireType}
+            />
           </div>
         </div>
       </Suspense>
@@ -83,4 +93,4 @@ export default function QuestionnairePage({
   };
 
   return QuestionnairePageContent();
-} 
+}
