@@ -2,43 +2,47 @@ import { supabase } from '../supabase/client';
 import type { ValueImage } from '../supabase/client';
 
 /**
- * Fetch value images by category
+ * Fetch random value images by category using a database function
  * @param category The category of images to fetch
- * @returns An array of value images
+ * @param limit The number of random images to fetch (default: 4)
+ * @returns An array of random value images for the specified category
  */
-export async function getValueImagesByCategory(category: string): Promise<ValueImage[]> {
+export async function getRandomValueImagesByCategory(category: string, limit: number = 4): Promise<ValueImage[]> {
   const { data, error } = await supabase
-    .from('value_images')
-    .select('*')
-    .eq('category', category);
+    .rpc('get_random_value_images_by_category', {
+      category_param: category,
+      limit_param: limit
+    });
 
   if (error) {
-    console.error('Error fetching value images:', error);
-    throw new Error('Failed to fetch value images');
+    console.error('Error fetching random value images:', error);
+    throw new Error('Failed to fetch random value images');
   }
 
   return data || [];
 }
 
 /**
- * Fetch all value images
- * @returns An array of all value images
+ * Fetch random value images using a database function
+ * @param limit The number of random images to fetch (default: 4)
+ * @returns An array of random value images
  */
-export async function getAllValueImages(): Promise<ValueImage[]> {
+export async function getRandomValueImages(limit: number = 4): Promise<ValueImage[]> {
   const { data, error } = await supabase
-    .from('value_images')
-    .select('*');
+    .rpc('get_random_value_images', {
+      limit_param: limit
+    });
 
   if (error) {
-    console.error('Error fetching value images:', error);
-    throw new Error('Failed to fetch value images');
+    console.error('Error fetching random value images:', error);
+    throw new Error('Failed to fetch random value images');
   }
 
   return data || [];
 }
 
 /**
- * Fetch value images for image-based questions
+ * Fetch value images for image-based questions using database functions
  * @returns An object with image questions by category
  */
 export async function getImageQuestions(): Promise<Record<string, ValueImage[]>> {
@@ -58,49 +62,27 @@ export async function getImageQuestions(): Promise<Record<string, ValueImage[]>>
   // Initialize the result object
   const imagesByCategory: Record<string, ValueImage[]> = {};
 
-  // For each category, fetch all images and then randomly select 4
+  // For each category, fetch random images directly using the database function
   await Promise.all(
     categories.map(async (category: string) => {
-      // Fetch all images for this category
-      const { data: allImages, error: imagesError } = await supabase
-        .from('value_images')
-        .select('*')
-        .eq('category', category)
-        .limit(20);
+      // Use the RPC function to get random images for this category
+      const { data: randomImages, error: imagesError } = await supabase
+        .rpc('get_random_value_images_by_category', {
+          category_param: category,
+          limit_param: 4
+        });
 
       if (imagesError) {
-        console.error(`Error fetching images for category ${category}:`, imagesError);
+        console.error(`Error fetching random images for category ${category}:`, imagesError);
         return;
       }
 
-      if (!allImages || allImages.length === 0) {
-        imagesByCategory[category] = [];
-        return;
-      }
-
-      // Randomly select 4 images (or fewer if there aren't enough)
-      const randomImages = shuffleArray(allImages).slice(0, 4);
-      
       // Add the images to the result object
-      imagesByCategory[category] = randomImages;
+      imagesByCategory[category] = randomImages || [];
     })
   );
 
   return imagesByCategory;
-}
-
-/**
- * Shuffle an array using the Fisher-Yates algorithm
- * @param array The array to shuffle
- * @returns A new shuffled array
- */
-function shuffleArray<T>(array: T[]): T[] {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
 }
 
 /**
