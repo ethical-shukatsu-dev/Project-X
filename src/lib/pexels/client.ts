@@ -196,8 +196,6 @@ export async function fetchAndSaveImagesForCategory(
         // Create value name from query
         const valueName = query.charAt(0).toUpperCase() + query.slice(1);
         
-        // Insert the image data into the value_images table using the admin client
-        // This bypasses RLS policies
         const { data, error } = await supabase
           .from('value_images')
           .insert({
@@ -205,7 +203,7 @@ export async function fetchAndSaveImagesForCategory(
             value_name: valueName,
             image_url: publicUrl,
             description: photo.alt || `${valueName} image from Pexels`,
-            tags: [query, category, 'pexels', photo.photographer]
+            tags: [query, category, photo.photographer]
           })
           .select()
           .single();
