@@ -157,7 +157,11 @@
       "interested": "興味あり",
       "notInterested": "興味なし",
       "markedInterested": "興味ありとマークしました",
-      "markedNotInterested": "興味なしとマークしました"
+      "markedNotInterested": "興味なしとマークしました",
+      "companyRevealed": {
+        "interested": "企業が明らかになりました！あなたはこの企業に興味を示しました。",
+        "notInterested": "企業が明らかになりました！あなたはこの企業に興味がないとマークしました。"
+      }
     },
     "errors": {
       "title": "エラーが発生しました",
