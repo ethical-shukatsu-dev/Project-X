@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
+import type { ValueImage } from '@/lib/supabase/client';
 import { fetchAndSaveImagesForCategory, fetchAndSaveImagesForAllCategories } from '@/lib/pexels/client';
 
 export async function POST(request: Request) {
@@ -123,22 +124,39 @@ export async function POST(request: Request) {
           result = await fetchAndSaveImagesForCategory(category, count || 10);
           return NextResponse.json({
             success: true,
-            message: `Successfully fetched ${result.length} images for category: ${category}`,
-            images: result
+            message: `Successfully fetched ${result.saved.length} images for category: ${category} (${result.skipped} duplicates skipped)`,
+            images: result.saved,
+            skipped: result.skipped
           });
         } else {
           result = await fetchAndSaveImagesForAllCategories(count || 20);
           
-          // Calculate total images fetched
-          const totalImages = Object.values(result).reduce(
-            (sum, images) => sum + images.length, 
+          // Calculate total images fetched and skipped
+          const totalSaved = Object.values(result).reduce(
+            (sum, categoryResult) => sum + categoryResult.saved.length, 
             0
           );
           
+          const totalSkipped = Object.values(result).reduce(
+            (sum, categoryResult) => sum + categoryResult.skipped, 
+            0
+          );
+          
+          // Format the response with saved images and skipped counts per category
+          const formattedResult: Record<string, { images: ValueImage[], skipped: number }> = {};
+          for (const [category, categoryResult] of Object.entries(result)) {
+            formattedResult[category] = {
+              images: categoryResult.saved,
+              skipped: categoryResult.skipped
+            };
+          }
+          
           return NextResponse.json({
             success: true,
-            message: `Successfully fetched ${totalImages} images for all categories`,
-            images: result
+            message: `Successfully fetched ${totalSaved} images for all categories (${totalSkipped} duplicates skipped)`,
+            result: formattedResult,
+            totalSaved,
+            totalSkipped
           });
         }
       } catch (error) {

@@ -33,6 +33,14 @@ interface PexelsSearchResponse {
   next_page: string;
 }
 
+/**
+ * Result object for image fetching operations
+ */
+interface ImageFetchResult {
+  saved: ValueImage[];
+  skipped: number;
+}
+
 // Map value categories to search queries
 const VALUE_CATEGORY_QUERIES: Record<string, string[]> = {
   'hobbies': [
@@ -102,6 +110,36 @@ const VALUE_CATEGORY_QUERIES: Record<string, string[]> = {
 };
 
 /**
+ * Check if a Pexels image already exists in the database by its ID
+ * @param pexelsId The Pexels image ID
+ * @returns Boolean indicating if the image exists
+ */
+async function doesPexelsImageExist(pexelsId: number): Promise<boolean> {
+  // Look for images with a file name pattern of pexels_{id}.jpg
+  const fileName = `pexels_${pexelsId}.jpg`;
+  
+  // Check if the file exists in storage
+  const { data: fileExists } = await supabase.storage
+    .from('images')
+    .list('value_images', {
+      search: fileName
+    });
+    
+  if (fileExists && fileExists.length > 0) {
+    return true;
+  }
+  
+  // Also check if there's an entry in the database with this image URL
+  const { data: dbEntries } = await supabase
+    .from('value_images')
+    .select('id')
+    .like('image_url', `%pexels_${pexelsId}%`)
+    .limit(1);
+    
+  return !!dbEntries && dbEntries.length > 0;
+}
+
+/**
  * Fetch images from Pexels API based on a search query
  * @param query The search query
  * @param perPage Number of images to fetch per page
@@ -141,12 +179,12 @@ export async function searchPexelsImages(
  * Fetch and save images for a specific value category
  * @param category The value category
  * @param count Number of images to fetch
- * @returns Promise with the saved images
+ * @returns Promise with the saved images and skipped count
  */
 export async function fetchAndSaveImagesForCategory(
   category: string,
   count: number = 10
-): Promise<ValueImage[]> {
+): Promise<ImageFetchResult> {
   // Get search queries for the category
   const queries = VALUE_CATEGORY_QUERIES[category];
   
@@ -158,15 +196,39 @@ export async function fetchAndSaveImagesForCategory(
   const imagesPerQuery = Math.ceil(count / queries.length);
   
   // Fetch and save images for each query
-  const savedImages: ValueImage[] = [];
+  const result: ImageFetchResult = {
+    saved: [],
+    skipped: 0
+  };
   
-  for (const query of queries) {
+  // Keep track of how many images we've successfully saved
+  let savedCount = 0;
+  let queryIndex = 0;
+  
+  // Continue fetching until we reach the desired count or run out of queries
+  while (savedCount < count && queryIndex < queries.length) {
+    const query = queries[queryIndex];
     try {
-      // Search for images
-      const searchResults = await searchPexelsImages(query, imagesPerQuery);
+      // Determine page size based on remaining images needed
+      const remainingNeeded = count - savedCount;
+      const fetchCount = Math.min(remainingNeeded + 5, imagesPerQuery);
+      
+      // Search for images, requesting a few extra to account for potential duplicates
+      const searchResults = await searchPexelsImages(query, fetchCount);
       
       // Process each photo
       for (const photo of searchResults.photos) {
+        // Stop if we've reached the target count
+        if (savedCount >= count) break;
+        
+        // Check if this image already exists
+        const imageExists = await doesPexelsImageExist(photo.id);
+        
+        if (imageExists) {
+          result.skipped++;
+          continue;
+        }
+        
         // Generate a unique file name
         const fileName = `pexels_${photo.id}.jpg`;
         const filePath = `value_images/${fileName}`;
@@ -214,34 +276,38 @@ export async function fetchAndSaveImagesForCategory(
         }
         
         if (data) {
-          savedImages.push(data);
+          result.saved.push(data);
+          savedCount++;
         }
       }
     } catch (error) {
       console.error(`Error fetching images for query "${query}":`, error);
     }
+    
+    // Move to the next query
+    queryIndex++;
   }
   
-  return savedImages;
+  return result;
 }
 
 /**
  * Fetch and save images for all value categories
  * @param imagesPerCategory Number of images to fetch per category
- * @returns Promise with the saved images
+ * @returns Promise with the saved images and skipped counts
  */
 export async function fetchAndSaveImagesForAllCategories(
   imagesPerCategory: number = 20
-): Promise<Record<string, ValueImage[]>> {
-  const result: Record<string, ValueImage[]> = {};
+): Promise<Record<string, ImageFetchResult>> {
+  const result: Record<string, ImageFetchResult> = {};
   
   for (const category of Object.keys(VALUE_CATEGORY_QUERIES)) {
     try {
-      const images = await fetchAndSaveImagesForCategory(category, imagesPerCategory);
-      result[category] = images;
+      const categoryResult = await fetchAndSaveImagesForCategory(category, imagesPerCategory);
+      result[category] = categoryResult;
     } catch (error) {
       console.error(`Error fetching images for category "${category}":`, error);
-      result[category] = [];
+      result[category] = { saved: [], skipped: 0 };
     }
   }
   
