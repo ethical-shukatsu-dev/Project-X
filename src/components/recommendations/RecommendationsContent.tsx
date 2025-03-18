@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 import {useSearchParams} from "next/navigation";
 import CompanyCard from "@/components/recommendations/CompanyCard";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Button} from "@/components/ui/button";
 import {Skeleton} from "@/components/ui/skeleton";
 import {
@@ -35,6 +35,8 @@ export default function RecommendationsContent({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  const [activeSizeTab, setActiveSizeTab] = useState("all-sizes");
 
   useEffect(() => {
     const fetchRecommendations = async (refresh = false) => {
@@ -137,10 +139,10 @@ export default function RecommendationsContent({
   // Show loading state while translations are loading
   if (!loaded) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto text-center">
-          <Skeleton className="h-8 w-1/3 mx-auto mb-4" />
-          <Skeleton className="h-4 w-1/2 mx-auto mb-8" />
+          <Skeleton className="w-1/3 h-8 mx-auto mb-4" />
+          <Skeleton className="w-1/2 h-4 mx-auto mb-8" />
         </div>
       </div>
     );
@@ -148,12 +150,12 @@ export default function RecommendationsContent({
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-8">
+          <h1 className="mb-8 text-3xl font-bold">
             {t("recommendations.loading.title")}
           </h1>
-          <p className="text-lg mb-8">
+          <p className="mb-8 text-lg">
             {t("recommendations.loading.description")}
           </p>
           <div className="max-w-4xl mx-auto">
@@ -168,9 +170,9 @@ export default function RecommendationsContent({
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto">
-          <Card className="mx-auto max-w-md">
+          <Card className="max-w-md mx-auto">
             <CardHeader>
               <CardTitle className="text-center">
                 {t("recommendations.errors.title")}
@@ -198,13 +200,112 @@ export default function RecommendationsContent({
   );
   const pendingRecommendations = recommendations.filter((rec) => !rec.feedback);
 
+  // Helper function to determine company size category
+  const getSizeCategory = (sizeText: string, industry?: string): string => {
+    const normalizedSize = sizeText.toLowerCase();
+    const normalizedIndustry = industry?.toLowerCase() || "";
+
+    // Check for startup - also consider industry
+    if (
+      normalizedSize.includes("startup") ||
+      normalizedSize.includes("スタートアップ") ||
+      normalizedIndustry.includes("startup") ||
+      normalizedIndustry.includes("スタートアップ")
+    ) {
+      return "startup";
+    }
+
+    // Check for small
+    if (normalizedSize.includes("small") || normalizedSize.includes("小")) {
+      return "small";
+    }
+
+    // Check for medium - also check for cases where a company might be between small and large
+    if (normalizedSize.includes("medium") || normalizedSize.includes("中")) {
+      return "medium";
+    }
+
+    // Check for large
+    if (normalizedSize.includes("large") || normalizedSize.includes("大")) {
+      return "large";
+    }
+
+    // Default to unknown if no match
+    return "unknown";
+  };
+
+  // Filter recommendations by company size using the helper function
+  const startupRecommendations = recommendations.filter(
+    (rec) =>
+      getSizeCategory(rec.company.size, rec.company.industry) === "startup"
+  );
+
+  const smallRecommendations = recommendations.filter(
+    (rec) => getSizeCategory(rec.company.size, rec.company.industry) === "small"
+  );
+
+  const mediumRecommendations = recommendations.filter(
+    (rec) =>
+      getSizeCategory(rec.company.size, rec.company.industry) === "medium"
+  );
+
+  const largeRecommendations = recommendations.filter(
+    (rec) => getSizeCategory(rec.company.size, rec.company.industry) === "large"
+  );
+
+  // Function to get the filtered recommendations based on both tabs
+  const getFilteredRecommendations = () => {
+    // First filter by feedback status
+    let filtered: (RecommendationResult & {
+      feedback?: "interested" | "not_interested";
+    })[] = [];
+    if (activeTab === "all") {
+      filtered = [...recommendations];
+    } else if (activeTab === "interested") {
+      filtered = [...interestedRecommendations];
+    } else if (activeTab === "not-interested") {
+      filtered = [...notInterestedRecommendations];
+    } else if (activeTab === "pending") {
+      filtered = [...pendingRecommendations];
+    }
+
+    // Then filter by size if not "all-sizes"
+    if (activeSizeTab === "all-sizes") {
+      return filtered;
+    } else if (activeSizeTab === "startup") {
+      return filtered.filter(
+        (rec) =>
+          getSizeCategory(rec.company.size, rec.company.industry) === "startup"
+      );
+    } else if (activeSizeTab === "small") {
+      return filtered.filter(
+        (rec) =>
+          getSizeCategory(rec.company.size, rec.company.industry) === "small"
+      );
+    } else if (activeSizeTab === "medium") {
+      return filtered.filter(
+        (rec) =>
+          getSizeCategory(rec.company.size, rec.company.industry) === "medium"
+      );
+    } else if (activeSizeTab === "large") {
+      return filtered.filter(
+        (rec) =>
+          getSizeCategory(rec.company.size, rec.company.industry) === "large"
+      );
+    }
+
+    return filtered;
+  };
+
+  console.log("recommendations", recommendations);
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container px-4 py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">
+        <h1 className="mb-8 text-3xl font-bold text-center">
           {t("recommendations.title")}
         </h1>
-        <p className="text-lg text-center mb-8">
+        <p className="mb-8 text-lg text-center">
           {t("recommendations.description")}
         </p>
 
@@ -218,7 +319,7 @@ export default function RecommendationsContent({
             {refreshing ? (
               <>
                 <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary"
+                  className="w-4 h-4 mr-2 -ml-1 animate-spin text-primary"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -243,7 +344,7 @@ export default function RecommendationsContent({
               <>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
+                  className="w-4 h-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -261,8 +362,14 @@ export default function RecommendationsContent({
           </Button>
         </div>
 
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="flex flex-wrap gap-2 h-full">
+        {/* Feedback Status Tabs */}
+        <Tabs
+          defaultValue="all"
+          className="w-full mb-6"
+          value={activeTab}
+          onValueChange={setActiveTab}
+        >
+          <TabsList className="flex flex-wrap h-full gap-2">
             <TabsTrigger value="all">
               {t("recommendations.tabs.all")} ({recommendations.length})
             </TabsTrigger>
@@ -279,95 +386,60 @@ export default function RecommendationsContent({
               {notInterestedRecommendations.length})
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="all" className="mt-6 space-y-6">
-            {recommendations.length > 0 ? (
-              recommendations.map((recommendation) => (
-                <CompanyCard
-                  key={recommendation.id || recommendation.company.id}
-                  company={recommendation.company}
-                  matchingPoints={recommendation.matching_points}
-                  feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
-                    recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
-                  }
-                  lng={lng}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p>{t("recommendations.no_matches")}</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="pending" className="mt-6 space-y-6">
-            {pendingRecommendations.length > 0 ? (
-              pendingRecommendations.map((recommendation) => (
-                <CompanyCard
-                  key={recommendation.id || recommendation.company.id}
-                  company={recommendation.company}
-                  matchingPoints={recommendation.matching_points}
-                  feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
-                    recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
-                  }
-                  lng={lng}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p>{t("recommendations.no_pending")}</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="interested" className="mt-6 space-y-6">
-            {interestedRecommendations.length > 0 ? (
-              interestedRecommendations.map((recommendation) => (
-                <CompanyCard
-                  key={recommendation.id || recommendation.company.id}
-                  company={recommendation.company}
-                  matchingPoints={recommendation.matching_points}
-                  feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
-                    recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
-                  }
-                  lng={lng}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p>{t("recommendations.no_interested")}</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="not-interested" className="mt-6 space-y-6">
-            {notInterestedRecommendations.length > 0 ? (
-              notInterestedRecommendations.map((recommendation) => (
-                <CompanyCard
-                  key={recommendation.id || recommendation.company.id}
-                  company={recommendation.company}
-                  matchingPoints={recommendation.matching_points}
-                  feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
-                    recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
-                  }
-                  lng={lng}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p>{t("recommendations.no_not_interested")}</p>
-              </div>
-            )}
-          </TabsContent>
         </Tabs>
+
+        {/* Company Size Tabs */}
+        <Tabs
+          defaultValue="all-sizes"
+          className="w-full mb-6"
+          value={activeSizeTab}
+          onValueChange={setActiveSizeTab}
+        >
+          <TabsList className="flex flex-wrap h-full gap-2">
+            <TabsTrigger value="all-sizes">
+              {t("recommendations.size_tabs.all")} ({recommendations.length})
+            </TabsTrigger>
+            <TabsTrigger value="startup">
+              {t("recommendations.size_tabs.startup")} (
+              {startupRecommendations.length})
+            </TabsTrigger>
+            <TabsTrigger value="small">
+              {t("recommendations.size_tabs.small")} (
+              {smallRecommendations.length})
+            </TabsTrigger>
+            <TabsTrigger value="medium">
+              {t("recommendations.size_tabs.medium")} (
+              {mediumRecommendations.length})
+            </TabsTrigger>
+            <TabsTrigger value="large">
+              {t("recommendations.size_tabs.large")} (
+              {largeRecommendations.length})
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Display filtered recommendations */}
+        <div className="mt-6 space-y-6">
+          {getFilteredRecommendations().length > 0 ? (
+            getFilteredRecommendations().map((recommendation) => (
+              <CompanyCard
+                key={recommendation.id || recommendation.company.id}
+                company={recommendation.company}
+                matchingPoints={recommendation.matching_points}
+                feedback={recommendation.feedback}
+                onFeedback={(feedback) =>
+                  recommendation.id &&
+                  handleFeedback(recommendation.id, feedback)
+                }
+                lng={lng}
+              />
+            ))
+          ) : (
+            <div className="py-8 text-center">
+              <p>{t("recommendations.no_matches")}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

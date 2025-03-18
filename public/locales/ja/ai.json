@@ -144,6 +144,13 @@
       "interested": "興味あり",
       "not_interested": "興味なし"
     },
+    "size_tabs": {
+      "all": "すべてのサイズ",
+      "startup": "スタートアップ",
+      "small": "小規模 (50-200人)",
+      "medium": "中規模 (1,000-5,000人)",
+      "large": "大規模 (10,000人以上)"
+    },
     "feedback": {
       "interested": "興味あり",
       "notInterested": "興味なし",
