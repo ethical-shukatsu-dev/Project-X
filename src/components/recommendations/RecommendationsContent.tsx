@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import {RecommendationResult} from "@/lib/openai/client";
 import {useTranslation} from "@/i18n-client";
+import SignupDialog from "@/components/recommendations/SignupDialog";
 
 interface RecommendationsContentProps {
   lng: string;
@@ -37,6 +38,8 @@ export default function RecommendationsContent({
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [activeSizeTab, setActiveSizeTab] = useState("all-sizes");
+  const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
+  const [feedbackCount, setFeedbackCount] = useState(0);
 
   useEffect(() => {
     const fetchRecommendations = async (refresh = false) => {
@@ -130,6 +133,14 @@ export default function RecommendationsContent({
           rec.id === recommendationId ? {...rec, feedback} : rec
         )
       );
+
+      // Increment feedback count
+      setFeedbackCount((prevCount) => prevCount + 1);
+
+      // Open the sign-up dialog after feedback for three companies
+      if (feedbackCount + 1 === 3) {
+        setSignupDialogOpen(true);
+      }
     } catch (err) {
       console.error("Error submitting feedback:", err);
       // Show error message to user
@@ -297,8 +308,6 @@ export default function RecommendationsContent({
     return filtered;
   };
 
-  console.log("recommendations", recommendations);
-
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
@@ -440,6 +449,10 @@ export default function RecommendationsContent({
             </div>
           )}
         </div>
+
+        {isSignupDialogOpen && (
+          <SignupDialog open={isSignupDialogOpen} onClose={() => setSignupDialogOpen(false)} lng={lng} />
+        )}
       </div>
     </div>
   );
