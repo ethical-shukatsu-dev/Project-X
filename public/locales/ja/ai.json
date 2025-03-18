@@ -120,20 +120,22 @@
   },
   "recommendations": {
     "title": "あなたにマッチする企業",
-    "description": "あなたの価値観や興味に基づいて、あなたに合うかもしれない企業を見つけました。",
+    "description": "あなたの価値観と興味に基づいて、あなたに合うかもしれないこれらの企業を見つけました。",
     "viewDetails": "詳細を見る",
     "noMatches": "マッチする企業が見つかりませんでした。設定を調整してみてください。",
-    "noMatchingPoints": "具体的なマッチングポイントはありません",
-    "about": "企業について",
+    "noMatchingPoints": "特定のマッチングポイントはありません",
+    "about": "企業概要",
     "whyMatch": "マッチする理由",
     "no_matches": "マッチする企業が見つかりませんでした",
-    "no_pending": "保留中の推薦はありません",
+    "no_pending": "保留中の企業はありません",
     "no_interested": "興味ありとマークした企業はありません",
     "no_not_interested": "興味なしとマークした企業はありません",
-    "regenerate": "おすすめを再生成",
+    "regenerate": "レコメンデーションを再生成する",
     "visitWebsite": "企業のウェブサイトを訪問",
-    "refresh": "おすすめを更新",
+    "refresh": "レコメンデーションを更新",
     "refreshing": "更新中...",
+    "anonymized": "匿名企業",
+    "thisCompany": "この企業",
     "loading": {
       "title": "マッチを検索中...",
       "description": "あなたの価値観と好みを分析して、最適な企業マッチを見つけています。"
@@ -155,7 +157,11 @@
       "interested": "興味あり",
       "notInterested": "興味なし",
       "markedInterested": "興味ありとマークしました",
-      "markedNotInterested": "興味なしとマークしました"
+      "markedNotInterested": "興味なしとマークしました",
+      "companyRevealed": {
+        "interested": "企業が明らかになりました！あなたはこの企業に興味を示しました。",
+        "notInterested": "企業が明らかになりました！あなたはこの企業に興味がないとマークしました。"
+      }
     },
     "errors": {
       "title": "エラーが発生しました",

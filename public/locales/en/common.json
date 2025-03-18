@@ -11,7 +11,9 @@
     "getStarted": "Get Started",
     "selectQuestionnaireType": "Choose your questionnaire type:",
     "textQuestionnaire": "Text-Based",
-    "imageQuestionnaire": "Image-Based"
+    "imageQuestionnaire": "Image-Based",
+    "anonymousMode": "Anonymous Company Mode",
+    "anonymousModeDescription": "Show company details with company names hidden until you provide feedback. Company names will only be revealed after indicating interest or disinterest."
   },
   "features": {
     "quick": {

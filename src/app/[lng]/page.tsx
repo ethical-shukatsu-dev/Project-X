@@ -2,6 +2,7 @@ import Link from "next/link";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {getTranslation} from "@/i18n-server";
+import AnonymousModeToggle from "@/components/AnonymousModeToggle";
 
 export default function Home({params}: {params: Promise<{lng: string}>}) {
   // Use an async IIFE to handle the Promise
@@ -40,6 +41,9 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
                       </Button>
                     </Link>
                   </div>
+                </div>
+                <div className="mt-8">
+                  <AnonymousModeToggle lng={lng} />
                 </div>
               </div>
             </div>

@@ -54,6 +54,7 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
+  --primary-rgb: 52, 52, 52; /* RGB equivalent for primary color */
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -90,6 +91,7 @@
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.205 0 0);
+  --primary-rgb: 250, 250, 250; /* RGB equivalent for primary color in dark mode */
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -123,4 +125,86 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Company reveal animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); }
+  to { transform: scale(1); }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(10px); }
+  to { transform: translateY(0); }
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(var(--primary-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0); }
+}
+
+/* Confetti animation */
+@keyframes confettiFall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+
+.confetti-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 0;
+  opacity: 0.7;
+  animation: confettiFall 5s ease-out forwards;
+  transform-origin: center;
+}
+
+.revealed-card {
+  animation: scaleUp 0.5s ease-out forwards, glowPulse 2s ease-out;
+  transform-origin: center;
+}
+
+.reveal-avatar {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.reveal-text {
+  animation: fadeIn 0.5s ease-out forwards, slideIn 0.5s ease-out forwards;
+}
+
+.reveal-text-delay {
+  animation: fadeIn 0.8s ease-out 0.3s forwards, slideIn 0.8s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.reveal-text-delay-2 {
+  animation: fadeIn 0.8s ease-out 0.5s forwards, slideIn 0.8s ease-out 0.5s forwards;
+  opacity: 0;
+}
+
+.reveal-text-delay-3 {
+  animation: fadeIn 0.8s ease-out 0.7s forwards, slideIn 0.8s ease-out 0.7s forwards;
+  opacity: 0;
+}
+
+.reveal-text-delay-4 {
+  animation: fadeIn 0.8s ease-out 0.9s forwards, slideIn 0.8s ease-out 0.9s forwards;
+  opacity: 0;
 }

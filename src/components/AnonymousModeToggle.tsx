@@ -1,0 +1,61 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { useTranslation } from "@/i18n-client";
+import useAnonymousMode from "@/hooks/useAnonymousMode";
+import { Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+interface AnonymousModeToggleProps {
+  lng: string;
+}
+
+export default function AnonymousModeToggle({ lng }: AnonymousModeToggleProps) {
+  const { t, loaded: translationsLoaded } = useTranslation(lng, "common");
+  const { isAnonymous, toggleAnonymousMode, isLoaded } = useAnonymousMode();
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted || !translationsLoaded || !isLoaded) {
+    return null; // Don't render anything on server or while loading
+  }
+
+  return (
+    <div className="flex items-center space-x-2 mt-4">
+      <Card className="p-4 flex flex-col sm:flex-row items-center gap-3">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="anonymous-mode"
+            checked={isAnonymous}
+            onCheckedChange={toggleAnonymousMode}
+          />
+          <Label htmlFor="anonymous-mode" className="text-sm sm:text-base cursor-pointer">
+            {t("homepage.anonymousMode")}
+          </Label>
+        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info size={16} className="text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs">{t("homepage.anonymousModeDescription")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </Card>
+    </div>
+  );
+} 

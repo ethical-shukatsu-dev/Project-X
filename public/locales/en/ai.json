@@ -134,6 +134,8 @@
     "visitWebsite": "Visit company website",
     "refresh": "Refresh Recommendations",
     "refreshing": "Refreshing...",
+    "anonymized": "Anonymous company",
+    "thisCompany": "this company",
     "loading": {
       "title": "Finding Your Matches...",
       "description": "We're analyzing your values and preferences to find the best company matches for you."
@@ -155,7 +157,11 @@
       "interested": "Interested",
       "notInterested": "Not Interested",
       "markedInterested": "You marked this as interesting",
-      "markedNotInterested": "You marked this as not interesting"
+      "markedNotInterested": "You marked this as not interesting",
+      "companyRevealed": {
+        "interested": "Company revealed! You expressed interest in this company.",
+        "notInterested": "Company revealed! You marked this company as not interesting."
+      }
     },
     "errors": {
       "title": "Oops!",
