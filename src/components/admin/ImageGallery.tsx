@@ -4,38 +4,53 @@ import React from "react";
 import Image from "next/image";
 import {Loader2} from "lucide-react";
 import {ValueImage} from "@/lib/supabase/client";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Image card as a memoized component to prevent unnecessary re-renders
 export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
   return (
     <div className="relative group">
       <div className="aspect-square relative rounded-md overflow-hidden">
-        <Image
-          src={image.image_url}
-          alt={image.description || image.value_name}
-          fill
-          className="object-cover"
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Image
+                src={image.image_url}
+                alt={image.description || image.value_name}
+                fill
+                className="object-cover"
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{image.description || image.value_name}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       <div className="mt-2">
         <p className="font-medium">{image.value_name}</p>
         <p className="text-sm text-gray-500">{image.category}</p>
-        
+
         {/* Attribution for images */}
         {image.attribution && (
           <div className="text-xs mt-1 text-gray-500">
             Photo by{" "}
-            <a 
+            <a
               href={image.attribution.photographer_url}
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:text-gray-700"
             >
               {image.attribution.photographer_name}
-            </a>
-            {" "}on{" "}
+            </a>{" "}
+            on{" "}
             {image.unsplash_id ? (
-              <a 
+              <a
                 href="https://unsplash.com/?utm_source=project_x&utm_medium=referral"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -44,7 +59,7 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
                 Unsplash
               </a>
             ) : image.pexels_id ? (
-              <a 
+              <a
                 href="https://www.pexels.com"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -57,7 +72,7 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
             )}
           </div>
         )}
-        
+
         {image.tags && image.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
             {image.tags.map((tag, index) => (
@@ -145,7 +160,16 @@ export const ImageGallery = React.memo(
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images.map((image) => (
-          <ImageCard key={image.id} image={image} />
+          <TooltipProvider key={image.id}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <ImageCard key={image.id} image={image} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{image.description || image.value_name || "Value image"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         ))}
       </div>
     );
