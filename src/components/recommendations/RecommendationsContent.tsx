@@ -308,8 +308,6 @@ export default function RecommendationsContent({
     return filtered;
   };
 
-  console.log("recommendations", recommendations);
-
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
