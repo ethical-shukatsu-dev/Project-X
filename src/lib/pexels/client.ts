@@ -1,5 +1,6 @@
 import { supabase } from '../supabase/client';
-import type { ValueImage } from '../supabase/client';
+import type { ImageAttribution, ImageSizes } from '../supabase/client';
+import { VALUE_CATEGORY_QUERIES } from '../constants/category-queries';
 
 // Define the Pexels API response types
 interface PexelsPhoto {
@@ -33,73 +34,46 @@ interface PexelsSearchResponse {
   next_page: string;
 }
 
-// Map value categories to search queries
-const VALUE_CATEGORY_QUERIES: Record<string, string[]> = {
-  'hobbies': [
-    // Outdoor & Adventure
-    'hiking adventure', 'mountain climbing', 'camping outdoors', 'fishing nature', 
-    'kayaking', 'surfing ocean', 'skiing snow', 'backpacking travel',
-    // Creative & Artistic
-    'painting art', 'drawing sketch', 'photography creative', 'writing poetry', 
-    'playing music', 'singing performance', 'dancing expression', 'crafting handmade',
-    // Intellectual & Learning
-    'reading books', 'learning languages', 'chess strategy', 'puzzles problem-solving', 
-    'history exploration', 'science experiments', 'philosophy thinking', 'documentary watching',
-    // Social & Community
-    'volunteering community', 'team sports', 'board games friends', 'cooking together', 
-    'book club discussion', 'community gardening', 'group travel', 'cultural events',
-    // Wellness & Mindfulness
-    'yoga practice', 'meditation mindfulness', 'fitness training', 'cycling outdoors', 
-    'running marathon', 'swimming exercise', 'healthy cooking', 'nature walks',
-    // Technology & Digital
-    'video gaming', 'programming coding', 'digital art', 'drone flying', 
-    'virtual reality', 'tech gadgets', 'robotics building', 'streaming content'
-  ],
-  'work_values': [
-    'teamwork', 'collaboration', 'productivity', 'achievement', 
-    'dedication', 'excellence', 'professionalism', 'growth'
-  ],
-  'leadership_values': [
-    'leadership', 'vision', 'inspiration', 'mentorship', 
-    'guidance', 'direction', 'empowerment', 'strategy'
-  ],
-  'company_culture': [
-    'culture', 'diversity', 'inclusion', 'community', 
-    'celebration', 'team spirit', 'office culture', 'workplace happiness'
-  ],
-  'work_environment': [
-    'modern office', 'workspace', 'ergonomic', 'collaborative space', 
-    'remote work', 'office design', 'productive environment', 'creative space'
-  ],
-  'innovation': [
-    'innovation', 'technology', 'creativity', 'brainstorming', 
-    'ideas', 'future', 'digital transformation', 'breakthrough'
-  ],
-  'personal_professional_growth': [
-    'learning', 'development', 'career growth', 'adaptability', 
-    'change', 'education', 'skill development', 'personal growth'
-  ],
-  'work_life_balance': [
-    'work-life balance', 'remote work', 'hybrid work', 'mental health', 
-    'wellness', 'relaxation', 'flexible work', 'healthy lifestyle'
-  ],
-  'financial_job_security': [
-    'compensation', 'benefits', 'job stability', 'ownership', 
-    'equity', 'financial security', 'career stability', 'retirement'
-  ],
-  'impact_purpose': [
-    'social impact', 'sustainability', 'ethical standards', 'mission', 
-    'purpose', 'meaningful work', 'environmental responsibility', 'community impact'
-  ],
-  'communication_transparency': [
-    'open communication', 'feedback', 'trust', 'autonomy', 
-    'transparency', 'honest conversation', 'information sharing', 'clear communication'
-  ],
-  'recognition_appreciation': [
-    'employee recognition', 'supportive management', 'peer recognition', 'appreciation', 
-    'awards', 'acknowledgment', 'gratitude', 'team celebration'
-  ]
-};
+/**
+ * Result object for image fetching operations
+ */
+interface ImageFetchResult {
+  added: number;
+  skipped: number;
+  failed: number;
+}
+
+/**
+ * Check if a Pexels image already exists in the database by its ID
+ * @param pexelsId The Pexels image ID
+ * @returns Boolean indicating if the image exists
+ */
+async function doesPexelsImageExist(pexelsId: number): Promise<boolean> {
+  // Check if there's an entry in the database with this image ID
+  const { data: dbEntries } = await supabase
+    .from('value_images')
+    .select('id')
+    .eq('pexels_id', pexelsId)
+    .limit(1);
+    
+  if (dbEntries && dbEntries.length > 0) {
+    return true;
+  }
+  
+  // For backward compatibility, also check for images stored with the old method
+  const fileName = `pexels_${pexelsId}.jpg`;
+  const { data: fileExists } = await supabase.storage
+    .from('images')
+    .list('value_images', {
+      search: fileName
+    });
+    
+  if (fileExists && fileExists.length > 0) {
+    return true;
+  }
+  
+  return false;
+}
 
 /**
  * Fetch images from Pexels API based on a search query
@@ -141,12 +115,12 @@ export async function searchPexelsImages(
  * Fetch and save images for a specific value category
  * @param category The value category
  * @param count Number of images to fetch
- * @returns Promise with the saved images
+ * @returns Promise with the saved images and skipped count
  */
 export async function fetchAndSaveImagesForCategory(
   category: string,
   count: number = 10
-): Promise<ValueImage[]> {
+): Promise<ImageFetchResult> {
   // Get search queries for the category
   const queries = VALUE_CATEGORY_QUERIES[category];
   
@@ -158,90 +132,114 @@ export async function fetchAndSaveImagesForCategory(
   const imagesPerQuery = Math.ceil(count / queries.length);
   
   // Fetch and save images for each query
-  const savedImages: ValueImage[] = [];
+  const result: ImageFetchResult = {
+    added: 0,
+    skipped: 0,
+    failed: 0
+  };
   
-  for (const query of queries) {
+  // Keep track of how many images we've successfully saved
+  let savedCount = 0;
+  let queryIndex = 0;
+  
+  // Continue fetching until we reach the desired count or run out of queries
+  while (savedCount < count && queryIndex < queries.length) {
+    const query = queries[queryIndex];
     try {
-      // Search for images
-      const searchResults = await searchPexelsImages(query, imagesPerQuery);
+      // Determine page size based on remaining images needed
+      const remainingNeeded = count - savedCount;
+      const fetchCount = Math.min(remainingNeeded + 5, imagesPerQuery);
+      
+      // Search for images, requesting a few extra to account for potential duplicates
+      const searchResults = await searchPexelsImages(query, fetchCount);
       
       // Process each photo
       for (const photo of searchResults.photos) {
-        // Generate a unique file name
-        const fileName = `pexels_${photo.id}.jpg`;
-        const filePath = `value_images/${fileName}`;
+        // Stop if we've reached the target count
+        if (savedCount >= count) break;
         
-        // Download the image
-        const imageResponse = await fetch(photo.src.medium);
-        const imageBlob = await imageResponse.blob();
+        // Check if this image already exists
+        const imageExists = await doesPexelsImageExist(photo.id);
         
-        // Upload the image to Supabase Storage
-        const { error: uploadError } = await supabase.storage
-          .from('images')
-          .upload(filePath, imageBlob, {
-            contentType: 'image/jpeg',
-            upsert: true
-          });
-          
-        if (uploadError) {
-          console.error('Error uploading image:', uploadError);
+        if (imageExists) {
+          result.skipped++;
           continue;
         }
         
-        // Get the public URL for the uploaded file
-        const { data: { publicUrl } } = supabase.storage
-          .from('images')
-          .getPublicUrl(filePath);
-          
         // Create value name from query
         const valueName = query.charAt(0).toUpperCase() + query.slice(1);
         
-        const { data, error } = await supabase
-          .from('value_images')
-          .insert({
-            category,
-            value_name: valueName,
-            image_url: publicUrl,
-            description: photo.alt || `${valueName} image from Pexels`,
-            tags: [query, category, photo.photographer]
-          })
-          .select()
-          .single();
-          
+        // Create the attribution text and links
+        const photographerName = photo.photographer;
+        const photographerUrl = photo.photographer_url;
+        const pexelsPhotoUrl = photo.url;
+        
+        // Create attribution object
+        const attribution: ImageAttribution = {
+          photographer_name: photographerName,
+          photographer_url: photographerUrl,
+          photo_url: pexelsPhotoUrl
+        };
+
+        // Create image sizes object
+        const imageSizes: ImageSizes = {
+          thumb: photo.src.tiny,
+          small: photo.src.small,
+          regular: photo.src.medium,
+          full: photo.src.large,
+          raw: photo.src.original
+        };
+
+        // Insert the image into the database
+        const { error } = await supabase.from('value_images').insert({
+          category,
+          value_name: valueName,
+          image_url: photo.src.medium,
+          description: photo.alt || `${valueName} image from Pexels`,
+          tags: [query, category, `by ${photo.photographer}`, `pexels_${photo.id}`],
+          pexels_id: photo.id.toString(),
+          attribution,
+          image_sizes: imageSizes
+        });
+
         if (error) {
-          console.error('Error inserting image data:', error);
+          console.error('Error saving Pexels image:', error);
+          result.failed++;
           continue;
         }
         
-        if (data) {
-          savedImages.push(data);
-        }
+        result.added++;
+        savedCount++;
       }
     } catch (error) {
       console.error(`Error fetching images for query "${query}":`, error);
+      result.failed++;
     }
+    
+    // Move to the next query
+    queryIndex++;
   }
   
-  return savedImages;
+  return result;
 }
 
 /**
  * Fetch and save images for all value categories
  * @param imagesPerCategory Number of images to fetch per category
- * @returns Promise with the saved images
+ * @returns Promise with the saved images and skipped counts
  */
 export async function fetchAndSaveImagesForAllCategories(
   imagesPerCategory: number = 20
-): Promise<Record<string, ValueImage[]>> {
-  const result: Record<string, ValueImage[]> = {};
+): Promise<Record<string, ImageFetchResult>> {
+  const result: Record<string, ImageFetchResult> = {};
   
   for (const category of Object.keys(VALUE_CATEGORY_QUERIES)) {
     try {
-      const images = await fetchAndSaveImagesForCategory(category, imagesPerCategory);
-      result[category] = images;
+      const categoryResult = await fetchAndSaveImagesForCategory(category, imagesPerCategory);
+      result[category] = categoryResult;
     } catch (error) {
       console.error(`Error fetching images for category "${category}":`, error);
-      result[category] = [];
+      result[category] = { added: 0, skipped: 0, failed: 0 };
     }
   }
   

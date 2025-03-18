@@ -1,6 +1,6 @@
 # Value Images Feature
 
-This feature allows you to use images for value-based questions in the questionnaire. It includes functionality to upload images manually or fetch them automatically from the Pexels API.
+This feature allows you to use images for value-based questions in the questionnaire. It includes functionality to upload images manually or fetch them automatically from Pexels and Unsplash APIs.
 
 ## Setup
 
@@ -16,7 +16,20 @@ To use the Pexels API integration, you need to obtain an API key:
 PEXELS_API_KEY=your_pexels_api_key_here
 ```
 
-### 2. Supabase Storage
+### 2. Unsplash API Key
+
+To use the Unsplash API integration, you need to obtain API credentials:
+
+1. Create a developer account at [Unsplash](https://unsplash.com/developers)
+2. Register a new application to get your API keys
+3. Add your API keys to the `.env.local` file:
+
+```
+UNSPLASH_ACCESS_KEY=your_unsplash_access_key_here
+UNSPLASH_SECRET_KEY=your_unsplash_secret_key_here
+```
+
+### 3. Supabase Storage
 
 Make sure you have a bucket named `images` in your Supabase storage. If not, create one:
 
@@ -29,10 +42,11 @@ Make sure you have a bucket named `images` in your Supabase storage. If not, cre
 
 ### Admin Interface
 
-The admin interface for value images is available at `/[lng]/admin/value-images`. It provides two main functionalities:
+The admin interface for value images is available at `/[lng]/admin/value-images`. It provides three main functionalities:
 
 1. **Upload Images**: Upload images manually with metadata
 2. **Fetch from Pexels**: Automatically fetch images from Pexels API based on value categories
+3. **Fetch from Unsplash**: Automatically fetch images from Unsplash API based on value categories
 
 #### Uploading Images Manually
 
@@ -49,6 +63,13 @@ The admin interface for value images is available at `/[lng]/admin/value-images`
 2. Select a category (or leave empty to fetch for all categories)
 3. Set the number of images to fetch
 4. Click "Fetch Images from Pexels"
+
+#### Fetching Images from Unsplash
+
+1. Go to the "Fetch from Unsplash" tab
+2. Select a category (or leave empty to fetch for all categories)
+3. Set the number of images to fetch
+4. Click "Fetch Images from Unsplash"
 
 ### Value Categories
 
@@ -90,7 +111,7 @@ This association helps the system understand user preferences based on their ima
 ### `POST /api/value-images`
 
 - **Form Data Upload**: Upload an image file with metadata
-- **JSON Request**: Fetch images from Pexels API
+- **JSON Request**: Fetch images from Pexels or Unsplash API
 
 #### Fetch from Pexels Example
 
@@ -102,6 +123,24 @@ const response = await fetch('/api/value-images', {
   },
   body: JSON.stringify({
     action: 'fetch_pexels',
+    category: 'work_values', // Optional, leave empty for all categories
+    count: 10 // Number of images to fetch
+  })
+});
+
+const data = await response.json();
+```
+
+#### Fetch from Unsplash Example
+
+```javascript
+const response = await fetch('/api/value-images', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    action: 'fetch_unsplash',
     category: 'work_values', // Optional, leave empty for all categories
     count: 10 // Number of images to fetch
   })
@@ -126,8 +165,22 @@ const response = await fetch('/api/value-images?category=work_values');
 
 The value images can be used in the questionnaire to create image-based questions. This provides a more engaging and visual experience for users.
 
+## Image Metadata and Attribution
+
+The system stores metadata for each image depending on its source:
+
+### Pexels Images
+- **pexels_id**: Unique identifier for the Pexels photo for attribution purposes
+
+### Unsplash Images
+- **unsplash_id**: Unique identifier for the Unsplash photo
+- **attribution**: JSONB object containing photographer name, photographer URL, and photo URL
+- **image_sizes**: JSONB object with different size variants of the image for responsive usage
+
+When displaying images sourced from Pexels or Unsplash, make sure to include proper attribution as required by their respective APIs' terms of service.
+
 ## Troubleshooting
 
-- **API Key Issues**: Make sure your Pexels API key is correctly set in the `.env.local` file
+- **API Key Issues**: Make sure your Pexels and Unsplash API keys are correctly set in the `.env.local` file
 - **Storage Issues**: Check that your Supabase storage bucket exists and has the correct permissions
 - **Image Upload Failures**: Ensure the image file is valid and not too large (recommended max size: 5MB) 

@@ -44,7 +44,23 @@ export type Recommendation = {
   feedback?: "interested" | "not_interested"; // User feedback
 };
 
-// New type for value images
+// Type for image attribution
+export type ImageAttribution = {
+  photographer_name: string;
+  photographer_url: string;
+  photo_url: string;
+};
+
+// Type for image sizes
+export type ImageSizes = {
+  thumb: string;
+  small: string;
+  regular: string;
+  full: string;
+  raw: string;
+};
+
+// Type for value images
 export type ValueImage = {
   id: string;
   created_at: string;
@@ -53,4 +69,10 @@ export type ValueImage = {
   image_url: string;
   description?: string;
   tags?: string[];
+  // Unsplash-specific fields
+  unsplash_id?: string;
+  // Pexels-specific fields
+  pexels_id?: string;
+  attribution?: ImageAttribution;
+  image_sizes?: ImageSizes;
 };
