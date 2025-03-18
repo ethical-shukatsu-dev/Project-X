@@ -114,8 +114,8 @@ export async function generateRecommendations(
     必ず以下の企業規模をすべて含めた多様な企業を推薦してください：
     - スタートアップ: 少なくとも1社（会社の規模は正確に「スタートアップ（50人未満）」と表記）
     - 小規模企業: 少なくとも1社（会社の規模は正確に「小規模（50-200人）」と表記）
-    - 中規模企業: 少なくとも1社（会社の規模は正確に「中規模（1000-5000人）」と表記）
-    - 大規模企業: 少なくとも1社（会社の規模は正確に「大規模（10000人以上）」と表記）
+    - 中規模企業: 少なくとも1社（会社の規模は正確に「中規模 200-1000人」と表記）
+    - 大規模企業: 少なくとも1社（会社の規模は正確に「大規模 1000人以上」と表記）
     
     企業の規模はフィルタリングと検索の目的で重要なので、必ず上記の正確な形式で表記してください。
     
@@ -189,8 +189,8 @@ export async function generateRecommendations(
     You must include companies of all the following sizes in your recommendations:
     - Startup: at least 1 company (use the exact text "Startup (less than 50 employees)" for company size)
     - Small company: at least 1 company (use the exact text "Small (50-200 employees)" for company size)
-    - Medium company: at least 1 company (use the exact text "Medium (1000-5000 employees)" for company size)
-    - Large company: at least 1 company (use the exact text "Large (10000+ employees)" for company size)
+    - Medium company: at least 1 company (use the exact text "Medium (200-1000 employees)" for company size)
+    - Large company: at least 1 company (use the exact text "Large (1000+ employees)" for company size)
     
     Company size is important for filtering and search purposes, so please use these exact formats.
     
