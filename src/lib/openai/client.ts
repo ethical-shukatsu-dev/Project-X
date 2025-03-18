@@ -111,7 +111,13 @@ export async function generateRecommendations(
     - ユーザーの価値観と企業文化の間の本質的な適合性を評価してください
     - 企業の社会的評判、従業員満足度、業界での評価も考慮してください
     
-    さまざまな規模の企業を含めるようにしてください。スタートアップ、小規模企業、中規模企業、大企業など、多様な企業規模の推薦を提供してください。少なくとも1つのスタートアップ企業と少なくとも1つの大企業を含めてください。
+    必ず以下の企業規模をすべて含めた多様な企業を推薦してください：
+    - スタートアップ: 少なくとも1社（会社の規模は正確に「スタートアップ（50人未満）」と表記）
+    - 小規模企業: 少なくとも1社（会社の規模は正確に「小規模（50-200人）」と表記）
+    - 中規模企業: 少なくとも1社（会社の規模は正確に「中規模（1000-5000人）」と表記）
+    - 大規模企業: 少なくとも1社（会社の規模は正確に「大規模（10000人以上）」と表記）
+    
+    企業の規模はフィルタリングと検索の目的で重要なので、必ず上記の正確な形式で表記してください。
     
     以下の構造でJSONフォーマットで回答してください: 
     {
@@ -167,7 +173,13 @@ export async function generateRecommendations(
     - Evaluate the intrinsic fit between user values and company culture
     - Consider the company's social reputation, employee satisfaction, and industry standing
     
-    Include companies of various sizes. Provide recommendations for a diverse range of company sizes including startups, small companies, medium-sized companies, and large corporations. Include at least one startup and at least one large corporation.
+    You must include companies of all the following sizes in your recommendations:
+    - Startup: at least 1 company (use the exact text "Startup (less than 50 employees)" for company size)
+    - Small company: at least 1 company (use the exact text "Small (50-200 employees)" for company size)
+    - Medium company: at least 1 company (use the exact text "Medium (1000-5000 employees)" for company size)
+    - Large company: at least 1 company (use the exact text "Large (10000+ employees)" for company size)
+    
+    Company size is important for filtering and search purposes, so please use these exact formats.
     
     Format as JSON with this structure: 
     {
@@ -350,7 +362,11 @@ export async function fetchCompanyData(
     - name: 会社の正式名称（日本語で表記）
     - industry: 主要業界（日本語で表記）
     - description: 詳細な説明（100〜150語）。会社の歴史、主要製品/サービス、市場での位置づけを含めてください。すべて日本語で記述してください。
-    - size: 会社の規模（従業員数の範囲を含む小/中/大）（日本語で表記）
+    - size: 会社の規模。従業員数に基づいて、以下の正確な形式のいずれかのみを使用してください：
+      - 「スタートアップ（50人未満）」 - 小規模スタートアップ企業向け
+      - 「小規模（50-200人）」 - 50人から200人程度の企業向け
+      - 「中規模（1000-5000人）」 - 1000人から5000人程度の企業向け
+      - 「大規模（10000人以上）」 - 10000人以上の大企業向け
     - values: 1〜10の数値評価による会社の価値観を表すJSONオブジェクト。以下の要素を含め、可能な限り正確に評価してください:
       {
         "work_life_balance": 8, // 実際の労働時間、休暇制度、柔軟な勤務体制に基づく評価
@@ -387,7 +403,11 @@ export async function fetchCompanyData(
     - name: Full company name (in English)
     - industry: Primary industry (in English)
     - description: A detailed description (100-150 words) including company history, main products/services, and market position. All in English.
-    - size: Company size (Small/Medium/Large with employee count range) (in English)
+    - size: Company size. Use only one of the following exact formats based on employee count:
+      - "Startup (less than 50 employees)" - For small startups
+      - "Small (50-200 employees)" - For companies with around 50-200 employees
+      - "Medium (1000-5000 employees)" - For companies with around 1000-5000 employees
+      - "Large (10000+ employees)" - For large companies with over 10000 employees
     - values: JSON object with company values as numeric ratings from 1-10. Include the following elements and rate them as accurately as possible:
       {
         "work_life_balance": 8, // Based on actual working hours, vacation policies, and flexible work arrangements
