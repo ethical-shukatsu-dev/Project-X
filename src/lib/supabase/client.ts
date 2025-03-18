@@ -1,11 +1,16 @@
 import {createClient} from "@supabase/supabase-js";
+import { getSupabaseConfig, getEnvironmentName } from "./config";
 
-// These environment variables need to be set in your .env.local file
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+// Get the appropriate Supabase configuration based on environment
+const config = getSupabaseConfig();
 
 // Create a single supabase client for interacting with your database
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(config.url, config.anonKey);
+
+// Log which environment we're using (only in development)
+if (process.env.NODE_ENV !== 'production') {
+  console.log(`[Supabase Client] Using ${getEnvironmentName()} environment`);
+}
 
 // Types for our database tables
 export type UserValues = {

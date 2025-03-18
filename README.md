@@ -8,6 +8,7 @@ Project X is a web application that helps job-seeking students find companies th
 - **AI-Powered Recommendations**: Get personalized company recommendations based on your values and interests.
 - **Company Details**: View detailed information about each recommended company, including why it's a good match for you.
 - **Feedback System**: Provide feedback on recommendations to improve future matches.
+- **Visual Values Selection**: Choose values through image-based selection for a more intuitive experience.
 
 ## Tech Stack
 
@@ -55,7 +56,8 @@ CREATE TABLE user_values (
   id UUID PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   values JSONB NOT NULL,
-  interests TEXT[] NOT NULL
+  interests TEXT[] NOT NULL,
+  selected_image_values JSONB
 );
 ```
 
@@ -68,7 +70,10 @@ CREATE TABLE companies (
   description TEXT NOT NULL,
   size TEXT NOT NULL,
   values JSONB NOT NULL,
-  logo_url TEXT
+  logo_url TEXT,
+  site_url TEXT,
+  data_source TEXT DEFAULT 'manual',
+  last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 
@@ -81,6 +86,19 @@ CREATE TABLE recommendations (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   matching_points TEXT[] NOT NULL,
   feedback TEXT
+);
+```
+
+**value_images**
+```sql
+CREATE TABLE value_images (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  category VARCHAR(255) NOT NULL, -- e.g., 'work_environment', 'leadership_style'
+  value_name VARCHAR(255) NOT NULL, -- e.g., 'collaborative', 'mentorship'
+  image_url TEXT NOT NULL,
+  description TEXT, -- Description of what the image represents
+  tags TEXT[] -- Array of tags for better categorization and searching
 );
 ```
 
