@@ -202,20 +202,6 @@ function shuffleArray<T>(array: T[]): T[] {
   return newArray;
 }
 
-// Define the interest areas
-const INTERESTS = [
-  {value: "technology", labelKey: "questionnaire.interests.technology"},
-  {value: "healthcare", labelKey: "questionnaire.interests.healthcare"},
-  {value: "finance", labelKey: "questionnaire.interests.finance"},
-  {value: "education", labelKey: "questionnaire.interests.education"},
-  {value: "sustainability", labelKey: "questionnaire.interests.sustainability"},
-  {value: "retail", labelKey: "questionnaire.interests.retail"},
-  {value: "manufacturing", labelKey: "questionnaire.interests.manufacturing"},
-  {value: "media", labelKey: "questionnaire.interests.media"},
-  {value: "consulting", labelKey: "questionnaire.interests.consulting"},
-  {value: "nonprofit", labelKey: "questionnaire.interests.nonprofit"},
-];
-
 interface ValuesQuestionnaireProps {
   lng: string;
   questionnaireType?: string; // New prop to control which type of questionnaire to show
@@ -226,7 +212,6 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
   const {t, loaded} = useTranslation(lng, "ai");
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [values, setValues] = useState<Record<string, string>>({});
-  const [interests, setInterests] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageQuestions, setImageQuestions] = useState<
     Record<string, ValueImage[]>
@@ -275,20 +260,12 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
     setSelectedImageValues((prev) => ({...prev, [questionId]: imageId}));
   };
 
-  const handleInterestChange = (interest: string, checked: boolean) => {
-    if (checked) {
-      setInterests((prev) => [...prev, interest]);
-    } else {
-      setInterests((prev) => prev.filter((i) => i !== interest));
-    }
-  };
-
   const handleNext = () => {
-    if (currentQuestion < totalQuestions) {
+    // If we're at the last question, submit automatically instead of showing interests
+    if (currentQuestion === totalQuestions - 1) {
+      handleSubmit();
+    } else if (currentQuestion < totalQuestions) {
       setCurrentQuestion((prev) => prev + 1);
-    } else {
-      // Show interests selection
-      setCurrentQuestion(totalQuestions);
     }
   };
 
@@ -339,10 +316,9 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
         });
       }
 
-      // Create user values object
+      // Create user values object - no longer including interests
       const userValues: Partial<UserValues> = {
         values: numericValues,
-        interests: interests,
         selected_image_values: selectedImages,
         questionnaire_type: questionnaireType, // Add the questionnaire type to the user values
       };
@@ -400,7 +376,7 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
             <CardTitle className="text-xl">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
-                total: totalTextQuestions + 1, // +1 for interests
+                total: totalTextQuestions, // No longer adding +1 for interests
               })}
             </CardTitle>
             <CardDescription className="text-lg">
@@ -431,8 +407,14 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
             >
               {t("questionnaire.previous")}
             </Button>
-            <Button onClick={handleNext} disabled={!values[question.id]}>
-              {t("questionnaire.next")}
+            <Button 
+              onClick={currentQuestion === totalTextQuestions - 1 ? handleSubmit : handleNext} 
+              disabled={!values[question.id] || isSubmitting}
+            >
+              {currentQuestion === totalTextQuestions - 1 
+                ? (isSubmitting ? t("questionnaire.submitting") : t("questionnaire.submit"))
+                : t("questionnaire.next")
+              }
             </Button>
           </CardFooter>
         </>
@@ -451,7 +433,7 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
             <CardTitle className="text-xl">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
-                total: totalImageQuestions + 1, // +1 for interests
+                total: totalImageQuestions, // No longer adding +1 for interests
               })}
             </CardTitle>
             <CardDescription className="text-lg">
@@ -480,59 +462,13 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
               {t("questionnaire.previous")}
             </Button>
             <Button
-              onClick={handleNext}
-              disabled={!selectedImageValues[question.id] && images.length > 0}
+              onClick={currentQuestion === totalImageQuestions - 1 ? handleSubmit : handleNext}
+              disabled={(!selectedImageValues[question.id] && images.length > 0) || isSubmitting}
             >
-              {t("questionnaire.next")}
-            </Button>
-          </CardFooter>
-        </>
-      );
-    }
-    // Interests selection
-    else {
-      return (
-        <>
-          <CardHeader>
-            <CardTitle className="text-xl">
-              {t("questionnaire.interests.title")}
-            </CardTitle>
-            <CardDescription className="text-lg">
-              {t("questionnaire.interests.description")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              {INTERESTS.map((interest) => (
-                <div
-                  key={interest.value}
-                  className="flex items-center space-x-2"
-                >
-                  <Checkbox
-                    id={interest.value}
-                    checked={interests.includes(interest.value)}
-                    onCheckedChange={(checked) =>
-                      handleInterestChange(interest.value, checked === true)
-                    }
-                  />
-                  <Label htmlFor={interest.value} className="text-base">
-                    {t(interest.labelKey)}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={handlePrevious}>
-              {t("questionnaire.previous")}
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={interests.length === 0 || isSubmitting}
-            >
-              {isSubmitting
-                ? t("questionnaire.submitting")
-                : t("questionnaire.submit")}
+              {currentQuestion === totalImageQuestions - 1 
+                ? (isSubmitting ? t("questionnaire.submitting") : t("questionnaire.submit"))
+                : t("questionnaire.next")
+              }
             </Button>
           </CardFooter>
         </>

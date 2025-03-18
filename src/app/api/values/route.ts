@@ -7,9 +7,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     
     // Validate the request body
-    if (!body.values || !body.interests) {
+    if (!body.values) {
       return NextResponse.json(
-        { error: 'Values and interests are required' },
+        { error: 'Values are required' },
         { status: 400 }
       );
     }
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       .insert({
         id: userId,
         values: body.values,
-        interests: body.interests,
+        interests: body.interests || [], // Use empty array if interests not provided
         selected_image_values: body.selected_image_values || null,
       });
 
