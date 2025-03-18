@@ -98,7 +98,11 @@ CREATE TABLE value_images (
   value_name VARCHAR(255) NOT NULL, -- e.g., 'collaborative', 'mentorship'
   image_url TEXT NOT NULL,
   description TEXT, -- Description of what the image represents
-  tags TEXT[] -- Array of tags for better categorization and searching
+  tags TEXT[], -- Array of tags for better categorization and searching
+  pexels_id TEXT, -- The Pexels photo ID for proper attribution
+  unsplash_id TEXT, -- The Unsplash photo ID for proper attribution
+  attribution JSONB, -- Attribution information including photographer name, photographer URL, and photo URL
+  image_sizes JSONB -- Different size variants of the image for responsive usage
 );
 ```
 

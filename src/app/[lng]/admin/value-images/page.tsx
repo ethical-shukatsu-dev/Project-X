@@ -49,6 +49,7 @@ export default function AdminValueImagesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isFetchingPexels, setIsFetchingPexels] = useState(false);
+  const [isFetchingUnsplash, setIsFetchingUnsplash] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [category, setCategory] = useState<string>("");
@@ -59,6 +60,8 @@ export default function AdminValueImagesPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [pexelsCategory, setPexelsCategory] = useState<string>("all");
   const [pexelsCount, setPexelsCount] = useState<number>(10);
+  const [unsplashCategory, setUnsplashCategory] = useState<string>("all");
+  const [unsplashCount, setUnsplashCount] = useState<number>(10);
   const [activeTab, setActiveTab] = useState<string>("upload");
 
   // Fetch existing images on component mount
@@ -193,7 +196,7 @@ export default function AdminValueImagesPage() {
       const data = await response.json();
 
       // Show success message
-      setSuccess(data.message || "Images fetched successfully");
+      setSuccess(data.message || "Images fetched successfully from Pexels");
 
       // Refresh images
       fetchImages();
@@ -209,14 +212,65 @@ export default function AdminValueImagesPage() {
     }
   };
 
+  // Handle fetching images from Unsplash
+  const handleFetchUnsplashImages = async () => {
+    setIsFetchingUnsplash(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const payload = {
+        action: "fetch_unsplash",
+        category:
+          unsplashCategory && unsplashCategory !== "all"
+            ? unsplashCategory
+            : undefined,
+        count: unsplashCount,
+      };
+
+      const response = await fetch("/api/value-images", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to fetch images from Unsplash"
+        );
+      }
+
+      const data = await response.json();
+
+      // Show success message
+      setSuccess(data.message || "Images fetched successfully from Unsplash");
+
+      // Refresh images
+      fetchImages();
+    } catch (error) {
+      console.error("Error fetching Unsplash images:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch images from Unsplash"
+      );
+    } finally {
+      setIsFetchingUnsplash(false);
+    }
+  };
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8">Value Images Admin</h1>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="upload">Upload Image</TabsTrigger>
-          <TabsTrigger value="fetch">Fetch from Pexels</TabsTrigger>
+          <TabsTrigger value="fetch-pexels">Fetch from Pexels</TabsTrigger>
+          <TabsTrigger value="fetch-unsplash">Fetch from Unsplash</TabsTrigger>
         </TabsList>
 
         {/* Upload Tab */}
@@ -348,7 +402,7 @@ export default function AdminValueImagesPage() {
         </TabsContent>
 
         {/* Fetch from Pexels Tab */}
-        <TabsContent value="fetch">
+        <TabsContent value="fetch-pexels">
           <Card>
             <CardHeader>
               <CardTitle>Fetch Images from Pexels</CardTitle>
@@ -428,6 +482,93 @@ export default function AdminValueImagesPage() {
                   </>
                 ) : (
                   "Fetch Images from Pexels"
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        {/* Fetch from Unsplash Tab */}
+        <TabsContent value="fetch-unsplash">
+          <Card>
+            <CardHeader>
+              <CardTitle>Fetch Images from Unsplash</CardTitle>
+              <CardDescription>
+                Automatically fetch and save images from Unsplash API based on
+                value categories.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                  {success}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="unsplash-category" className="mb-2 block">
+                    Category (optional)
+                  </Label>
+                  <Select
+                    value={unsplashCategory}
+                    onValueChange={setUnsplashCategory}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {VALUE_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Leave empty to fetch images for all categories.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="unsplash-count">Number of Images</Label>
+                  <Input
+                    id="unsplash-count"
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={unsplashCount}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setUnsplashCount(parseInt(e.target.value) || 10)
+                    }
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    For a single category, this is the total number of images.
+                    For all categories, this is per category.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+
+            <CardFooter>
+              <Button
+                onClick={handleFetchUnsplashImages}
+                disabled={isFetchingUnsplash}
+              >
+                {isFetchingUnsplash ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Fetching Images...
+                  </>
+                ) : (
+                  "Fetch Images from Unsplash"
                 )}
               </Button>
             </CardFooter>

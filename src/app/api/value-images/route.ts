@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
-import type { ValueImage } from '@/lib/supabase/client';
-import { fetchAndSaveImagesForCategory, fetchAndSaveImagesForAllCategories } from '@/lib/pexels/client';
+import { fetchAndSaveImagesForCategory as fetchAndSavePexelsImagesForCategory, fetchAndSaveImagesForAllCategories as fetchAndSavePexelsImagesForAllCategories } from '@/lib/pexels/client';
+import { fetchAndSaveImagesForCategory as fetchAndSaveUnsplashImagesForCategory, fetchAndSaveImagesForAllCategories as fetchAndSaveUnsplashImagesForAllCategories } from '@/lib/unsplash/client';
 
 export async function POST(request: Request) {
   try {
@@ -104,14 +104,14 @@ export async function POST(request: Request) {
       
       return NextResponse.json(data);
     } 
-    // Handle JSON requests for Pexels API
+    // Handle JSON requests for API fetching
     else if (contentType.includes('application/json')) {
       const body = await request.json();
       const { action, category, count } = body;
       
-      if (action !== 'fetch_pexels') {
+      if (!['fetch_pexels', 'fetch_unsplash'].includes(action)) {
         return NextResponse.json(
-          { error: 'Invalid action' },
+          { error: 'Invalid action. Use fetch_pexels or fetch_unsplash' },
           { status: 400 }
         );
       }
@@ -119,51 +119,111 @@ export async function POST(request: Request) {
       try {
         let result;
         
-        // Fetch images for a specific category or all categories
-        if (category) {
-          result = await fetchAndSaveImagesForCategory(category, count || 10);
-          return NextResponse.json({
-            success: true,
-            message: `Successfully fetched ${result.saved.length} images for category: ${category} (${result.skipped} duplicates skipped)`,
-            images: result.saved,
-            skipped: result.skipped
-          });
-        } else {
-          result = await fetchAndSaveImagesForAllCategories(count || 20);
-          
-          // Calculate total images fetched and skipped
-          const totalSaved = Object.values(result).reduce(
-            (sum, categoryResult) => sum + categoryResult.saved.length, 
-            0
-          );
-          
-          const totalSkipped = Object.values(result).reduce(
-            (sum, categoryResult) => sum + categoryResult.skipped, 
-            0
-          );
-          
-          // Format the response with saved images and skipped counts per category
-          const formattedResult: Record<string, { images: ValueImage[], skipped: number }> = {};
-          for (const [category, categoryResult] of Object.entries(result)) {
-            formattedResult[category] = {
-              images: categoryResult.saved,
-              skipped: categoryResult.skipped
-            };
+        // Fetch images from the specified source
+        if (action === 'fetch_pexels') {
+          // Fetch images for a specific category or all categories from Pexels
+          if (category) {
+            result = await fetchAndSavePexelsImagesForCategory(category, count || 10);
+            return NextResponse.json({
+              success: true,
+              message: `Successfully fetched ${result.added} images from Pexels for category: ${category} (${result.skipped} duplicates skipped, ${result.failed} failed)`,
+              added: result.added,
+              skipped: result.skipped,
+              failed: result.failed
+            });
+          } else {
+            result = await fetchAndSavePexelsImagesForAllCategories(count || 20);
+            
+            // Calculate total images fetched, skipped, and failed
+            const totalAdded = Object.values(result).reduce(
+              (sum, categoryResult) => sum + categoryResult.added, 
+              0
+            );
+            
+            const totalSkipped = Object.values(result).reduce(
+              (sum, categoryResult) => sum + categoryResult.skipped, 
+              0
+            );
+
+            const totalFailed = Object.values(result).reduce(
+              (sum, categoryResult) => sum + categoryResult.failed, 
+              0
+            );
+            
+            // Format the response with added, skipped, and failed counts per category
+            const formattedResult: Record<string, { added: number, skipped: number, failed: number }> = {};
+            for (const [category, categoryResult] of Object.entries(result)) {
+              formattedResult[category] = {
+                added: categoryResult.added,
+                skipped: categoryResult.skipped,
+                failed: categoryResult.failed
+              };
+            }
+            
+            return NextResponse.json({
+              success: true,
+              message: `Successfully fetched ${totalAdded} images from Pexels for all categories (${totalSkipped} duplicates skipped, ${totalFailed} failed)`,
+              result: formattedResult,
+              totalAdded,
+              totalSkipped,
+              totalFailed
+            });
           }
-          
-          return NextResponse.json({
-            success: true,
-            message: `Successfully fetched ${totalSaved} images for all categories (${totalSkipped} duplicates skipped)`,
-            result: formattedResult,
-            totalSaved,
-            totalSkipped
-          });
+        } else if (action === 'fetch_unsplash') {
+          // Fetch images for a specific category or all categories from Unsplash
+          if (category) {
+            result = await fetchAndSaveUnsplashImagesForCategory(category, count || 10);
+            return NextResponse.json({
+              success: true,
+              message: `Successfully fetched ${result.added} images from Unsplash for category: ${category} (${result.skipped} duplicates skipped, ${result.failed} failed)`,
+              added: result.added,
+              skipped: result.skipped,
+              failed: result.failed
+            });
+          } else {
+            result = await fetchAndSaveUnsplashImagesForAllCategories(count || 20);
+            
+            // Calculate total images fetched, skipped, and failed
+            const totalAdded = Object.values(result).reduce(
+              (sum, categoryResult) => sum + categoryResult.added, 
+              0
+            );
+            
+            const totalSkipped = Object.values(result).reduce(
+              (sum, categoryResult) => sum + categoryResult.skipped, 
+              0
+            );
+
+            const totalFailed = Object.values(result).reduce(
+              (sum, categoryResult) => sum + categoryResult.failed, 
+              0
+            );
+            
+            // Format the response with added, skipped, and failed counts per category
+            const formattedResult: Record<string, { added: number, skipped: number, failed: number }> = {};
+            for (const [category, categoryResult] of Object.entries(result)) {
+              formattedResult[category] = {
+                added: categoryResult.added,
+                skipped: categoryResult.skipped,
+                failed: categoryResult.failed
+              };
+            }
+            
+            return NextResponse.json({
+              success: true,
+              message: `Successfully fetched ${totalAdded} images from Unsplash for all categories (${totalSkipped} duplicates skipped, ${totalFailed} failed)`,
+              result: formattedResult,
+              totalAdded,
+              totalSkipped,
+              totalFailed
+            });
+          }
         }
       } catch (error) {
-        console.error('Error fetching images from Pexels:', error);
+        console.error(`Error fetching images from ${action === 'fetch_pexels' ? 'Pexels' : 'Unsplash'}:`, error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
-          { error: 'Failed to fetch images: ' + errorMessage },
+          { error: `Failed to fetch images: ${errorMessage}` },
           { status: 500 }
         );
       }

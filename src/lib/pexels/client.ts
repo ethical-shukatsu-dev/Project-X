@@ -1,5 +1,6 @@
 import { supabase } from '../supabase/client';
-import type { ValueImage } from '../supabase/client';
+import type { ImageAttribution, ImageSizes } from '../supabase/client';
+import { VALUE_CATEGORY_QUERIES } from '../constants/category-queries';
 
 // Define the Pexels API response types
 interface PexelsPhoto {
@@ -37,77 +38,10 @@ interface PexelsSearchResponse {
  * Result object for image fetching operations
  */
 interface ImageFetchResult {
-  saved: ValueImage[];
+  added: number;
   skipped: number;
+  failed: number;
 }
-
-// Map value categories to search queries
-const VALUE_CATEGORY_QUERIES: Record<string, string[]> = {
-  'hobbies': [
-    // Outdoor & Adventure
-    'hiking adventure', 'mountain climbing', 'camping outdoors', 'fishing nature', 
-    'kayaking', 'surfing ocean', 'skiing snow', 'backpacking travel',
-    // Creative & Artistic
-    'painting art', 'drawing sketch', 'photography creative', 'writing poetry', 
-    'playing music', 'singing performance', 'dancing expression', 'crafting handmade',
-    // Intellectual & Learning
-    'reading books', 'learning languages', 'chess strategy', 'puzzles problem-solving', 
-    'history exploration', 'science experiments', 'philosophy thinking', 'documentary watching',
-    // Social & Community
-    'volunteering community', 'team sports', 'board games friends', 'cooking together', 
-    'book club discussion', 'community gardening', 'group travel', 'cultural events',
-    // Wellness & Mindfulness
-    'yoga practice', 'meditation mindfulness', 'fitness training', 'cycling outdoors', 
-    'running marathon', 'swimming exercise', 'healthy cooking', 'nature walks',
-    // Technology & Digital
-    'video gaming', 'programming coding', 'digital art', 'drone flying', 
-    'virtual reality', 'tech gadgets', 'robotics building', 'streaming content'
-  ],
-  'work_values': [
-    'teamwork', 'collaboration', 'productivity', 'achievement', 
-    'dedication', 'excellence', 'professionalism', 'growth'
-  ],
-  'leadership_values': [
-    'leadership', 'vision', 'inspiration', 'mentorship', 
-    'guidance', 'direction', 'empowerment', 'strategy'
-  ],
-  'company_culture': [
-    'culture', 'diversity', 'inclusion', 'community', 
-    'celebration', 'team spirit', 'office culture', 'workplace happiness'
-  ],
-  'work_environment': [
-    'modern office', 'workspace', 'ergonomic', 'collaborative space', 
-    'remote work', 'office design', 'productive environment', 'creative space'
-  ],
-  'innovation': [
-    'innovation', 'technology', 'creativity', 'brainstorming', 
-    'ideas', 'future', 'digital transformation', 'breakthrough'
-  ],
-  'personal_professional_growth': [
-    'learning', 'development', 'career growth', 'adaptability', 
-    'change', 'education', 'skill development', 'personal growth'
-  ],
-  'work_life_balance': [
-    'work-life balance', 'remote work', 'hybrid work', 'mental health', 
-    'wellness', 'relaxation', 'flexible work', 'healthy lifestyle'
-  ],
-  'financial_job_security': [
-    'compensation', 'benefits', 'job stability', 'ownership', 
-    'equity', 'financial security', 'career stability', 'retirement'
-  ],
-  'impact_purpose': [
-    'social impact', 'sustainability', 'ethical standards', 'mission', 
-    'purpose', 'meaningful work', 'environmental responsibility', 'community impact'
-  ],
-  'communication_transparency': [
-    'open communication', 'feedback', 'trust', 'autonomy', 
-    'transparency', 'honest conversation', 'information sharing', 'clear communication'
-  ],
-  'recognition_appreciation': [
-    'employee recognition', 'supportive management', 'peer recognition', 'appreciation', 
-    'awards', 'acknowledgment', 'gratitude', 'team celebration'
-  ]
-};
 
 /**
  * Check if a Pexels image already exists in the database by its ID
@@ -115,10 +49,19 @@ const VALUE_CATEGORY_QUERIES: Record<string, string[]> = {
  * @returns Boolean indicating if the image exists
  */
 async function doesPexelsImageExist(pexelsId: number): Promise<boolean> {
-  // Look for images with a file name pattern of pexels_{id}.jpg
-  const fileName = `pexels_${pexelsId}.jpg`;
+  // Check if there's an entry in the database with this image ID
+  const { data: dbEntries } = await supabase
+    .from('value_images')
+    .select('id')
+    .eq('pexels_id', pexelsId)
+    .limit(1);
+    
+  if (dbEntries && dbEntries.length > 0) {
+    return true;
+  }
   
-  // Check if the file exists in storage
+  // For backward compatibility, also check for images stored with the old method
+  const fileName = `pexels_${pexelsId}.jpg`;
   const { data: fileExists } = await supabase.storage
     .from('images')
     .list('value_images', {
@@ -129,14 +72,7 @@ async function doesPexelsImageExist(pexelsId: number): Promise<boolean> {
     return true;
   }
   
-  // Also check if there's an entry in the database with this image URL
-  const { data: dbEntries } = await supabase
-    .from('value_images')
-    .select('id')
-    .like('image_url', `%pexels_${pexelsId}%`)
-    .limit(1);
-    
-  return !!dbEntries && dbEntries.length > 0;
+  return false;
 }
 
 /**
@@ -197,8 +133,9 @@ export async function fetchAndSaveImagesForCategory(
   
   // Fetch and save images for each query
   const result: ImageFetchResult = {
-    saved: [],
-    skipped: 0
+    added: 0,
+    skipped: 0,
+    failed: 0
   };
   
   // Keep track of how many images we've successfully saved
@@ -229,59 +166,54 @@ export async function fetchAndSaveImagesForCategory(
           continue;
         }
         
-        // Generate a unique file name
-        const fileName = `pexels_${photo.id}.jpg`;
-        const filePath = `value_images/${fileName}`;
-        
-        // Download the image
-        const imageResponse = await fetch(photo.src.medium);
-        const imageBlob = await imageResponse.blob();
-        
-        // Upload the image to Supabase Storage
-        const { error: uploadError } = await supabase.storage
-          .from('images')
-          .upload(filePath, imageBlob, {
-            contentType: 'image/jpeg',
-            upsert: true
-          });
-          
-        if (uploadError) {
-          console.error('Error uploading image:', uploadError);
-          continue;
-        }
-        
-        // Get the public URL for the uploaded file
-        const { data: { publicUrl } } = supabase.storage
-          .from('images')
-          .getPublicUrl(filePath);
-          
         // Create value name from query
         const valueName = query.charAt(0).toUpperCase() + query.slice(1);
         
-        const { data, error } = await supabase
-          .from('value_images')
-          .insert({
-            category,
-            value_name: valueName,
-            image_url: publicUrl,
-            description: photo.alt || `${valueName} image from Pexels`,
-            tags: [query, category, photo.photographer]
-          })
-          .select()
-          .single();
-          
+        // Create the attribution text and links
+        const photographerName = photo.photographer;
+        const photographerUrl = photo.photographer_url;
+        const pexelsPhotoUrl = photo.url;
+        
+        // Create attribution object
+        const attribution: ImageAttribution = {
+          photographer_name: photographerName,
+          photographer_url: photographerUrl,
+          photo_url: pexelsPhotoUrl
+        };
+
+        // Create image sizes object
+        const imageSizes: ImageSizes = {
+          thumb: photo.src.tiny,
+          small: photo.src.small,
+          regular: photo.src.medium,
+          full: photo.src.large,
+          raw: photo.src.original
+        };
+
+        // Insert the image into the database
+        const { error } = await supabase.from('value_images').insert({
+          category,
+          value_name: valueName,
+          image_url: photo.src.medium,
+          description: photo.alt || `${valueName} image from Pexels`,
+          tags: [query, category, `by ${photo.photographer}`, `pexels_${photo.id}`],
+          pexels_id: photo.id.toString(),
+          attribution,
+          image_sizes: imageSizes
+        });
+
         if (error) {
-          console.error('Error inserting image data:', error);
+          console.error('Error saving Pexels image:', error);
+          result.failed++;
           continue;
         }
         
-        if (data) {
-          result.saved.push(data);
-          savedCount++;
-        }
+        result.added++;
+        savedCount++;
       }
     } catch (error) {
       console.error(`Error fetching images for query "${query}":`, error);
+      result.failed++;
     }
     
     // Move to the next query
@@ -307,7 +239,7 @@ export async function fetchAndSaveImagesForAllCategories(
       result[category] = categoryResult;
     } catch (error) {
       console.error(`Error fetching images for category "${category}":`, error);
-      result[category] = { saved: [], skipped: 0 };
+      result[category] = { added: 0, skipped: 0, failed: 0 };
     }
   }
   

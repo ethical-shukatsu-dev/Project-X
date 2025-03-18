@@ -20,6 +20,44 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
       <div className="mt-2">
         <p className="font-medium">{image.value_name}</p>
         <p className="text-sm text-gray-500">{image.category}</p>
+        
+        {/* Attribution for images */}
+        {image.attribution && (
+          <div className="text-xs mt-1 text-gray-500">
+            Photo by{" "}
+            <a 
+              href={image.attribution.photographer_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-700"
+            >
+              {image.attribution.photographer_name}
+            </a>
+            {" "}on{" "}
+            {image.unsplash_id ? (
+              <a 
+                href="https://unsplash.com/?utm_source=project_x&utm_medium=referral"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-gray-700"
+              >
+                Unsplash
+              </a>
+            ) : image.pexels_id ? (
+              <a 
+                href="https://www.pexels.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-gray-700"
+              >
+                Pexels
+              </a>
+            ) : (
+              "Stock"
+            )}
+          </div>
+        )}
+        
         {image.tags && image.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
             {image.tags.map((tag, index) => (
@@ -91,7 +129,7 @@ export const ImageGallery = React.memo(
 
     if (images.length === 0 && !isFiltering) {
       return (
-        <EmptyState message="No images found. Upload some images or fetch from Pexels to get started" />
+        <EmptyState message="No images found. Upload some images or fetch from Pexels or Unsplash to get started" />
       );
     }
 
