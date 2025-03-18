@@ -137,6 +137,12 @@ export default function AdminPage() {
           >
             {status === "loading" && message.includes("site URLs") ? "Updating..." : "Update Company Site URLs"}
           </Button>
+          <Button
+            onClick={() => window.location.href = "./admin/value-images"}
+            className="w-full"
+          >
+            Manage Value Images
+          </Button>
         </CardFooter>
       </Card>
     </div>
