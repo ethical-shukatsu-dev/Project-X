@@ -139,10 +139,10 @@ export default function RecommendationsContent({
   // Show loading state while translations are loading
   if (!loaded) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto text-center">
-          <Skeleton className="h-8 w-1/3 mx-auto mb-4" />
-          <Skeleton className="h-4 w-1/2 mx-auto mb-8" />
+          <Skeleton className="w-1/3 h-8 mx-auto mb-4" />
+          <Skeleton className="w-1/2 h-4 mx-auto mb-8" />
         </div>
       </div>
     );
@@ -150,12 +150,12 @@ export default function RecommendationsContent({
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-8">
+          <h1 className="mb-8 text-3xl font-bold">
             {t("recommendations.loading.title")}
           </h1>
-          <p className="text-lg mb-8">
+          <p className="mb-8 text-lg">
             {t("recommendations.loading.description")}
           </p>
           <div className="max-w-4xl mx-auto">
@@ -170,9 +170,9 @@ export default function RecommendationsContent({
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto">
-          <Card className="mx-auto max-w-md">
+          <Card className="max-w-md mx-auto">
             <CardHeader>
               <CardTitle className="text-center">
                 {t("recommendations.errors.title")}
@@ -300,12 +300,12 @@ export default function RecommendationsContent({
   console.log("recommendations", recommendations);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container px-4 py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">
+        <h1 className="mb-8 text-3xl font-bold text-center">
           {t("recommendations.title")}
         </h1>
-        <p className="text-lg text-center mb-8">
+        <p className="mb-8 text-lg text-center">
           {t("recommendations.description")}
         </p>
 
@@ -319,7 +319,7 @@ export default function RecommendationsContent({
             {refreshing ? (
               <>
                 <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary"
+                  className="w-4 h-4 mr-2 -ml-1 animate-spin text-primary"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -344,7 +344,7 @@ export default function RecommendationsContent({
               <>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
+                  className="w-4 h-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -369,7 +369,7 @@ export default function RecommendationsContent({
           value={activeTab}
           onValueChange={setActiveTab}
         >
-          <TabsList className="flex flex-wrap gap-2 h-full">
+          <TabsList className="flex flex-wrap h-full gap-2">
             <TabsTrigger value="all">
               {t("recommendations.tabs.all")} ({recommendations.length})
             </TabsTrigger>
@@ -395,7 +395,7 @@ export default function RecommendationsContent({
           value={activeSizeTab}
           onValueChange={setActiveSizeTab}
         >
-          <TabsList className="flex flex-wrap gap-2 h-full">
+          <TabsList className="flex flex-wrap h-full gap-2">
             <TabsTrigger value="all-sizes">
               {t("recommendations.size_tabs.all")} ({recommendations.length})
             </TabsTrigger>
@@ -435,7 +435,7 @@ export default function RecommendationsContent({
               />
             ))
           ) : (
-            <div className="text-center py-8">
+            <div className="py-8 text-center">
               <p>{t("recommendations.no_matches")}</p>
             </div>
           )}

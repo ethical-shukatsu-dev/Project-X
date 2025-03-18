@@ -10,7 +10,8 @@
     "lint": "bun --bun next lint",
     "verify-supabase": "bun verify-supabase.mjs",
     "verify-supabase:dev": "bun verify-supabase.mjs --development",
-    "verify-supabase:prod": "bun verify-supabase.mjs --production"
+    "verify-supabase:prod": "bun verify-supabase.mjs --production",
+    "deduplicate-companies": "bun scripts/deduplicate-companies.ts"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.4",
