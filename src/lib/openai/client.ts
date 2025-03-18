@@ -61,7 +61,7 @@ export async function generateRecommendations(
 ): Promise<RecommendationResult[]> {
   // Load translations for the specified locale
   const translations = loadAiTranslations(locale) || loadAiTranslations('en');
-  const RECOMMENDATION_COUNT =10
+  const RECOMMENDATION_COUNT = 5
   
   // Get the appropriate system prompt from translations
   const systemPrompt = translations?.systemPrompt?.recommendations?.replace('{{language}}', locale === 'ja' ? '日本語' : 'English') 
