@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Label} from "@/components/ui/label";
-import {Checkbox} from "@/components/ui/checkbox";
 import {UserValues, ValueImage} from "@/lib/supabase/client";
 import {useTranslation} from "@/i18n-client";
 import {ImageQuestionGrid} from "./ImageValueSelector";
@@ -202,31 +201,19 @@ function shuffleArray<T>(array: T[]): T[] {
   return newArray;
 }
 
-// Define the interest areas
-const INTERESTS = [
-  {value: "technology", labelKey: "questionnaire.interests.technology"},
-  {value: "healthcare", labelKey: "questionnaire.interests.healthcare"},
-  {value: "finance", labelKey: "questionnaire.interests.finance"},
-  {value: "education", labelKey: "questionnaire.interests.education"},
-  {value: "sustainability", labelKey: "questionnaire.interests.sustainability"},
-  {value: "retail", labelKey: "questionnaire.interests.retail"},
-  {value: "manufacturing", labelKey: "questionnaire.interests.manufacturing"},
-  {value: "media", labelKey: "questionnaire.interests.media"},
-  {value: "consulting", labelKey: "questionnaire.interests.consulting"},
-  {value: "nonprofit", labelKey: "questionnaire.interests.nonprofit"},
-];
-
 interface ValuesQuestionnaireProps {
   lng: string;
   questionnaireType?: string; // New prop to control which type of questionnaire to show
 }
 
-export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QUESTIONNAIRE_TYPE}: ValuesQuestionnaireProps) {
+export default function ValuesQuestionnaire({
+  lng,
+  questionnaireType = DEFAULT_QUESTIONNAIRE_TYPE,
+}: ValuesQuestionnaireProps) {
   const router = useRouter();
   const {t, loaded} = useTranslation(lng, "ai");
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [values, setValues] = useState<Record<string, string>>({});
-  const [interests, setInterests] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageQuestions, setImageQuestions] = useState<
     Record<string, ValueImage[]>
@@ -236,16 +223,21 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
   >({});
   const [isLoadingImages, setIsLoadingImages] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   // Determine if we should use only image questions based on the prop
   const useOnlyImageQuestions = questionnaireType === "image";
-  
+
   // Randomly select a subset of image questions on component mount
-  const [randomImageQuestions, setRandomImageQuestions] = useState<typeof ALL_IMAGE_QUESTIONS>([]);
-  
+  const [randomImageQuestions, setRandomImageQuestions] = useState<
+    typeof ALL_IMAGE_QUESTIONS
+  >([]);
+
   useEffect(() => {
     // Randomly select NUM_RANDOM_IMAGE_QUESTIONS from ALL_IMAGE_QUESTIONS
-    const randomQuestions = shuffleArray(ALL_IMAGE_QUESTIONS).slice(0, NUM_RANDOM_IMAGE_QUESTIONS);
+    const randomQuestions = shuffleArray(ALL_IMAGE_QUESTIONS).slice(
+      0,
+      NUM_RANDOM_IMAGE_QUESTIONS
+    );
     setRandomImageQuestions(randomQuestions);
     setIsInitialized(true);
   }, []);
@@ -253,7 +245,9 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
   // Calculate total questions based on questionnaire type
   const totalTextQuestions = QUESTIONS.length;
   const totalImageQuestions = randomImageQuestions.length;
-  const totalQuestions = useOnlyImageQuestions ? totalImageQuestions : totalTextQuestions;
+  const totalQuestions = useOnlyImageQuestions
+    ? totalImageQuestions
+    : totalTextQuestions;
 
   // Fetch image questions on component mount
   useEffect(() => {
@@ -275,20 +269,12 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
     setSelectedImageValues((prev) => ({...prev, [questionId]: imageId}));
   };
 
-  const handleInterestChange = (interest: string, checked: boolean) => {
-    if (checked) {
-      setInterests((prev) => [...prev, interest]);
-    } else {
-      setInterests((prev) => prev.filter((i) => i !== interest));
-    }
-  };
-
   const handleNext = () => {
-    if (currentQuestion < totalQuestions) {
+    // If we're at the last question, submit automatically instead of showing interests
+    if (currentQuestion === totalQuestions - 1) {
+      handleSubmit();
+    } else if (currentQuestion < totalQuestions) {
       setCurrentQuestion((prev) => prev + 1);
-    } else {
-      // Show interests selection
-      setCurrentQuestion(totalQuestions);
     }
   };
 
@@ -303,7 +289,7 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
     try {
       // Convert values to numeric format for better AI processing
       const numericValues: Record<string, number> = {};
-      
+
       // Only process text-based values if we're in text-only mode
       if (!useOnlyImageQuestions) {
         Object.values(values).forEach((value) => {
@@ -314,11 +300,13 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
 
       // Prepare selected image values - only if we're in image-only mode
       const selectedImages: Record<string, string[]> = {};
-      
+
       if (useOnlyImageQuestions) {
         Object.entries(selectedImageValues).forEach(([questionId, imageId]) => {
           // Find the corresponding image question from our random selection
-          const imageQuestion = randomImageQuestions.find((q) => q.id === questionId);
+          const imageQuestion = randomImageQuestions.find(
+            (q) => q.id === questionId
+          );
           if (imageQuestion) {
             // Get the category
             const category = imageQuestion.category;
@@ -339,10 +327,9 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
         });
       }
 
-      // Create user values object
+      // Create user values object - no longer including interests
       const userValues: Partial<UserValues> = {
         values: numericValues,
-        interests: interests,
         selected_image_values: selectedImages,
         questionnaire_type: questionnaireType, // Add the questionnaire type to the user values
       };
@@ -400,7 +387,7 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
             <CardTitle className="text-xl">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
-                total: totalTextQuestions + 1, // +1 for interests
+                total: totalTextQuestions, // No longer adding +1 for interests
               })}
             </CardTitle>
             <CardDescription className="text-lg">
@@ -413,14 +400,19 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
               onValueChange={(value) => handleValueChange(question.id, value)}
               className="space-y-3"
             >
-              {question.options.map((option: { value: string; labelKey: string }) => (
-                <div key={option.value} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option.value} id={option.value} />
-                  <Label htmlFor={option.value} className="text-base">
-                    {t(option.labelKey)}
-                  </Label>
-                </div>
-              ))}
+              {question.options.map(
+                (option: {value: string; labelKey: string}) => (
+                  <div
+                    key={option.value}
+                    className="flex items-center space-x-2"
+                  >
+                    <RadioGroupItem value={option.value} id={option.value} />
+                    <Label htmlFor={option.value} className="text-base">
+                      {t(option.labelKey)}
+                    </Label>
+                  </div>
+                )
+              )}
             </RadioGroup>
           </CardContent>
           <CardFooter className="flex justify-between">
@@ -431,8 +423,19 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
             >
               {t("questionnaire.previous")}
             </Button>
-            <Button onClick={handleNext} disabled={!values[question.id]}>
-              {t("questionnaire.next")}
+            <Button
+              onClick={
+                currentQuestion === totalTextQuestions - 1
+                  ? handleSubmit
+                  : handleNext
+              }
+              disabled={!values[question.id] || isSubmitting}
+            >
+              {currentQuestion === totalTextQuestions - 1
+                ? isSubmitting
+                  ? t("questionnaire.submitting")
+                  : t("questionnaire.submit")
+                : t("questionnaire.next")}
             </Button>
           </CardFooter>
         </>
@@ -451,7 +454,7 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
             <CardTitle className="text-xl">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
-                total: totalImageQuestions + 1, // +1 for interests
+                total: totalImageQuestions, // No longer adding +1 for interests
               })}
             </CardTitle>
             <CardDescription className="text-lg">
@@ -472,67 +475,29 @@ export default function ValuesQuestionnaire({lng, questionnaireType = DEFAULT_QU
             )}
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handlePrevious}
               disabled={currentQuestion === 0}
             >
               {t("questionnaire.previous")}
             </Button>
             <Button
-              onClick={handleNext}
-              disabled={!selectedImageValues[question.id] && images.length > 0}
+              onClick={
+                currentQuestion === totalImageQuestions - 1
+                  ? handleSubmit
+                  : handleNext
+              }
+              disabled={
+                (!selectedImageValues[question.id] && images.length > 0) ||
+                isSubmitting
+              }
             >
-              {t("questionnaire.next")}
-            </Button>
-          </CardFooter>
-        </>
-      );
-    }
-    // Interests selection
-    else {
-      return (
-        <>
-          <CardHeader>
-            <CardTitle className="text-xl">
-              {t("questionnaire.interests.title")}
-            </CardTitle>
-            <CardDescription className="text-lg">
-              {t("questionnaire.interests.description")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              {INTERESTS.map((interest) => (
-                <div
-                  key={interest.value}
-                  className="flex items-center space-x-2"
-                >
-                  <Checkbox
-                    id={interest.value}
-                    checked={interests.includes(interest.value)}
-                    onCheckedChange={(checked) =>
-                      handleInterestChange(interest.value, checked === true)
-                    }
-                  />
-                  <Label htmlFor={interest.value} className="text-base">
-                    {t(interest.labelKey)}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={handlePrevious}>
-              {t("questionnaire.previous")}
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={interests.length === 0 || isSubmitting}
-            >
-              {isSubmitting
-                ? t("questionnaire.submitting")
-                : t("questionnaire.submit")}
+              {currentQuestion === totalImageQuestions - 1
+                ? isSubmitting
+                  ? t("questionnaire.submitting")
+                  : t("questionnaire.submit")
+                : t("questionnaire.next")}
             </Button>
           </CardFooter>
         </>

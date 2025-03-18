@@ -61,7 +61,7 @@ export async function generateRecommendations(
 ): Promise<RecommendationResult[]> {
   // Load translations for the specified locale
   const translations = loadAiTranslations(locale) || loadAiTranslations('en');
-  const RECOMMENDATION_COUNT =10
+  const RECOMMENDATION_COUNT = 5
   
   // Get the appropriate system prompt from translations
   const systemPrompt = translations?.systemPrompt?.recommendations?.replace('{{language}}', locale === 'ja' ? '日本語' : 'English') 
@@ -74,13 +74,12 @@ export async function generateRecommendations(
 
   const promptTemplate = locale === 'ja' 
     ? `
-    ユーザーの価値観と興味に基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。
+    ユーザーの価値観に基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。
 
     重要: すべての回答は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。
     
-    ユーザーの価値観と興味:
+    ユーザーの価値観:
     ${JSON.stringify(userData.values)}
-    ${JSON.stringify(userData.interests)}
     ${userData.selected_image_values ? `
     
     ユーザーが選択した画像ベースの価値観:
@@ -115,10 +114,24 @@ export async function generateRecommendations(
     必ず以下の企業規模をすべて含めた多様な企業を推薦してください：
     - スタートアップ: 少なくとも1社（会社の規模は正確に「スタートアップ（50人未満）」と表記）
     - 小規模企業: 少なくとも1社（会社の規模は正確に「小規模（50-200人）」と表記）
-    - 中規模企業: 少なくとも1社（会社の規模は正確に「中規模（1000-5000人）」と表記）
-    - 大規模企業: 少なくとも1社（会社の規模は正確に「大規模（10000人以上）」と表記）
+    - 中規模企業: 少なくとも1社（会社の規模は正確に「中規模 200-1000人」と表記）
+    - 大規模企業: 少なくとも1社（会社の規模は正確に「大規模 1000人以上」と表記）
     
     企業の規模はフィルタリングと検索の目的で重要なので、必ず上記の正確な形式で表記してください。
+    
+    また、以下の業界からそれぞれ少なくとも1社を含めてください。全ての業界から選ぶ必要はありませんが、少なくとも5つの異なる業界からの企業を含めてください：
+    - テクノロジー/IT
+    - 医療/ヘルスケア
+    - 金融/銀行
+    - 教育
+    - サステナビリティ/環境
+    - 小売/消費財
+    - 製造業
+    - メディア/エンターテインメント
+    - コンサルティング
+    - 非営利/社会的企業
+    
+    これにより、学生が様々な業界の選択肢を検討できるようになります。
     
     以下の構造でJSONフォーマットで回答してください: 
     {
@@ -135,14 +148,13 @@ export async function generateRecommendations(
     再度強調しますが、すべての出力は日本語のみで提供してください。英語の単語や文を混在させないでください。
     `
     : `
-    Based on the user's values and interests, recommend ${RECOMMENDATION_COUNT} real companies in Japan 
+    Based on the user's values, recommend ${RECOMMENDATION_COUNT} real companies in Japan 
     that would be good matches for a university student seeking employment.
 
     Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
     
-    User values and interests:
+    User values:
     ${JSON.stringify(userData.values)}
-    ${JSON.stringify(userData.interests)}
     ${userData.selected_image_values ? `
     
     User's image-based values:
@@ -177,10 +189,24 @@ export async function generateRecommendations(
     You must include companies of all the following sizes in your recommendations:
     - Startup: at least 1 company (use the exact text "Startup (less than 50 employees)" for company size)
     - Small company: at least 1 company (use the exact text "Small (50-200 employees)" for company size)
-    - Medium company: at least 1 company (use the exact text "Medium (1000-5000 employees)" for company size)
-    - Large company: at least 1 company (use the exact text "Large (10000+ employees)" for company size)
+    - Medium company: at least 1 company (use the exact text "Medium (200-1000 employees)" for company size)
+    - Large company: at least 1 company (use the exact text "Large (1000+ employees)" for company size)
     
     Company size is important for filtering and search purposes, so please use these exact formats.
+    
+    Additionally, please include at least one company from each of these industries. You don't need to include all industries, but ensure that at least 5 different industries are represented:
+    - Technology/IT
+    - Healthcare/Medical
+    - Finance/Banking
+    - Education
+    - Sustainability/Environment
+    - Retail/Consumer Goods
+    - Manufacturing
+    - Media/Entertainment
+    - Consulting
+    - Nonprofit/Social Enterprise
+    
+    This will help students consider options across various industries.
     
     Format as JSON with this structure: 
     {
