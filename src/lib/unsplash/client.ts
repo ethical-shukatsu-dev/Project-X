@@ -229,7 +229,7 @@ export async function fetchAndSaveImagesForCategory(
             category,
             value_name: valueName,
             image_url: photo.urls.regular,
-            description: photo.description || photo.alt_description || `${valueName} image from Unsplash`,
+            description: photo.alt_description || photo.description || `${valueName} image from Unsplash`,
             tags: [query, category, `by ${photo.user.name}`, `unsplash_${photo.user.username}`],
             unsplash_id: photo.id,
             attribution,
