@@ -111,6 +111,8 @@ export async function generateRecommendations(
     - ユーザーの価値観と企業文化の間の本質的な適合性を評価してください
     - 企業の社会的評判、従業員満足度、業界での評価も考慮してください
     
+    さまざまな規模の企業を含めるようにしてください。スタートアップ、小規模企業、中規模企業、大企業など、多様な企業規模の推薦を提供してください。少なくとも1つのスタートアップ企業と少なくとも1つの大企業を含めてください。
+    
     以下の構造でJSONフォーマットで回答してください: 
     {
       "recommendations": [
@@ -164,6 +166,8 @@ export async function generateRecommendations(
     - When there's a gap between official company statements and actual practices, prioritize actual practices
     - Evaluate the intrinsic fit between user values and company culture
     - Consider the company's social reputation, employee satisfaction, and industry standing
+    
+    Include companies of various sizes. Provide recommendations for a diverse range of company sizes including startups, small companies, medium-sized companies, and large corporations. Include at least one startup and at least one large corporation.
     
     Format as JSON with this structure: 
     {
