@@ -1,26 +1,48 @@
 // This script verifies your Supabase connection and checks if tables are set up correctly
-// Run with: node verify-supabase.js
+// Run with: bun run verify-supabase
 
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
 
-// Load environment variables from .env.local
-dotenv.config({ path: '.env.local' });
+// Allow specifying environment via command line
+if (process.argv.includes('--production')) {
+  process.env.NEXT_PUBLIC_APP_ENV = 'production';
+  console.log('Forcing production environment check');
+} else if (process.argv.includes('--development')) {
+  process.env.NEXT_PUBLIC_APP_ENV = 'development';
+  console.log('Forcing development environment check');
+}
 
-// Initialize Supabase client
+// Determine environment
+const isProduction = process.env.NODE_ENV === 'production' || 
+                    process.env.NEXT_PUBLIC_APP_ENV === 'production';
+const environment = isProduction ? 'production' : 'development';
+
+// Load appropriate environment variables
+if (isProduction && fs.existsSync('.env.production')) {
+  console.log('Loading production environment variables from .env.production');
+  dotenv.config({ path: '.env.production' });
+} else {
+  console.log('Loading development environment variables from .env.local');
+  dotenv.config({ path: '.env.local' });
+}
+
+// Get the Supabase configuration
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Error: Missing Supabase environment variables');
-  console.error('Make sure you have NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file');
+  console.error(`Error: Missing Supabase environment variables for ${environment} environment`);
+  console.error('Make sure you have the correct environment variables in your environment file');
+  console.error(`For ${environment}: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.${isProduction ? 'production' : 'local'}`);
   process.exit(1);
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function verifySupabaseSetup() {
-  console.log('Verifying Supabase connection and table setup...');
+  console.log(`Verifying Supabase connection and table setup for ${environment} environment...`);
   
   try {
     // Check connection
@@ -31,7 +53,7 @@ async function verifySupabaseSetup() {
       throw new Error(`Connection error: ${connectionError.message}`);
     }
     
-    console.log('✅ Supabase connection successful!');
+    console.log(`✅ Supabase connection successful to ${environment} database!`);
     
     // Check tables
     console.log('\nChecking database tables:');
@@ -64,12 +86,12 @@ async function verifySupabaseSetup() {
     
     console.log('✅ Recommendations table exists');
     
-    console.log('\n🎉 Supabase setup verification complete! Your database is ready to use.');
+    console.log(`\n🎉 Supabase setup verification complete! Your ${environment} database is ready to use.`);
     
   } catch (error) {
     console.error('\n❌ Verification failed:');
     console.error(error.message);
-    console.error('\nPlease check your Supabase setup and environment variables.');
+    console.error(`\nPlease check your Supabase setup and environment variables for the ${environment} environment.`);
     process.exit(1);
   }
 }

@@ -1,9 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
+import { getSupabaseConfig, getEnvironmentName } from "./config";
 
-// These environment variables need to be set in your .env.local file
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY || "";
+// Get the appropriate Supabase configuration based on environment
+const config = getSupabaseConfig();
 
 // Create a Supabase client with the service role key for admin operations
 // This client bypasses RLS policies and should only be used in server-side code
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey); 
+export const supabaseAdmin = createClient(config.url, config.serviceRoleKey);
+
+// Log which environment we're using (only in development)
+if (process.env.NODE_ENV !== 'production') {
+  console.log(`[Supabase Admin Client] Using ${getEnvironmentName()} environment`);
+} 

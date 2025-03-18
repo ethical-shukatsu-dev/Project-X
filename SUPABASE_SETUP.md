@@ -37,11 +37,15 @@ After setting up your Supabase project, you need to configure your environment v
    cp .env.local.example .env.local
    ```
 4. Edit the `.env.local` file and replace the placeholder values with your actual Supabase URL and key:
+
    ```
    NEXT_PUBLIC_SUPABASE_URL=your_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
    OPENAI_API_KEY=your_openai_api_key
    ```
+
+5. For production setup, see the [Environment Setup Guide](ENVIRONMENT_SETUP.md)
 
 ## 4. Verify Setup
 
@@ -79,3 +83,7 @@ Once your Supabase project is set up, you can:
 2. Add more sample company data if needed
 
 3. Test the questionnaire and recommendation features 
+
+## Multiple Environments
+
+For information on setting up and switching between development and production environments, see the [Environment Setup Guide](ENVIRONMENT_SETUP.md). 
