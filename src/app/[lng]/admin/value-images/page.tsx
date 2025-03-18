@@ -16,6 +16,14 @@ import {ValueImage} from "@/lib/supabase/client";
 import Image from "next/image";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Loader2} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {FilteredGallery} from "@/components/admin/FilteredGallery";
 
 // Define the categories for value images
 const VALUE_CATEGORIES = [
@@ -38,7 +46,7 @@ const VALUE_CATEGORIES = [
 
 export default function AdminValueImagesPage() {
   const [images, setImages] = useState<ValueImage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isFetchingPexels, setIsFetchingPexels] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -49,7 +57,7 @@ export default function AdminValueImagesPage() {
   const [tags, setTags] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [pexelsCategory, setPexelsCategory] = useState<string>("");
+  const [pexelsCategory, setPexelsCategory] = useState<string>("all");
   const [pexelsCount, setPexelsCount] = useState<number>(10);
   const [activeTab, setActiveTab] = useState<string>("upload");
 
@@ -60,7 +68,6 @@ export default function AdminValueImagesPage() {
 
   // Fetch images from the API
   const fetchImages = async () => {
-    setIsLoading(true);
     try {
       const response = await fetch("/api/value-images");
       if (!response.ok) {
@@ -161,7 +168,10 @@ export default function AdminValueImagesPage() {
     try {
       const payload = {
         action: "fetch_pexels",
-        category: pexelsCategory || undefined,
+        category:
+          pexelsCategory && pexelsCategory !== "all"
+            ? pexelsCategory
+            : undefined,
         count: pexelsCount,
       };
 
@@ -258,23 +268,25 @@ export default function AdminValueImagesPage() {
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="category">Category *</Label>
-                      <select
-                        id="category"
+                      <Label htmlFor="category" className="mb-2 block">
+                        Category *
+                      </Label>
+                      <Select
                         value={category}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                          setCategory(e.target.value)
-                        }
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onValueChange={setCategory}
                         required
                       >
-                        <option value="">Select a category</option>
-                        {VALUE_CATEGORIES.map((cat) => (
-                          <option key={cat.value} value={cat.value}>
-                            {cat.label}
-                          </option>
-                        ))}
-                      </select>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {VALUE_CATEGORIES.map((cat) => (
+                            <SelectItem key={cat.value} value={cat.value}>
+                              {cat.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="space-y-2">
@@ -360,22 +372,25 @@ export default function AdminValueImagesPage() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="pexels-category">Category (optional)</Label>
-                  <select
-                    id="pexels-category"
+                  <Label htmlFor="pexels-category" className="mb-2 block">
+                    Category (optional)
+                  </Label>
+                  <Select
                     value={pexelsCategory}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setPexelsCategory(e.target.value)
-                    }
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    onValueChange={setPexelsCategory}
                   >
-                    <option value="">All Categories</option>
-                    {VALUE_CATEGORIES.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {VALUE_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <p className="text-sm text-gray-500 mt-1">
                     Leave empty to fetch images for all categories.
                   </p>
@@ -420,57 +435,11 @@ export default function AdminValueImagesPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Image Gallery */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Value Images Gallery</CardTitle>
-          <CardDescription>Manage existing value images.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="ml-2">Loading images...</span>
-            </div>
-          ) : images.length === 0 ? (
-            <p>
-              No images found. Upload some images or fetch from Pexels to get
-              started.
-            </p>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {images.map((image) => (
-                <div key={image.id} className="relative group">
-                  <div className="aspect-square relative rounded-md overflow-hidden">
-                    <Image
-                      src={image.image_url}
-                      alt={image.description || image.value_name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="mt-2">
-                    <p className="font-medium">{image.value_name}</p>
-                    <p className="text-sm text-gray-500">{image.category}</p>
-                    {image.tags && image.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {image.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <FilteredGallery
+        images={images}
+        VALUE_CATEGORIES={VALUE_CATEGORIES}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
