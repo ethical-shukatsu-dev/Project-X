@@ -2,15 +2,49 @@ import { supabase, Company } from '../src/lib/supabase/client';
 
 /**
  * Script to identify and remove duplicate companies in the database
+ * including handling references in the recommendations table
  * 
  * The approach:
  * 1. Group companies by normalized name (lowercase, trimmed)
- * 2. For each group with multiple companies, keep the most detailed one and remove others
- * 3. We'll determine the most detailed one by:
- *    - Preferring entries with longer descriptions
- *    - Preferring entries with more complete data (logo, site URL)
- *    - Preferring entries with more recent updates
+ * 2. For each group with multiple companies, keep the most detailed one and update references to others
+ * 3. Remove the duplicate companies after updating all references
  */
+
+// Function to update recommendation references from one company ID to another
+async function updateRecommendationReferences(fromCompanyId: string, toCompanyId: string): Promise<number> {
+  try {
+    // Find recommendations referencing the duplicate company
+    const { data, error: fetchError } = await supabase
+      .from('recommendations')
+      .select('id')
+      .eq('company_id', fromCompanyId);
+    
+    if (fetchError) {
+      console.error('Error fetching recommendations:', fetchError);
+      return 0;
+    }
+    
+    if (!data || data.length === 0) {
+      return 0; // No recommendations to update
+    }
+    
+    // Update the references to point to the company we're keeping
+    const { error: updateError } = await supabase
+      .from('recommendations')
+      .update({ company_id: toCompanyId })
+      .eq('company_id', fromCompanyId);
+    
+    if (updateError) {
+      console.error('Error updating recommendation references:', updateError);
+      return 0;
+    }
+    
+    return data.length; // Return count of updated recommendations
+  } catch (error) {
+    console.error('Error in updateRecommendationReferences:', error);
+    return 0;
+  }
+}
 
 async function deduplicateCompanies() {
   console.log('Starting company deduplication process...');
@@ -58,6 +92,7 @@ async function deduplicateCompanies() {
     }
     
     let totalDuplicatesRemoved = 0;
+    let totalReferencesUpdated = 0;
     
     // Process each group with duplicates
     for (const [companyName, group] of duplicateGroups) {
@@ -88,16 +123,25 @@ async function deduplicateCompanies() {
       // Sort by score descending (highest score first)
       scoredCompanies.sort((a, b) => b.score - a.score);
       
-      // Keep the highest-scoring company, remove the rest
+      // Keep the highest-scoring company, update references to others then remove them
       const keepCompany = scoredCompanies[0].company;
       const removeCompanies = scoredCompanies.slice(1).map(item => item.company);
       
       console.log(`Keeping: ${keepCompany.id} (${keepCompany.name})`);
       
-      // Remove duplicate companies
+      // Update references and remove duplicate companies
       for (const company of removeCompanies) {
-        console.log(`Removing: ${company.id} (${company.name})`);
+        console.log(`Processing duplicate: ${company.id} (${company.name})`);
         
+        // Update any recommendation references
+        const updatedCount = await updateRecommendationReferences(company.id, keepCompany.id);
+        
+        if (updatedCount > 0) {
+          console.log(`Updated ${updatedCount} recommendation references from ${company.id} to ${keepCompany.id}`);
+          totalReferencesUpdated += updatedCount;
+        }
+        
+        // After updating references, delete the duplicate company
         const { error } = await supabase
           .from('companies')
           .delete()
@@ -106,73 +150,23 @@ async function deduplicateCompanies() {
         if (error) {
           console.error(`Failed to remove company ${company.id}:`, error);
         } else {
+          console.log(`Removed company ${company.id}`);
           totalDuplicatesRemoved++;
         }
       }
     }
     
-    console.log(`\nDeduplication complete! Removed ${totalDuplicatesRemoved} duplicate companies.`);
+    console.log(`\nDeduplication complete!`);
+    console.log(`- Removed ${totalDuplicatesRemoved} duplicate companies`);
+    console.log(`- Updated ${totalReferencesUpdated} recommendation references`);
   } catch (error) {
     console.error('Error during deduplication process:', error);
   }
 }
 
-// Check if any companies reference recommendations before deletion
-async function checkRecommendationReferences() {
-  console.log('Checking for companies referenced in recommendations...');
-  
-  try {
-    const { data, error } = await supabase
-      .from('recommendations')
-      .select('company_id');
-    
-    if (error) {
-      throw error;
-    }
-    
-    if (!data || data.length === 0) {
-      console.log('No recommendations found.');
-      return new Set();
-    }
-    
-    console.log(`Found ${data.length} recommendations that reference companies.`);
-    
-    // Create a set of company IDs referenced in recommendations
-    const referencedCompanyIds = new Set(data.map(rec => rec.company_id));
-    
-    console.log(`${referencedCompanyIds.size} unique companies are referenced in recommendations.`);
-    
-    return referencedCompanyIds;
-  } catch (error) {
-    console.error('Error checking recommendation references:', error);
-    return new Set();
-  }
-}
-
 // Run the script
 async function main() {
-  // Check for recommendation references to be careful
-  const referencedCompanyIds = await checkRecommendationReferences();
-  
-  // If there are recommendations, warn the user
-  if (referencedCompanyIds.size > 0) {
-    console.log('\nWARNING: Some companies are referenced in recommendations.');
-    console.log('Ensure that you have a backup of your database before proceeding.');
-    console.log('This script does not currently handle updating recommendation references.');
-    
-    // In a real application, you might want to:
-    // 1. Ask for confirmation
-    // 2. Implement logic to update recommendation references
-    
-    const confirmation = true; // For now, auto-confirm
-    
-    if (!confirmation) {
-      console.log('Deduplication cancelled.');
-      return;
-    }
-  }
-  
-  // Run the deduplication
+  // Run the deduplication with reference handling
   await deduplicateCompanies();
 }
 

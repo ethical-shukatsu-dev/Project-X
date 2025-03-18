@@ -11,7 +11,9 @@
     "verify-supabase": "bun verify-supabase.mjs",
     "verify-supabase:dev": "bun verify-supabase.mjs --development",
     "verify-supabase:prod": "bun verify-supabase.mjs --production",
-    "deduplicate-companies": "bun scripts/deduplicate-companies.ts"
+    "deduplicate-companies": "bun --bun scripts/deduplicate-companies.ts",
+    "deduplicate-companies-with-refs": "bun --bun scripts/deduplicate-companies-with-refs.ts",
+    "deduplicate-companies-interactive": "bun --bun scripts/deduplicate-companies-interactive.ts"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.4",

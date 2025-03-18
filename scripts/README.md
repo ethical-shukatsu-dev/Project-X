@@ -1,47 +1,64 @@
 # Database Maintenance Scripts
 
-## Company Deduplication Script
+This directory contains utility scripts for maintaining the database.
 
-This script removes duplicate company records in the database that have the same `site_url`.
-For each set of duplicates, it keeps the most recently updated record and removes the others.
+## Company Deduplication Scripts
 
-### How it works
+### Basic Deduplication
 
-1. Fetches all companies with a non-null `site_url`
-2. Groups them by normalized site URL (lowercase, no trailing slashes)
-3. For each group, keeps the most recently updated record and marks others for deletion
-4. Updates any recommendations pointing to companies that will be deleted
-5. Deletes the duplicate company records
-
-### Usage
-
-Run the deduplication script using:
+To run the basic company deduplication script:
 
 ```bash
-npm run deduplicate-companies
-# or
-yarn deduplicate-companies
-# or
 bun deduplicate-companies
 ```
 
-### Safety features
+This script:
+1. Identifies duplicate companies based on their name (case-insensitive)
+2. For each set of duplicates, keeps the most complete record and removes others
+3. Does not update any recommendation references, so use with caution if you have recommendations
 
-- The script doesn't delete companies without site URLs
-- It keeps the most recently updated record for each site URL
-- It updates any recommendations that reference companies to be deleted
-- It provides detailed logging to track progress and any errors
+### Deduplication with Reference Handling
 
-### When to run
+For a safer approach that handles recommendation references:
 
-Run this script when:
-- You notice duplicate company entries in the database
-- You've imported company data from multiple sources
-- You want to clean up the database before a major update
+```bash
+bun deduplicate-companies-with-refs
+```
 
-### Backup recommendation
+This script:
+1. Identifies duplicate companies based on their name (case-insensitive)
+2. For each set of duplicates, keeps the most complete record
+3. Updates any recommendation references from the duplicates to the retained company
+4. Removes the duplicate companies
 
-As this is a HIGH-RISK operation that permanently removes data, it's recommended to:
-1. Create a database backup before running this script
-2. Run the script in a testing environment first if possible
-3. Review the logs carefully to ensure the operation completed successfully 
+### Interactive Deduplication
+
+For maximum control over which company records to keep:
+
+```bash
+bun deduplicate-companies-interactive
+```
+
+This script:
+1. Identifies duplicate companies based on their name (case-insensitive)
+2. For each set of duplicates, displays all options with details
+3. Lets you choose which record to keep or use "auto" for automatic selection
+4. Updates any recommendation references from the duplicates to the selected company
+5. Removes the duplicate companies
+
+## How Duplicates Are Resolved
+
+The automatic scripts use a scoring system to determine which company record to keep:
+
+- Longer descriptions add to the score (more detailed info preferred)
+- Having a logo URL adds 5 points
+- Having a site URL adds 5 points
+- More recently updated records are preferred
+
+The interactive script gives you full control over which record to keep, while still showing these quality metrics.
+
+## Important Notes
+
+- Always back up your database before running these scripts
+- The scripts will print detailed logs about what they're doing
+- If an error occurs, the scripts will log it but continue processing other duplicates
