@@ -1,7 +1,6 @@
 "use client";
 
-import {useEffect, useMemo, useState} from "react";
-import Image from "next/image";
+import React, {useEffect, useMemo, useState, useCallback} from "react";
 import {
   Card,
   CardContent,
@@ -21,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import {Loader2, Search, X} from "lucide-react";
 import {ValueImage} from "@/lib/supabase/client";
+import {ImageGallery} from "./ImageGallery";
 
 // FilteredGallery component to isolate filtering logic
 export function FilteredGallery({
@@ -62,39 +62,50 @@ export function FilteredGallery({
   }, [activeFilters, images.length]);
 
   // Handle input changes without triggering search
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValue(e.target.value);
+    },
+    []
+  );
 
   // Handle key press - trigger search on Enter
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      executeSearch();
-    }
-  };
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        executeSearch();
+      }
+    },
+    []
+  );
 
   // Execute search with current filter values
-  const executeSearch = () => {
+  const executeSearch = useCallback(() => {
     setActiveFilters({
       category: filterCategory,
       searchTerm: inputValue.trim(),
     });
     setIsFiltering(true);
-  };
+  }, [filterCategory, inputValue]);
 
   // Clear search
-  const handleClearSearch = () => {
+  const handleClearSearch = useCallback(() => {
     setInputValue("");
-  };
+  }, []);
 
   // Handle filter reset
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setFilterCategory("all");
     setInputValue("");
     setActiveFilters({category: "all", searchTerm: ""});
     setIsFiltering(false);
-  };
+  }, []);
+
+  // Handle category change
+  const handleCategoryChange = useCallback((value: string) => {
+    setFilterCategory(value);
+  }, []);
 
   // Calculate filtered images
   const filteredImages = useMemo(() => {
@@ -138,6 +149,46 @@ export function FilteredGallery({
     return result;
   }, [images, activeFilters]);
 
+  // Memoize the category dropdown items to prevent re-renders
+  const categoryOptions = useMemo(
+    () =>
+      VALUE_CATEGORIES.map((cat) => (
+        <SelectItem key={cat.value} value={cat.value}>
+          {cat.label}
+        </SelectItem>
+      )),
+    [VALUE_CATEGORIES]
+  );
+
+  // Memoize filter stats text
+  const filterStatsText = useMemo(() => {
+    let text = `Showing ${filteredImages.length} of ${images.length} images`;
+
+    if (activeFilters.category && activeFilters.category !== "all") {
+      const categoryLabel =
+        VALUE_CATEGORIES.find((cat) => cat.value === activeFilters.category)
+          ?.label || activeFilters.category;
+
+      text += ` in category "${categoryLabel}"`;
+    }
+
+    if (activeFilters.searchTerm) {
+      text += ` matching "${activeFilters.searchTerm}"`;
+    }
+
+    if (isFiltering) {
+      text += " (filtering...)";
+    }
+
+    return text;
+  }, [
+    filteredImages.length,
+    images.length,
+    activeFilters,
+    VALUE_CATEGORIES,
+    isFiltering,
+  ]);
+
   return (
     <Card>
       <CardHeader>
@@ -152,17 +203,16 @@ export function FilteredGallery({
               <Label htmlFor="filter-category" className="mb-2 block">
                 Filter by Category
               </Label>
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <Select
+                value={filterCategory}
+                onValueChange={handleCategoryChange}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  {VALUE_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
+                  {categoryOptions}
                 </SelectContent>
               </Select>
             </div>
@@ -225,70 +275,15 @@ export function FilteredGallery({
           </div>
 
           {/* Filter stats */}
-          <div className="text-sm text-gray-500">
-            Showing {filteredImages.length} of {images.length} images
-            {activeFilters.category &&
-              activeFilters.category !== "all" &&
-              ` in category "${
-                VALUE_CATEGORIES.find(
-                  (cat) => cat.value === activeFilters.category
-                )?.label || activeFilters.category
-              }"`}
-            {activeFilters.searchTerm &&
-              ` matching "${activeFilters.searchTerm}"`}
-            {isFiltering && " (filtering...)"}
-          </div>
+          <div className="text-sm text-gray-500">{filterStatsText}</div>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-2">Loading images...</span>
-          </div>
-        ) : filteredImages.length === 0 && !isFiltering ? (
-          <p>
-            No images match your current filters. Try adjusting your filters or{" "}
-            <button
-              onClick={handleResetFilters}
-              className="text-primary underline hover:text-primary/80"
-              disabled={isFiltering}
-            >
-              reset them
-            </button>
-            .
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredImages.map((image) => (
-              <div key={image.id} className="relative group">
-                <div className="aspect-square relative rounded-md overflow-hidden">
-                  <Image
-                    src={image.image_url}
-                    alt={image.description || image.value_name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="mt-2">
-                  <p className="font-medium">{image.value_name}</p>
-                  <p className="text-sm text-gray-500">{image.category}</p>
-                  {image.tags && image.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {image.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <ImageGallery
+          images={filteredImages}
+          isLoading={isLoading}
+          resetFilters={handleResetFilters}
+          isFiltering={isFiltering}
+        />
       </CardContent>
     </Card>
   );
