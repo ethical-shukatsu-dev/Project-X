@@ -61,6 +61,7 @@ export async function generateRecommendations(
 ): Promise<RecommendationResult[]> {
   // Load translations for the specified locale
   const translations = loadAiTranslations(locale) || loadAiTranslations('en');
+  const RECOMMENDATION_COUNT =10
   
   // Get the appropriate system prompt from translations
   const systemPrompt = translations?.systemPrompt?.recommendations?.replace('{{language}}', locale === 'ja' ? '日本語' : 'English') 
@@ -73,7 +74,7 @@ export async function generateRecommendations(
 
   const promptTemplate = locale === 'ja' 
     ? `
-    ユーザーの価値観と興味に基づいて、就職を考えている大学生に適した日本の企業5社を推薦してください。
+    ユーザーの価値観と興味に基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。
 
     重要: すべての回答は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。
     
@@ -134,7 +135,7 @@ export async function generateRecommendations(
     再度強調しますが、すべての出力は日本語のみで提供してください。英語の単語や文を混在させないでください。
     `
     : `
-    Based on the user's values and interests, recommend 5 real companies in Japan 
+    Based on the user's values and interests, recommend ${RECOMMENDATION_COUNT} real companies in Japan 
     that would be good matches for a university student seeking employment.
 
     Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
