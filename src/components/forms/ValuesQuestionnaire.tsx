@@ -100,28 +100,6 @@ const QUESTIONS = [
     ],
   },
   {
-    id: "company_size",
-    questionKey: "questionnaire.questions.company_size.question",
-    options: [
-      {
-        value: "startup",
-        labelKey: "questionnaire.questions.company_size.options.startup",
-      },
-      {
-        value: "small",
-        labelKey: "questionnaire.questions.company_size.options.small",
-      },
-      {
-        value: "medium",
-        labelKey: "questionnaire.questions.company_size.options.medium",
-      },
-      {
-        value: "large",
-        labelKey: "questionnaire.questions.company_size.options.large",
-      },
-    ],
-  },
-  {
     id: "work_priorities",
     questionKey: "questionnaire.questions.work_priorities.question",
     options: [
