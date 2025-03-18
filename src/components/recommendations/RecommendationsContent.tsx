@@ -3,6 +3,7 @@
 import {useEffect, useState} from "react";
 import {useSearchParams} from "next/navigation";
 import CompanyCard from "@/components/recommendations/CompanyCard";
+import SignupCTA from "@/components/recommendations/SignupCTA";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Button} from "@/components/ui/button";
 import {Skeleton} from "@/components/ui/skeleton";
@@ -440,6 +441,9 @@ export default function RecommendationsContent({
             </div>
           )}
         </div>
+        
+        {/* Add SignupCTA component here */}
+        <SignupCTA lng={lng} />
       </div>
     </div>
   );
