@@ -1,26 +1,28 @@
 {
-  "title": "プロジェクトX",
-  "description": "AIアシスタント",
+  "title": "Project X",
+  "description": "あなたのAIアシスタント",
   "buttons": {
     "submit": "送信",
     "cancel": "キャンセル"
   },
   "homepage": {
     "title": "あなたにぴったりの企業を見つけよう",
-    "description": "あなたの価値観や興味に合った企業を発見しましょう。簡単なアンケートに答えて、パーソナライズされたおすすめを受け取りましょう。",
+    "description": "あなたの価値観や興味に合った企業を発見しましょう。簡単なアンケートに答えて、パーソナライズされたおすすめ企業を取得しましょう。",
     "getStarted": "始める",
     "selectQuestionnaireType": "アンケートタイプを選択してください：",
     "textQuestionnaire": "テキストベース",
-    "imageQuestionnaire": "画像ベース"
+    "imageQuestionnaire": "画像ベース",
+    "anonymousMode": "匿名企業モード",
+    "anonymousModeDescription": "フィードバックを提供するまで企業名を非表示にして企業の詳細を表示します。企業名は、興味があるかどうかを示した後にのみ表示されます。"
   },
   "features": {
     "quick": {
-      "title": "簡単＆迅速",
-      "description": "3分以内で短いアンケートを完了して始めましょう。"
+      "title": "迅速かつ簡単",
+      "description": "3分以内に短いアンケートに回答して始めましょう。"
     },
     "values": {
-      "title": "価値観ベースのマッチング",
-      "description": "私たちのAIはあなたの価値観と興味を分析し、あなたにとって重要なことに合った企業を見つけます。"
+      "title": "価値観に基づくマッチング",
+      "description": "私たちのAIはあなたの価値観や興味を分析し、あなたにとって重要なことに合った企業を見つけます。"
     },
     "insights": {
       "title": "パーソナライズされた洞察",
@@ -28,6 +30,6 @@
     }
   },
   "footer": {
-    "copyright": "© 2023 プロジェクトX. All rights reserved."
+    "copyright": "© 2023 Project X. All rights reserved."
   }
 } 

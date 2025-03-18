@@ -134,6 +134,8 @@
     "visitWebsite": "Visit company website",
     "refresh": "Refresh Recommendations",
     "refreshing": "Refreshing...",
+    "anonymized": "Anonymous company",
+    "thisCompany": "this company",
     "loading": {
       "title": "Finding Your Matches...",
       "description": "We're analyzing your values and preferences to find the best company matches for you."
