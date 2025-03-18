@@ -69,17 +69,6 @@ export function FilteredGallery({
     []
   );
 
-  // Handle key press - trigger search on Enter
-  const handleKeyPress = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        executeSearch();
-      }
-    },
-    []
-  );
-
   // Execute search with current filter values
   const executeSearch = useCallback(() => {
     setActiveFilters({
@@ -88,6 +77,17 @@ export function FilteredGallery({
     });
     setIsFiltering(true);
   }, [filterCategory, inputValue]);
+
+  // Handle key press - trigger search on Enter
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        executeSearch();
+      }
+    },
+    [executeSearch]
+  );
 
   // Clear search
   const handleClearSearch = useCallback(() => {
