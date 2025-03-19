@@ -1,9 +1,7 @@
-/*
-	Installed from https://reactbits.dev/ts/tailwind/
-*/
+"use client";
 
-import { useEffect, useRef } from "react";
-import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
+import {useEffect, useRef} from "react";
+import {Renderer, Program, Mesh, Color, Triangle} from "ogl";
 
 const VERT = `#version 300 es
 in vec2 position;
@@ -145,7 +143,17 @@ export default function Aurora(props: AuroraProps) {
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.canvas.style.backgroundColor = "transparent";
 
-    let program: Program | undefined;
+    const program = new Program(gl, {
+      vertex: VERT,
+      fragment: FRAG,
+      uniforms: {
+        uTime: {value: 0},
+        uAmplitude: {value: amplitude},
+        uColorStops: {value: []},
+        uResolution: {value: [ctn.offsetWidth, ctn.offsetHeight]},
+        uBlend: {value: blend},
+      },
+    });
 
     function resize() {
       if (!ctn) return;
@@ -160,8 +168,8 @@ export default function Aurora(props: AuroraProps) {
 
     const geometry = new Triangle(gl);
     if (geometry.attributes.uv) {
-      // TypeScript may require a type assertion here.
-      delete (geometry.attributes as any).uv;
+      // Use a more specific type to avoid 'any'
+      delete (geometry.attributes as Record<string, unknown>).uv;
     }
 
     const colorStopsArray = colorStops.map((hex) => {
@@ -169,25 +177,15 @@ export default function Aurora(props: AuroraProps) {
       return [c.r, c.g, c.b];
     });
 
-    program = new Program(gl, {
-      vertex: VERT,
-      fragment: FRAG,
-      uniforms: {
-        uTime: { value: 0 },
-        uAmplitude: { value: amplitude },
-        uColorStops: { value: colorStopsArray },
-        uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
-        uBlend: { value: blend },
-      },
-    });
+    program.uniforms.uColorStops.value = colorStopsArray;
 
-    const mesh = new Mesh(gl, { geometry, program });
+    const mesh = new Mesh(gl, {geometry, program});
     ctn.appendChild(gl.canvas);
 
     let animateId = 0;
     const update = (t: number) => {
       animateId = requestAnimationFrame(update);
-      const { time = t * 0.01, speed = 1.0 } = propsRef.current;
+      const {time = t * 0.01, speed = 1.0} = propsRef.current;
       if (program) {
         program.uniforms.uTime.value = time * speed * 0.1;
         program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0;
@@ -197,7 +195,7 @@ export default function Aurora(props: AuroraProps) {
           const c = new Color(hex);
           return [c.r, c.g, c.b];
         });
-        renderer.render({ scene: mesh });
+        renderer.render({scene: mesh});
       }
     };
     animateId = requestAnimationFrame(update);

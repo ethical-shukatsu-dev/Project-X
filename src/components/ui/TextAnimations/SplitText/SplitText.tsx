@@ -1,16 +1,14 @@
-/*
-	Installed from https://reactbits.dev/ts/tailwind/
-*/
+"use client";
 
-import { useSprings, animated, SpringConfig } from "@react-spring/web";
-import { useEffect, useRef, useState } from "react";
+import {useSprings, animated, SpringConfig} from "@react-spring/web";
+import {useEffect, useRef, useState} from "react";
 
 interface SplitTextProps {
   text?: string;
   className?: string;
   delay?: number;
-  animationFrom?: { opacity: number; transform: string };
-  animationTo?: { opacity: number; transform: string };
+  animationFrom?: {opacity: number; transform: string};
+  animationTo?: {opacity: number; transform: string};
   easing?: SpringConfig["easing"];
   threshold?: number;
   rootMargin?: string;
@@ -18,14 +16,12 @@ interface SplitTextProps {
   onLetterAnimationComplete?: () => void;
 }
 
-const AnimatedDiv = animated("span");
-
 const SplitText: React.FC<SplitTextProps> = ({
   text = "",
   className = "",
   delay = 100,
-  animationFrom = { opacity: 0, transform: "translate3d(0,40px,0)" },
-  animationTo = { opacity: 1, transform: "translate3d(0,0,0)" },
+  animationFrom = {opacity: 0, transform: "translate3d(0,40px,0)"},
+  animationTo = {opacity: 1, transform: "translate3d(0,0,0)"},
   easing = (t: number) => t,
   threshold = 0.1,
   rootMargin = "-100px",
@@ -37,33 +33,36 @@ const SplitText: React.FC<SplitTextProps> = ({
   const [inView, setInView] = useState(false);
   const ref = useRef<HTMLParagraphElement>(null);
   const animatedCount = useRef(0);
+  const AnimatedSpan = animated("span");
 
   useEffect(() => {
+    if (!ref.current) return;
+
+    // Reset animation count if text changes
+    animatedCount.current = 0;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setInView(true);
-          if (ref.current) {
-            observer.unobserve(ref.current);
-          }
+          observer.unobserve(entry.target);
         }
       },
-      { threshold, rootMargin },
+      {threshold, rootMargin}
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
+    observer.observe(ref.current);
 
     return () => observer.disconnect();
-  }, [threshold, rootMargin]);
+  }, [threshold, rootMargin, text]);
 
+  // Configure springs for each letter
   const springs = useSprings(
     letters.length,
     letters.map((_, i) => ({
       from: animationFrom,
       to: inView
-        ? async (next: (props: unknown) => Promise<void>) => {
+        ? async (next: (value: unknown) => void) => {
             await next(animationTo);
             animatedCount.current += 1;
             if (
@@ -75,39 +74,38 @@ const SplitText: React.FC<SplitTextProps> = ({
           }
         : animationFrom,
       delay: i * delay,
-      config: { easing },
-    })),
+      config: {easing, tension: 200, friction: 20},
+    }))
   );
 
   return (
     <p
       ref={ref}
-      className={`split-parent overflow-hidden inline ${className}`}
-      style={{ textAlign, whiteSpace: "normal", wordWrap: "break-word" }}
+      className={`split-parent inline ${className}`}
+      style={{textAlign, whiteSpace: "normal", wordWrap: "break-word"}}
     >
       {words.map((word, wordIndex) => (
         <span
           key={wordIndex}
-          style={{ display: "inline-block", whiteSpace: "nowrap" }}
+          style={{display: "inline-block", whiteSpace: "nowrap"}}
         >
           {word.map((letter, letterIndex) => {
+            console.log(letter);
             const index =
               words.slice(0, wordIndex).reduce((acc, w) => acc + w.length, 0) +
               letterIndex;
 
             return (
-              <AnimatedDiv
+              <AnimatedSpan
                 key={index}
-                style={springs[index] as unknown as React.CSSProperties}
-                className="inline-block transform transition-opacity will-change-transform"
+                style={springs[index]}
+                className="inline-block will-change-transform"
               >
                 {letter}
-              </AnimatedDiv>
+              </AnimatedSpan>
             );
           })}
-          <span style={{ display: "inline-block", width: "0.3em" }}>
-            &nbsp;
-          </span>
+          <span style={{display: "inline-block", width: "0.3em"}}>&nbsp;</span>
         </span>
       ))}
     </p>
