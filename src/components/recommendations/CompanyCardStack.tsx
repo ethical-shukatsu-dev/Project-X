@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CompanyCard from './CompanyCard';
 import { Company } from '@/lib/supabase/client';
 import { ThumbsDown, PartyPopper } from 'lucide-react';
+import { LOCALSTORAGE_KEYS } from "@/lib/constants/localStorage";
 
 interface CompanyCardStackProps {
   companies: {
@@ -55,6 +56,15 @@ export default function CompanyCardStack({ companies, onFeedback, lng }: Company
   const [exitDirection, setExitDirection] = useState<"left" | "right" | null>(null);
   const [swipeProgress, setSwipeProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
+
+  // Check if we're in anonymous mode
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedValue = localStorage.getItem(LOCALSTORAGE_KEYS.ANONYMOUS_COMPANIES);
+      setIsAnonymous(storedValue === "true");
+    }
+  }, []);
 
   const handleFeedback = (feedback: "interested" | "not_interested") => {
     if (currentIndex >= companies.length) return;
@@ -84,6 +94,26 @@ export default function CompanyCardStack({ companies, onFeedback, lng }: Company
     setIsDragging(true);
   };
 
+  // If in anonymous mode, render all cards in a list
+  if (isAnonymous) {
+    return (
+      <div className="space-y-6">
+        {companies.map((item) => (
+          <CompanyCard
+            key={item.company.id}
+            company={item.company}
+            matchingPoints={item.matchingPoints}
+            onFeedback={(feedback) => onFeedback(item.id, feedback)}
+            feedback={item.feedback}
+            lng={lng}
+            disableBuiltInSwipe={false}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Non-anonymous mode: render card stack with swiper
   return (
     <div className={`relative w-full max-w-md mx-auto h-[600px] ${isDragging ? 'cursor-grabbing' : ''}`}>
       {/* Global swipe indicators */}

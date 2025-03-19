@@ -41,7 +41,6 @@ export default function RecommendationsContent({
   const [activeSizeTab, setActiveSizeTab] = useState("all-sizes");
   const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
   const [feedbackCount, setFeedbackCount] = useState(0);
-  console.log(recommendations);
 
   useEffect(() => {
     const fetchRecommendations = async (refresh = false) => {
