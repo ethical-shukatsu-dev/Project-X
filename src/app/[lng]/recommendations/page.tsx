@@ -1,25 +1,27 @@
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import {Suspense} from "react";
+import {Skeleton} from "@/components/ui/skeleton";
 import RecommendationsContent from "@/components/recommendations/RecommendationsContent";
-import { getTranslation } from "@/i18n-server";
+import {getTranslation} from "@/i18n-server";
 import Aurora from "@/components/ui/Backgrounds/Aurora/Aurora";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 import FloatingElement from "@/components/ui/FloatingElement";
 
 // Loading fallback component
-async function RecommendationsLoading({ lng }: { lng: string }) {
-  const { t } = await getTranslation(lng, 'ai');
-  
+async function RecommendationsLoading({lng}: {lng: string}) {
+  const {t} = await getTranslation(lng, "ai");
+
   return (
     <div className="container mx-auto px-4 py-8 text-center">
       <h1 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
-        {t('recommendations.loading.title')}
+        {t("recommendations.loading.title")}
       </h1>
-      <p className="text-lg mb-8 text-gray-300">{t('recommendations.loading.description')}</p>
+      <p className="text-lg mb-8 text-gray-300">
+        {t("recommendations.loading.description")}
+      </p>
       <div className="max-w-4xl mx-auto">
-        <Skeleton className="h-[200px] w-full mb-4" />
-        <Skeleton className="h-[200px] w-full mb-4" />
-        <Skeleton className="h-[200px] w-full" />
+        <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+        <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+        <Skeleton className="h-[200px] w-full bg-white/10 border border-white/10 backdrop-blur-sm" />
       </div>
     </div>
   );
@@ -27,15 +29,15 @@ async function RecommendationsLoading({ lng }: { lng: string }) {
 
 // Main page component with Suspense boundary
 export default function RecommendationsPage({
-  params
+  params,
 }: {
-  params: Promise<{ lng: string }>
+  params: Promise<{lng: string}>;
 }) {
   // Use an async IIFE to handle the Promise
   const RecommendationsPageContent = async () => {
     const resolvedParams = await params;
     const lng = resolvedParams.lng;
-    
+
     return (
       <div className="flex flex-col min-h-screen overflow-hidden bg-black text-white relative">
         {/* Background Aurora Effect */}
@@ -91,7 +93,7 @@ export default function RecommendationsPage({
             <div className="w-20 h-20 rounded-full bg-pink-500 opacity-20 blur-xl"></div>
           </FloatingElement>
         </div>
-        
+
         <main className="flex-1 relative z-20">
           <Suspense fallback={<RecommendationsLoading lng={lng} />}>
             <AnimatedContent direction="vertical" distance={40} delay={300}>
@@ -99,7 +101,7 @@ export default function RecommendationsPage({
             </AnimatedContent>
           </Suspense>
         </main>
-        
+
         {/* Decorative elements */}
         <div className="absolute -left-20 bottom-1/3 w-40 h-40 rounded-full bg-blue-500 opacity-20 blur-3xl"></div>
         <div className="absolute -right-20 bottom-2/3 w-60 h-60 rounded-full bg-purple-500 opacity-20 blur-3xl"></div>
@@ -108,4 +110,4 @@ export default function RecommendationsPage({
   };
 
   return RecommendationsPageContent();
-} 
+}
