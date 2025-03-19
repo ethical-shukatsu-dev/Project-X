@@ -13,7 +13,6 @@ import {
 } from "../ui/tooltip";
 import Link from "next/link";
 import {LOCALSTORAGE_KEYS} from "@/lib/constants/localStorage";
-import {motion, useMotionValue, useTransform} from "framer-motion";
 
 interface CompanyCardProps {
   company: Company;
@@ -21,6 +20,7 @@ interface CompanyCardProps {
   onFeedback: (feedback: "interested" | "not_interested") => void;
   feedback?: "interested" | "not_interested";
   lng: string;
+  disableBuiltInSwipe?: boolean;
 }
 
 export default function CompanyCard({
@@ -29,6 +29,7 @@ export default function CompanyCard({
   onFeedback,
   feedback,
   lng,
+  disableBuiltInSwipe = false,
 }: CompanyCardProps) {
   const {t, loaded} = useTranslation(lng, "ai");
   const [logoError, setLogoError] = useState(false);
@@ -37,20 +38,6 @@ export default function CompanyCard({
   const [wasAnonymous, setWasAnonymous] = useState<boolean>(false);
   const [confetti, setConfetti] = useState<boolean>(false);
   const cardRef = useRef<HTMLDivElement>(null);
-
-  // Motion values for swipe animation
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-30, 30]);
-  const leftIndicatorOpacity = useTransform(
-    x,
-    [-200, -100, 0],
-    [1, 0.5, 0]
-  );
-  const rightIndicatorOpacity = useTransform(
-    x,
-    [0, 100, 200],
-    [0, 0.5, 1]
-  );
 
   // Check if we're in a browser environment before accessing localStorage
   useEffect(() => {
@@ -93,16 +80,6 @@ export default function CompanyCard({
       }, 300);
     } else {
       onFeedback(type);
-    }
-  };
-
-  const handleDragEnd = (
-    event: MouseEvent | TouchEvent | PointerEvent,
-    info: {offset: {x: number}}
-  ) => {
-    const threshold = window.innerWidth * 0.3; // 30% of screen width
-    if (Math.abs(info.offset.x) > threshold && !feedback) {
-      handleFeedback(info.offset.x > 0 ? "interested" : "not_interested");
     }
   };
 
@@ -246,165 +223,135 @@ export default function CompanyCard({
         </div>
       )}
 
-      {/* Swipeable card */}
-      <motion.div
-        drag={feedback ? false : "x"}
-        dragConstraints={{left: 0, right: 0}}
-        dragElastic={0.9}
-        onDragEnd={handleDragEnd}
-        style={{x, rotate}}
-        whileTap={{scale: 1.02}}
-      >
-        <Card className={cardClasses}>
-          {/* Swipe indicators */}
-          <div className="absolute inset-0 flex items-center justify-between px-8 pointer-events-none">
-            <motion.div
-              className="flex items-center text-red-500 transition-opacity"
-              style={{opacity: leftIndicatorOpacity}}
-            >
-              <ThumbsDown className="w-12 h-12" />
-              <span className="ml-2 text-lg font-semibold">
-                {t("recommendations.feedback.notInterested")}
-              </span>
-            </motion.div>
-            <motion.div
-              className="flex items-center text-green-500 transition-opacity"
-              style={{opacity: rightIndicatorOpacity}}
-            >
-              <span className="mr-2 text-lg font-semibold">
-                {t("recommendations.feedback.interested")}
-              </span>
-              <PartyPopper className="w-12 h-12" />
-            </motion.div>
-          </div>
-
-          <CardHeader className="flex flex-row items-center gap-4">
-            {!shouldAnonymize ? (
-              <Link href={company.site_url || "/"} target="_blank">
-                <Avatar
-                  className={`h-14 w-14 ring-1 ring-white ${
-                    wasAnonymous && feedback ? "reveal-avatar" : ""
-                  }`}
-                >
-                  {company.logo_url && !logoError ? (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <AvatarImage
-                            src={company.logo_url}
-                            alt={company.name}
-                            onError={() => setLogoError(true)}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t("recommendations.visitWebsite")}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ) : null}
-                  <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
-                </Avatar>
-              </Link>
-            ) : (
-              <Avatar className="h-14 w-14 relative">
-                <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
-                  <EyeOff size={20} className="opacity-70" />
-                </div>
+      <Card className={cardClasses}>
+        <CardHeader className="flex flex-row items-center gap-4">
+          {!shouldAnonymize ? (
+            <Link href={company.site_url || "/"} target="_blank">
+              <Avatar
+                className={`h-14 w-14 ring-1 ring-white ${
+                  wasAnonymous && feedback ? "reveal-avatar" : ""
+                }`}
+              >
+                {company.logo_url && !logoError ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <AvatarImage
+                          src={company.logo_url}
+                          alt={company.name}
+                          onError={() => setLogoError(true)}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{t("recommendations.visitWebsite")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : null}
+                <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
               </Avatar>
-            )}
-
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span
-                  className={`font-medium text-white ${
-                    wasAnonymous && feedback ? "reveal-text" : ""
-                  }`}
-                >
-                  {shouldAnonymize ? getAnonymousName() : company.name}
-                </span>
-
-                {!shouldAnonymize && company.site_url && (
-                  <a
-                    href={
-                      company.site_url.startsWith("http")
-                        ? company.site_url
-                        : `https://${company.site_url}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/70 hover:text-primary"
-                    aria-label={`Visit ${company.name} website`}
-                  >
-                    <ExternalLink size={16} />
-                  </a>
-                )}
+            </Link>
+          ) : (
+            <Avatar className="h-14 w-14 relative">
+              <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
+                <EyeOff size={20} className="opacity-70" />
               </div>
+            </Avatar>
+          )}
 
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
               <span
-                className={`text-xs text-white/70 ${
-                  wasAnonymous && feedback ? "reveal-text-delay" : ""
+                className={`font-medium text-white ${
+                  wasAnonymous && feedback ? "reveal-text" : ""
                 }`}
               >
-                {shouldAnonymize
-                  ? t("recommendations.anonymized")
-                  : company.industry}
+                {shouldAnonymize ? getAnonymousName() : company.name}
+              </span>
+
+              {!shouldAnonymize && company.site_url && (
+                <a
+                  href={
+                    company.site_url.startsWith("http")
+                      ? company.site_url
+                      : `https://${company.site_url}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/70 hover:text-primary"
+                  aria-label={`Visit ${company.name} website`}
+                >
+                  <ExternalLink size={16} />
+                </a>
+              )}
+            </div>
+
+            <span
+              className={`text-xs text-white/70 ${
+                wasAnonymous && feedback ? "reveal-text-delay" : ""
+              }`}
+            >
+              {shouldAnonymize
+                ? t("recommendations.anonymized")
+                : company.industry}
+            </span>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          <div className="mb-4">
+            <h3 className="text-sm font-medium mb-2 text-white">
+              {t("recommendations.about")}
+            </h3>
+            <p
+              className={`text-sm text-white/80 ${
+                wasAnonymous && feedback ? "reveal-text-delay" : ""
+              }`}
+            >
+              {shouldAnonymize
+                ? getSanitizedDescription(company.description, company.name)
+                : company.description}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium mb-2 text-white">
+              {t("recommendations.whyMatch")}
+            </h3>
+            <ul className="list-disc pl-5 text-sm text-white/80">
+              {matchingPoints && matchingPoints.length > 0 ? (
+                matchingPoints.map((point, index) => (
+                  <li
+                    key={index}
+                    className={
+                      wasAnonymous && feedback
+                        ? `reveal-text-delay-${(index % 3) + 2}`
+                        : ""
+                    }
+                  >
+                    {shouldAnonymize
+                      ? getSanitizedDescription(point, company.name)
+                      : point}
+                  </li>
+                ))
+              ) : (
+                <li>{t("recommendations.noMatchingPoints")}</li>
+              )}
+            </ul>
+          </div>
+        </CardContent>
+
+        <CardFooter className="flex justify-end gap-4">
+          {feedback ? (
+            <div className="w-full flex justify-center items-center gap-2 text-sm text-white">
+              {getFeedbackIcon()}
+              <span>
+                {feedback === "interested"
+                  ? t("recommendations.feedback.markedInterested")
+                  : t("recommendations.feedback.markedNotInterested")}
               </span>
             </div>
-          </CardHeader>
-
-          <CardContent>
-            <div className="mb-4">
-              <h3 className="text-sm font-medium mb-2 text-white">
-                {t("recommendations.about")}
-              </h3>
-              <p
-                className={`text-sm text-white/80 ${
-                  wasAnonymous && feedback ? "reveal-text-delay" : ""
-                }`}
-              >
-                {shouldAnonymize
-                  ? getSanitizedDescription(company.description, company.name)
-                  : company.description}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium mb-2 text-white">
-                {t("recommendations.whyMatch")}
-              </h3>
-              <ul className="list-disc pl-5 text-sm text-white/80">
-                {matchingPoints && matchingPoints.length > 0 ? (
-                  matchingPoints.map((point, index) => (
-                    <li
-                      key={index}
-                      className={
-                        wasAnonymous && feedback
-                          ? `reveal-text-delay-${(index % 3) + 2}`
-                          : ""
-                      }
-                    >
-                      {shouldAnonymize
-                        ? getSanitizedDescription(point, company.name)
-                        : point}
-                    </li>
-                  ))
-                ) : (
-                  <li>{t("recommendations.noMatchingPoints")}</li>
-                )}
-              </ul>
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex justify-end gap-4">
-            {feedback ? (
-              <div className="w-full flex justify-center items-center gap-2 text-sm text-white">
-                {getFeedbackIcon()}
-                <span>
-                  {feedback === "interested"
-                    ? t("recommendations.feedback.markedInterested")
-                    : t("recommendations.feedback.markedNotInterested")}
-                </span>
-              </div>
-            ) : (
+          ) : (
+            !disableBuiltInSwipe && (
               <>
                 <Button
                   variant="outline"
@@ -423,10 +370,10 @@ export default function CompanyCard({
                   {t("recommendations.feedback.interested")}
                 </Button>
               </>
-            )}
-          </CardFooter>
-        </Card>
-      </motion.div>
+            )
+          )}
+        </CardFooter>
+      </Card>
     </div>
   );
 }
