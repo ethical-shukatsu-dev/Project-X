@@ -156,7 +156,9 @@ export default function CompanyCard({
   // Animation states and classes
   const cardClasses = `w-full transition-all duration-500 bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-xl hover:shadow-blue-500/10 ${
     isRevealing ? "shadow-lg" : ""
-  } ${wasAnonymous && feedback ? "revealed-card" : ""}`;
+  } ${wasAnonymous && feedback ? "revealed-card" : ""} ${
+    disableBuiltInSwipe ? "hover:cursor-grab" : ""
+  }`;
 
   const revealOverlayClasses = `absolute inset-0 z-10 flex items-center justify-center bg-primary/10 backdrop-blur-sm transition-opacity duration-700 ${
     isRevealing ? "opacity-100" : "opacity-0 pointer-events-none"
