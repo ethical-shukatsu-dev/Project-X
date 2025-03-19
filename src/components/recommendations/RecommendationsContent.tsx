@@ -17,6 +17,7 @@ import {RecommendationResult} from "@/lib/openai/client";
 import {useTranslation} from "@/i18n-client";
 import SignupDialog from "@/components/recommendations/SignupDialog";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
+import { RECOMMENDATION_COUNT } from "@/lib/constants/recommendations";
 
 interface RecommendationsContentProps {
   lng: string;
@@ -41,7 +42,6 @@ export default function RecommendationsContent({
   const [activeSizeTab, setActiveSizeTab] = useState("all-sizes");
   const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
   const [feedbackCount, setFeedbackCount] = useState(0);
-  console.log(recommendations);
 
   useEffect(() => {
     const fetchRecommendations = async (refresh = false) => {
@@ -139,8 +139,8 @@ export default function RecommendationsContent({
       // Increment feedback count
       setFeedbackCount((prevCount) => prevCount + 1);
 
-      // Open the sign-up dialog after feedback for three companies
-      if (feedbackCount + 1 === 3) {
+      // Open the sign-up dialog after feedback for all recommendations
+      if (feedbackCount + 1 === RECOMMENDATION_COUNT) {
         setSignupDialogOpen(true);
       }
     } catch (err) {
@@ -317,7 +317,7 @@ export default function RecommendationsContent({
     <div className="container px-4 py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
         <AnimatedContent direction="vertical" distance={40} delay={300}>
-          <h1 className="mb-8 text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+          <h1 className="mb-8 text-3xl font-bold text-center text-transparent md:text-4xl bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
             {t("recommendations.title")}
           </h1>
         </AnimatedContent>
