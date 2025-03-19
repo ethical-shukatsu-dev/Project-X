@@ -36,7 +36,6 @@ export default function CompanyCard({
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [isRevealing, setIsRevealing] = useState<boolean>(false);
   const [wasAnonymous, setWasAnonymous] = useState<boolean>(false);
-  const [confetti, setConfetti] = useState<boolean>(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Check if we're in a browser environment before accessing localStorage
@@ -55,12 +54,6 @@ export default function CompanyCard({
     if (feedback && isAnonymous) {
       setWasAnonymous(true);
       setIsRevealing(true);
-
-      // Show confetti animation for "interested" feedback
-      if (feedback === "interested") {
-        setConfetti(true);
-        setTimeout(() => setConfetti(false), 3000);
-      }
 
       // Reset the revealing animation state after animation completes
       const timer = setTimeout(() => {
@@ -179,32 +172,8 @@ export default function CompanyCard({
     );
   };
 
-  // Generate the confetti elements
-  const renderConfetti = () => {
-    if (!confetti) return null;
-
-    return (
-      <div className="confetti-container">
-        {Array.from({length: 50}).map((_, i) => (
-          <div
-            key={i}
-            className="confetti"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              backgroundColor: `hsl(${Math.random() * 360}, 80%, 60%)`,
-            }}
-          />
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className="relative" ref={cardRef}>
-      {/* Confetti celebration */}
-      {renderConfetti()}
-
       {/* Reveal animation overlay */}
       {wasAnonymous && (
         <div className={revealOverlayClasses}>
