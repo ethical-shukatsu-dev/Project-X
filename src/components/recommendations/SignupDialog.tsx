@@ -120,7 +120,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({open, onClose, lng}) => {
           <Button
             variant="outline"
             size="lg"
-            className="w-full sm:w-auto text-white/90 hover:bg-white/5 transition-all hover:scale-105 active:scale-95 backdrop-blur-sm border border-white/10"
+            className="w-full sm:w-auto transition-all hover:scale-105 active:scale-95 backdrop-blur-sm border border-white/10"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
