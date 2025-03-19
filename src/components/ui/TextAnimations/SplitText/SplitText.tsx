@@ -90,7 +90,6 @@ const SplitText: React.FC<SplitTextProps> = ({
           style={{display: "inline-block", whiteSpace: "nowrap"}}
         >
           {word.map((letter, letterIndex) => {
-            console.log(letter);
             const index =
               words.slice(0, wordIndex).reduce((acc, w) => acc + w.length, 0) +
               letterIndex;

@@ -2,7 +2,6 @@
 
 import {useEffect, useState} from "react";
 import {useSearchParams} from "next/navigation";
-import CompanyCard from "@/components/recommendations/CompanyCard";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Button} from "@/components/ui/button";
 import {Skeleton} from "@/components/ui/skeleton";
@@ -17,6 +16,7 @@ import {RecommendationResult} from "@/lib/openai/client";
 import {useTranslation} from "@/i18n-client";
 import SignupDialog from "@/components/recommendations/SignupDialog";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
+import CompanyCardStack from "@/components/recommendations/CompanyCardStack";
 
 interface RecommendationsContentProps {
   lng: string;
@@ -41,7 +41,6 @@ export default function RecommendationsContent({
   const [activeSizeTab, setActiveSizeTab] = useState("all-sizes");
   const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
   const [feedbackCount, setFeedbackCount] = useState(0);
-  console.log(recommendations);
 
   useEffect(() => {
     const fetchRecommendations = async (refresh = false) => {
@@ -172,9 +171,9 @@ export default function RecommendationsContent({
             {t("recommendations.loading.description")}
           </p>
           <div className="max-w-4xl mx-auto">
-            <Skeleton className="h-[200px] w-full mb-4" />
-            <Skeleton className="h-[200px] w-full mb-4" />
-            <Skeleton className="h-[200px] w-full" />
+            <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <Skeleton className="h-[200px] w-full bg-white/10 border border-white/10 backdrop-blur-sm" />
           </div>
         </div>
       </div>
@@ -476,19 +475,20 @@ export default function RecommendationsContent({
         <AnimatedContent direction="vertical" distance={30} delay={1050}>
           <div className="mt-6 space-y-6">
             {getFilteredRecommendations().length > 0 ? (
-              getFilteredRecommendations().map((recommendation) => (
-                <CompanyCard
-                  key={recommendation.id || recommendation.company.id}
-                  company={recommendation.company}
-                  matchingPoints={recommendation.matching_points}
-                  feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
-                    recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
-                  }
-                  lng={lng}
-                />
-              ))
+              <CompanyCardStack
+                companies={getFilteredRecommendations().map(
+                  (recommendation) => ({
+                    id: recommendation.id || recommendation.company.id,
+                    company: recommendation.company,
+                    matchingPoints: recommendation.matching_points,
+                    feedback: recommendation.feedback,
+                  })
+                )}
+                onFeedback={(recommendationId, feedback) =>
+                  recommendationId && handleFeedback(recommendationId, feedback)
+                }
+                lng={lng}
+              />
             ) : (
               <div className="py-8 text-center">
                 <p className="text-gray-300">

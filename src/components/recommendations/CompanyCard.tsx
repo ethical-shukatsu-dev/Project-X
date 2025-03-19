@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {Card, CardContent, CardFooter, CardHeader} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
@@ -20,6 +20,7 @@ interface CompanyCardProps {
   onFeedback: (feedback: "interested" | "not_interested") => void;
   feedback?: "interested" | "not_interested";
   lng: string;
+  disableBuiltInSwipe?: boolean;
 }
 
 export default function CompanyCard({
@@ -28,13 +29,14 @@ export default function CompanyCard({
   onFeedback,
   feedback,
   lng,
+  disableBuiltInSwipe = false,
 }: CompanyCardProps) {
   const {t, loaded} = useTranslation(lng, "ai");
   const [logoError, setLogoError] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [isRevealing, setIsRevealing] = useState<boolean>(false);
   const [wasAnonymous, setWasAnonymous] = useState<boolean>(false);
-  const [confetti, setConfetti] = useState<boolean>(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Check if we're in a browser environment before accessing localStorage
   useEffect(() => {
@@ -52,12 +54,6 @@ export default function CompanyCard({
     if (feedback && isAnonymous) {
       setWasAnonymous(true);
       setIsRevealing(true);
-
-      // Show confetti animation for "interested" feedback
-      if (feedback === "interested") {
-        setConfetti(true);
-        setTimeout(() => setConfetti(false), 3000);
-      }
 
       // Reset the revealing animation state after animation completes
       const timer = setTimeout(() => {
@@ -160,7 +156,9 @@ export default function CompanyCard({
   // Animation states and classes
   const cardClasses = `w-full transition-all duration-500 bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-xl hover:shadow-blue-500/10 ${
     isRevealing ? "shadow-lg" : ""
-  } ${wasAnonymous && feedback ? "revealed-card" : ""}`;
+  } ${wasAnonymous && feedback ? "revealed-card" : ""} ${
+    disableBuiltInSwipe ? "hover:cursor-grab" : ""
+  }`;
 
   const revealOverlayClasses = `absolute inset-0 z-10 flex items-center justify-center bg-primary/10 backdrop-blur-sm transition-opacity duration-700 ${
     isRevealing ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -176,32 +174,8 @@ export default function CompanyCard({
     );
   };
 
-  // Generate the confetti elements
-  const renderConfetti = () => {
-    if (!confetti) return null;
-
-    return (
-      <div className="confetti-container">
-        {Array.from({length: 50}).map((_, i) => (
-          <div
-            key={i}
-            className="confetti"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              backgroundColor: `hsl(${Math.random() * 360}, 80%, 60%)`,
-            }}
-          />
-        ))}
-      </div>
-    );
-  };
-
   return (
-    <div className="relative">
-      {/* Confetti celebration */}
-      {renderConfetti()}
-
+    <div className="relative" ref={cardRef}>
       {/* Reveal animation overlay */}
       {wasAnonymous && (
         <div className={revealOverlayClasses}>
@@ -348,24 +322,26 @@ export default function CompanyCard({
               </span>
             </div>
           ) : (
-            <>
-              <Button
-                variant="outline"
-                onClick={() => handleFeedback("not_interested")}
-                className=" text-white/90 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105 active:scale-95 bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10"
-              >
-                <ThumbsDown className="w-4 h-4 mr-2 text-red-500" />
-                {t("recommendations.feedback.notInterested")}
-              </Button>
+            !disableBuiltInSwipe && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => handleFeedback("not_interested")}
+                  className=" text-white/90 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105 active:scale-95 bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10"
+                >
+                  <ThumbsDown className="w-4 h-4 mr-2 text-red-500" />
+                  {t("recommendations.feedback.notInterested")}
+                </Button>
 
-              <Button
-                onClick={() => handleFeedback("interested")}
-                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all hover:scale-105 active:scale-95"
-              >
-                <PartyPopper className="w-4 h-4 mr-2 text-white" />
-                {t("recommendations.feedback.interested")}
-              </Button>
-            </>
+                <Button
+                  onClick={() => handleFeedback("interested")}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all hover:scale-105 active:scale-95"
+                >
+                  <PartyPopper className="w-4 h-4 mr-2 text-white" />
+                  {t("recommendations.feedback.interested")}
+                </Button>
+              </>
+            )
           )}
         </CardFooter>
       </Card>
