@@ -17,37 +17,37 @@ import FloatingElement from "@/components/ui/FloatingElement";
 // Loading skeleton component for the questionnaire
 function QuestionnaireLoadingSkeleton() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <Card className="mb-8 text-center">
+    <div className="container mx-auto z-20 pt-12 pb-20">
+      <div className="max-w-2xl mx-auto container mx-auto px-4 py-8">
+        <Card className="mb-8 text-center bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10">
           <CardHeader>
-            <Skeleton className="h-8 w-3/4 mx-auto mb-2" />
-            <Skeleton className="h-4 w-full mx-auto" />
-            <Skeleton className="h-4 w-5/6 mx-auto mt-1" />
+            <Skeleton className="h-8 w-3/4 mx-auto mb-2 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <Skeleton className="h-4 w-full mx-auto bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <Skeleton className="h-4 w-5/6 mx-auto mt-1 bg-white/10 border border-white/10 backdrop-blur-sm" />
           </CardHeader>
         </Card>
 
         {/* Skeleton for questionnaire form */}
-        <Card className="w-full max-w-md mx-auto">
+        <Card className="w-full max-w-md mx-auto bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10">
           <CardHeader>
-            <Skeleton className="h-6 w-40 mb-2" /> {/* Question X of Y */}
-            <Skeleton className="h-5 w-full" /> {/* Question text */}
+            <Skeleton className="h-6 w-40 mb-2 bg-white/10 border border-white/10 backdrop-blur-sm" /> {/* Question X of Y */}
+            <Skeleton className="h-5 w-full bg-white/10 border border-white/10 backdrop-blur-sm" /> {/* Question text */}
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex items-center space-x-2">
-                  <Skeleton className="h-4 w-4 rounded-full" />{" "}
+                  <Skeleton className="h-4 w-4 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm" />{" "}
                   {/* Radio button */}
-                  <Skeleton className="h-5 w-full max-w-[250px]" />{" "}
+                  <Skeleton className="h-5 w-full max-w-[250px] bg-white/10 border border-white/10 backdrop-blur-sm" />{" "}
                   {/* Option label */}
                 </div>
               ))}
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Skeleton className="h-10 w-24" /> {/* Previous button */}
-            <Skeleton className="h-10 w-20" /> {/* Next button */}
+            <Skeleton className="h-10 w-24 bg-white/10 border border-white/10 backdrop-blur-sm" /> {/* Previous button */}
+            <Skeleton className="h-10 w-20 bg-white/10 border border-white/10 backdrop-blur-sm" /> {/* Next button */}
           </CardFooter>
         </Card>
       </div>
