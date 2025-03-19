@@ -4,6 +4,7 @@ import {v4 as uuid} from "uuid";
 import {getOrCreateCompany} from "../companies/client";
 import fs from 'fs';
 import path from 'path';
+import { RECOMMENDATION_COUNT } from "../constants/recommendations";
 
 // Initialize the OpenAI client
 const openaiClient = new OpenAI({
@@ -61,7 +62,6 @@ export async function generateRecommendations(
 ): Promise<RecommendationResult[]> {
   // Load translations for the specified locale
   const translations = loadAiTranslations(locale) || loadAiTranslations('en');
-  const RECOMMENDATION_COUNT = 5
   
   // Get the appropriate system prompt from translations
   const systemPrompt = translations?.systemPrompt?.recommendations?.replace('{{language}}', locale === 'ja' ? '日本語' : 'English') 

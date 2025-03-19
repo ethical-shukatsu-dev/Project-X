@@ -409,7 +409,7 @@ export default function ValuesQuestionnaire({
                     <RadioGroupItem
                       value={option.value}
                       id={option.value}
-                      className="text-background"
+                      className="border-white/50 text-white data-[state=checked]:bg-white data-[state=checked]:border-white"
                     />
                     <Label
                       htmlFor={option.value}
@@ -437,7 +437,7 @@ export default function ValuesQuestionnaire({
                   : handleNext
               }
               disabled={!values[question.id] || isSubmitting}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10 transition-all duration-300"
+              className="text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10"
             >
               {currentQuestion === totalTextQuestions - 1
                 ? isSubmitting
@@ -500,7 +500,7 @@ export default function ValuesQuestionnaire({
                 (!selectedImageValues[question.id] && images.length > 0) ||
                 isSubmitting
               }
-              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10 transition-all duration-300"
+              className="text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10"
             >
               {currentQuestion === totalImageQuestions - 1
                 ? isSubmitting
