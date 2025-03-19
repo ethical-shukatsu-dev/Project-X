@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog"; // Import custom dialog components without DialogClose
 import {Button} from "@/components/ui/button"; // Import your Button component
@@ -23,19 +22,15 @@ const SignupDialog: React.FC<SignupDialogProps> = ({open, onClose, lng}) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-500/10">
-        <DialogTitle className="text-center text-2xl font-bold text-white">
+        <DialogTitle className="text-2xl font-bold text-center text-white">
           {t("cta.title") || "Ready to unlock your perfect career match?"}
         </DialogTitle>
-        <DialogDescription className="text-center text-base text-white/80">
-          {t("cta.subtitle") ||
-            "Join BaseMe today and discover companies that align with your values."}
-        </DialogDescription>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mt-4">
-          <div className="bg-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+        <div className="grid grid-cols-1 gap-4 mt-4 text-center md:grid-cols-3">
+          <div className="p-4 border rounded-lg bg-white/5 backdrop-blur-sm border-white/10">
             <div className="mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 mx-auto text-blue-400"
+                className="w-8 h-8 mx-auto text-blue-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -55,11 +50,11 @@ const SignupDialog: React.FC<SignupDialogProps> = ({open, onClose, lng}) => {
               {t("cta.benefit1.description") || "Powered by BaseMe AI"}
             </p>
           </div>
-          <div className="bg-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+          <div className="p-4 border rounded-lg bg-white/5 backdrop-blur-sm border-white/10">
             <div className="mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 mx-auto text-blue-400"
+                className="w-8 h-8 mx-auto text-blue-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -85,11 +80,11 @@ const SignupDialog: React.FC<SignupDialogProps> = ({open, onClose, lng}) => {
               {t("cta.benefit2.description") || "By company scouts"}
             </p>
           </div>
-          <div className="bg-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+          <div className="p-4 border rounded-lg bg-white/5 backdrop-blur-sm border-white/10">
             <div className="mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 mx-auto text-blue-400"
+                className="w-8 h-8 mx-auto text-blue-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -110,17 +105,17 @@ const SignupDialog: React.FC<SignupDialogProps> = ({open, onClose, lng}) => {
             </p>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+        <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
           <Button
             size="lg"
-            className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all hover:scale-105 active:scale-95"
+            className="w-full transition-all sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
           >
             {t("cta.primaryButton") || "Sign up with Email"}
           </Button>
           <Button
             variant="outline"
             size="lg"
-            className="w-full sm:w-auto transition-all hover:scale-105 active:scale-95 backdrop-blur-sm border border-white/10"
+            className="w-full transition-all border sm:w-auto hover:scale-105 active:scale-95 backdrop-blur-sm border-white/10"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -147,13 +142,13 @@ const SignupDialog: React.FC<SignupDialogProps> = ({open, onClose, lng}) => {
             {t("cta.secondaryButton") || "Continue with Google"}
           </Button>
         </div>
-        <div className="text-center text-sm text-white/60 mt-4">
+        <div className="mt-4 text-sm text-center text-white/60">
           <p>
             {t("cta.disclaimer") ||
               "By signing up, you agree to our Terms and Privacy Policy."}
           </p>
         </div>
-        <DialogClose className="absolute right-4 top-4 rounded-sm bg-white p-2  hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40" />
+        <DialogClose className="absolute p-2 transition-colors bg-white rounded-sm right-4 top-4 hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/40" />
       </DialogContent>
     </Dialog>
   );
