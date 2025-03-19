@@ -172,9 +172,9 @@ export default function RecommendationsContent({
             {t("recommendations.loading.description")}
           </p>
           <div className="max-w-4xl mx-auto">
-            <Skeleton className="h-[200px] w-full mb-4" />
-            <Skeleton className="h-[200px] w-full mb-4" />
-            <Skeleton className="h-[200px] w-full" />
+            <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <Skeleton className="h-[200px] w-full bg-white/10 border border-white/10 backdrop-blur-sm" />
           </div>
         </div>
       </div>
@@ -477,12 +477,14 @@ export default function RecommendationsContent({
           <div className="mt-6 space-y-6">
             {getFilteredRecommendations().length > 0 ? (
               <CompanyCardStack
-                companies={getFilteredRecommendations().map((recommendation) => ({
-                  id: recommendation.id || recommendation.company.id,
-                  company: recommendation.company,
-                  matchingPoints: recommendation.matching_points,
-                  feedback: recommendation.feedback
-                }))}
+                companies={getFilteredRecommendations().map(
+                  (recommendation) => ({
+                    id: recommendation.id || recommendation.company.id,
+                    company: recommendation.company,
+                    matchingPoints: recommendation.matching_points,
+                    feedback: recommendation.feedback,
+                  })
+                )}
                 onFeedback={(recommendationId, feedback) =>
                   recommendationId && handleFeedback(recommendationId, feedback)
                 }
