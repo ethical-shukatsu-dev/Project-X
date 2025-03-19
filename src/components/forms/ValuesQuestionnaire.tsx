@@ -384,13 +384,13 @@ export default function ValuesQuestionnaire({
       return (
         <>
           <CardHeader>
-            <CardTitle className="text-xl">
+            <CardTitle className="text-xl text-gray-300">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
                 total: totalTextQuestions, // No longer adding +1 for interests
               })}
             </CardTitle>
-            <CardDescription className="text-lg">
+            <CardDescription className="text-lg text-gray-300">
               {t(question.questionKey)}
             </CardDescription>
           </CardHeader>
@@ -406,8 +406,15 @@ export default function ValuesQuestionnaire({
                     key={option.value}
                     className="flex items-center space-x-2"
                   >
-                    <RadioGroupItem value={option.value} id={option.value} />
-                    <Label htmlFor={option.value} className="text-base">
+                    <RadioGroupItem
+                      value={option.value}
+                      id={option.value}
+                      className="text-background"
+                    />
+                    <Label
+                      htmlFor={option.value}
+                      className="text-base text-gray-300"
+                    >
                       {t(option.labelKey)}
                     </Label>
                   </div>
@@ -430,6 +437,7 @@ export default function ValuesQuestionnaire({
                   : handleNext
               }
               disabled={!values[question.id] || isSubmitting}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10 transition-all duration-300"
             >
               {currentQuestion === totalTextQuestions - 1
                 ? isSubmitting
@@ -451,13 +459,13 @@ export default function ValuesQuestionnaire({
       return (
         <>
           <CardHeader>
-            <CardTitle className="text-xl">
+            <CardTitle className="text-xl text-gray-300">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
                 total: totalImageQuestions, // No longer adding +1 for interests
               })}
             </CardTitle>
-            <CardDescription className="text-lg">
+            <CardDescription className="text-lg text-gray-300">
               {t(question.questionKey)}
             </CardDescription>
           </CardHeader>
@@ -492,6 +500,7 @@ export default function ValuesQuestionnaire({
                 (!selectedImageValues[question.id] && images.length > 0) ||
                 isSubmitting
               }
+              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10 transition-all duration-300"
             >
               {currentQuestion === totalImageQuestions - 1
                 ? isSubmitting
@@ -505,5 +514,9 @@ export default function ValuesQuestionnaire({
     }
   };
 
-  return <Card className="w-full max-w-md mx-auto">{renderQuestion()}</Card>;
+  return (
+    <Card className="w-full max-w-md mx-auto bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
+      {renderQuestion()}
+    </Card>
+  );
 }
