@@ -16,6 +16,7 @@ import {
 import {RecommendationResult} from "@/lib/openai/client";
 import {useTranslation} from "@/i18n-client";
 import SignupDialog from "@/components/recommendations/SignupDialog";
+import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 
 interface RecommendationsContentProps {
   lng: string;
@@ -164,10 +165,10 @@ export default function RecommendationsContent({
     return (
       <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="mb-8 text-3xl font-bold">
+          <h1 className="mb-8 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
             {t("recommendations.loading.title")}
           </h1>
-          <p className="mb-8 text-lg">
+          <p className="mb-8 text-lg text-gray-300">
             {t("recommendations.loading.description")}
           </p>
           <div className="max-w-4xl mx-auto">
@@ -184,16 +185,19 @@ export default function RecommendationsContent({
     return (
       <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto">
-          <Card className="max-w-md mx-auto">
+          <Card className="max-w-md mx-auto bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10">
             <CardHeader>
-              <CardTitle className="text-center">
+              <CardTitle className="text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
                 {t("recommendations.errors.title")}
               </CardTitle>
-              <CardDescription className="text-center">{error}</CardDescription>
+              <CardDescription className="text-center text-gray-300">
+                {error}
+              </CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-center">
               <Button
                 onClick={() => (window.location.href = `/${lng}/questionnaire`)}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
               >
                 {t("recommendations.errors.try_again")}
               </Button>
@@ -312,148 +316,194 @@ export default function RecommendationsContent({
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
-        <h1 className="mb-8 text-3xl font-bold text-center">
-          {t("recommendations.title")}
-        </h1>
-        <p className="mb-8 text-lg text-center">
-          {t("recommendations.description")}
-        </p>
+        <AnimatedContent direction="vertical" distance={40} delay={300}>
+          <h1 className="mb-8 text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+            {t("recommendations.title")}
+          </h1>
+        </AnimatedContent>
 
-        <div className="flex justify-end mb-4">
-          <Button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            {refreshing ? (
-              <>
-                <svg
-                  className="w-4 h-4 mr-2 -ml-1 animate-spin text-primary"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
+        <AnimatedContent direction="vertical" distance={30} delay={450}>
+          <p className="mb-8 text-lg text-center text-gray-300">
+            {t("recommendations.description")}
+          </p>
+        </AnimatedContent>
+
+        <AnimatedContent direction="vertical" distance={20} delay={600}>
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              variant="outline"
+              className="flex items-center gap-2 bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
+            >
+              {refreshing ? (
+                <>
+                  <svg
+                    className="w-4 h-4 mr-2 -ml-1 animate-spin text-primary"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042
+ 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  {t("recommendations.refreshing")}
+                </>
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
                     stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                {t("recommendations.refreshing")}
-              </>
-            ) : (
-              <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                {t("recommendations.refresh")}
-              </>
-            )}
-          </Button>
-        </div>
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 
+0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  {t("recommendations.refresh")}
+                </>
+              )}
+            </Button>
+          </div>
+        </AnimatedContent>
 
         {/* Feedback Status Tabs */}
-        <Tabs
-          defaultValue="all"
-          className="w-full mb-6"
-          value={activeTab}
-          onValueChange={setActiveTab}
-        >
-          <TabsList className="flex flex-wrap h-full gap-2">
-            <TabsTrigger value="all">
-              {t("recommendations.tabs.all")} ({recommendations.length})
-            </TabsTrigger>
-            <TabsTrigger value="pending">
-              {t("recommendations.tabs.pending")} (
-              {pendingRecommendations.length})
-            </TabsTrigger>
-            <TabsTrigger value="interested">
-              {t("recommendations.tabs.interested")} (
-              {interestedRecommendations.length})
-            </TabsTrigger>
-            <TabsTrigger value="not-interested">
-              {t("recommendations.tabs.not_interested")} (
-              {notInterestedRecommendations.length})
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <AnimatedContent direction="vertical" distance={20} delay={750}>
+          <Tabs
+            defaultValue="all"
+            className="w-full mb-6"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
+            <TabsList className="flex flex-wrap h-full gap-2 p-1 bg-gradient-to-b from-white/10 to-white/[0.02] backdrop-blur-sm border border-white/10">
+              <TabsTrigger
+                value="all"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              >
+                {t("recommendations.tabs.all")} ({recommendations.length})
+              </TabsTrigger>
+              <TabsTrigger
+                value="pending"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              >
+                {t("recommendations.tabs.pending")} (
+                {pendingRecommendations.length})
+              </TabsTrigger>
+              <TabsTrigger
+                value="interested"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              >
+                {t("recommendations.tabs.interested")} (
+                {interestedRecommendations.length})
+              </TabsTrigger>
+              <TabsTrigger
+                value="not-interested"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              >
+                {t("recommendations.tabs.not_interested")} (
+                {notInterestedRecommendations.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </AnimatedContent>
 
         {/* Company Size Tabs */}
-        <Tabs
-          defaultValue="all-sizes"
-          className="w-full mb-6"
-          value={activeSizeTab}
-          onValueChange={setActiveSizeTab}
-        >
-          <TabsList className="flex flex-wrap h-full gap-2">
-            <TabsTrigger value="all-sizes">
-              {t("recommendations.size_tabs.all")} ({recommendations.length})
-            </TabsTrigger>
-            <TabsTrigger value="startup">
-              {t("recommendations.size_tabs.startup")} (
-              {startupRecommendations.length})
-            </TabsTrigger>
-            <TabsTrigger value="small">
-              {t("recommendations.size_tabs.small")} (
-              {smallRecommendations.length})
-            </TabsTrigger>
-            <TabsTrigger value="medium">
-              {t("recommendations.size_tabs.medium")} (
-              {mediumRecommendations.length})
-            </TabsTrigger>
-            <TabsTrigger value="large">
-              {t("recommendations.size_tabs.large")} (
-              {largeRecommendations.length})
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <AnimatedContent direction="vertical" distance={20} delay={900}>
+          <Tabs
+            defaultValue="all-sizes"
+            className="w-full mb-6"
+            value={activeSizeTab}
+            onValueChange={setActiveSizeTab}
+          >
+            <TabsList className="flex flex-wrap h-full gap-2 p-1 bg-gradient-to-b from-white/10 to-white/[0.02] backdrop-blur-sm border border-white/10">
+              <TabsTrigger
+                value="all-sizes"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              >
+                {t("recommendations.size_tabs.all")} ({recommendations.length})
+              </TabsTrigger>
+              <TabsTrigger
+                value="startup"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              >
+                {t("recommendations.size_tabs.startup")} (
+                {startupRecommendations.length})
+              </TabsTrigger>
+              <TabsTrigger
+                value="small"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              >
+                {t("recommendations.size_tabs.small")} (
+                {smallRecommendations.length})
+              </TabsTrigger>
+              <TabsTrigger
+                value="medium"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              >
+                {t("recommendations.size_tabs.medium")} (
+                {mediumRecommendations.length})
+              </TabsTrigger>
+              <TabsTrigger
+                value="large"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              >
+                {t("recommendations.size_tabs.large")} (
+                {largeRecommendations.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </AnimatedContent>
 
         {/* Display filtered recommendations */}
-        <div className="mt-6 space-y-6">
-          {getFilteredRecommendations().length > 0 ? (
-            getFilteredRecommendations().map((recommendation) => (
-              <CompanyCard
-                key={recommendation.id || recommendation.company.id}
-                company={recommendation.company}
-                matchingPoints={recommendation.matching_points}
-                feedback={recommendation.feedback}
-                onFeedback={(feedback) =>
-                  recommendation.id &&
-                  handleFeedback(recommendation.id, feedback)
-                }
-                lng={lng}
-              />
-            ))
-          ) : (
-            <div className="py-8 text-center">
-              <p>{t("recommendations.no_matches")}</p>
-            </div>
-          )}
-        </div>
+        <AnimatedContent direction="vertical" distance={30} delay={1050}>
+          <div className="mt-6 space-y-6">
+            {getFilteredRecommendations().length > 0 ? (
+              getFilteredRecommendations().map((recommendation) => (
+                <CompanyCard
+                  key={recommendation.id || recommendation.company.id}
+                  company={recommendation.company}
+                  matchingPoints={recommendation.matching_points}
+                  feedback={recommendation.feedback}
+                  onFeedback={(feedback) =>
+                    recommendation.id &&
+                    handleFeedback(recommendation.id, feedback)
+                  }
+                  lng={lng}
+                />
+              ))
+            ) : (
+              <div className="py-8 text-center">
+                <p className="text-gray-300">
+                  {t("recommendations.no_matches")}
+                </p>
+              </div>
+            )}
+          </div>
+        </AnimatedContent>
 
-        {isSignupDialogOpen && (
-          <SignupDialog open={isSignupDialogOpen} onClose={() => setSignupDialogOpen(false)} lng={lng} />
-        )}
+        <SignupDialog
+          open={isSignupDialogOpen}
+          onClose={() => setSignupDialogOpen(false)}
+          lng={lng}
+        />
       </div>
     </div>
   );
