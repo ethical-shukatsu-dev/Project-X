@@ -83,6 +83,8 @@ export default function BounceCards({
       gsap.killTweensOf(selector);
 
       const baseTransform = transformStyles[i] || "none";
+      const offsetMultiplier = containerWidth * 0.2; // 20% of container width
+      const maxOffset = 160;
 
       if (i === hoveredIdx) {
         const noRotation = getNoRotationTransform(baseTransform);
@@ -93,7 +95,9 @@ export default function BounceCards({
           overwrite: "auto",
         });
       } else {
-        const offsetX = i < hoveredIdx ? -160 : 160;
+        const offsetX = i < hoveredIdx 
+          ? Math.max(-maxOffset, -offsetMultiplier)
+          : Math.min(maxOffset, offsetMultiplier);
         const pushedTransform = getPushedTransform(baseTransform, offsetX);
 
         const distance = Math.abs(hoveredIdx - i);
@@ -138,10 +142,12 @@ export default function BounceCards({
       {cards.map((content, idx) => (
         <div
           key={idx}
-          className={`card card-${idx} absolute w-[200px] aspect-square border-8 border-white rounded-[30px] overflow-hidden bg-white/5 backdrop-blur-sm flex items-center justify-center`}
+          className={`card card-${idx} absolute border-8 border-white rounded-[30px] overflow-hidden bg-white/5 backdrop-blur-sm flex items-center justify-center`}
           style={{
             boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
             transform: transformStyles[idx] || "none",
+            width: Math.min(200, Math.max(120, containerWidth * 0.3)),
+            aspectRatio: "1",
           }}
           onMouseEnter={() => pushSiblings(idx)}
           onMouseLeave={resetSiblings}

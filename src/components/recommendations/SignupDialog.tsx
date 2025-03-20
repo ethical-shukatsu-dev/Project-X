@@ -41,20 +41,35 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[60vw]  max-h-[90vh] overflow-y-auto">
-        <DialogTitle className="mb-6 text-2xl font-bold text-center text-white">
+      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[50vw] max-h-[90vh] overflow-y-auto">
+        <DialogTitle className="mb-4 text-2xl font-bold text-center text-white">
           {t("cta.title") || "Ready to unlock your perfect career match?"}
         </DialogTitle>
 
         {/* Company Cards */}
-        <div className="px-6 pt-8 -mx-6 overflow-x-hidden">
-          <BounceCards
-            cards={companyCards}
-            containerWidth={Math.min(100, window.innerWidth - 64)}
-            containerHeight={280}
-            className="mx-auto"
-            enableHover={true}
-          />
+        <div className="relative flex items-center justify-center w-full">
+          <div className="w-full overflow-hidden">
+            <BounceCards
+              cards={companyCards}
+              containerWidth={Math.min(
+                600,
+                Math.max(280, window.innerWidth * 0.6 - 48)
+              )}
+              containerHeight={Math.min(
+                300,
+                Math.max(200, window.innerWidth * 0.35)
+              )}
+              className="mx-auto"
+              enableHover={true}
+              transformStyles={[
+                "rotate(5deg) translate(-150px)",
+                "rotate(0deg) translate(-70px)",
+                "rotate(-5deg)",
+                "rotate(5deg) translate(70px)",
+                "rotate(-5deg) translate(150px)",
+              ]}
+            />
+          </div>
         </div>
 
         {/* Signup Buttons */}
