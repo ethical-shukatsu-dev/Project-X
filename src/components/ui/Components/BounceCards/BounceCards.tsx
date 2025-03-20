@@ -2,12 +2,12 @@
 	Installed from https://reactbits.dev/ts/tailwind/
 */
 
-import { useEffect } from "react";
+import { useEffect, ReactNode } from "react";
 import { gsap } from "gsap";
 
 interface BounceCardsProps {
   className?: string;
-  images?: string[];
+  cards: ReactNode[];
   containerWidth?: number;
   containerHeight?: number;
   animationDelay?: number;
@@ -19,18 +19,18 @@ interface BounceCardsProps {
 
 export default function BounceCards({
   className = "",
-  images = [],
+  cards = [],
   containerWidth = 400,
   containerHeight = 400,
   animationDelay = 0.5,
   animationStagger = 0.06,
   easeType = "elastic.out(1, 0.8)",
   transformStyles = [
-    "rotate(10deg) translate(-170px)",
-    "rotate(5deg) translate(-85px)",
-    "rotate(-3deg)",
-    "rotate(-10deg) translate(85px)",
-    "rotate(2deg) translate(170px)",
+    "rotate(12deg) translate(-240px)",
+    "rotate(6deg) translate(-120px)",
+    "rotate(0deg)",
+    "rotate(-6deg) translate(120px)",
+    "rotate(-12deg) translate(240px)",
   ],
   enableHover = false,
 }: BounceCardsProps) {
@@ -78,7 +78,7 @@ export default function BounceCards({
   const pushSiblings = (hoveredIdx: number) => {
     if (!enableHover) return;
 
-    images.forEach((_, i) => {
+    cards.forEach((_, i) => {
       const selector = `.card-${i}`;
       gsap.killTweensOf(selector);
 
@@ -113,7 +113,7 @@ export default function BounceCards({
   const resetSiblings = () => {
     if (!enableHover) return;
 
-    images.forEach((_, i) => {
+    cards.forEach((_, i) => {
       const selector = `.card-${i}`;
       gsap.killTweensOf(selector);
 
@@ -135,10 +135,10 @@ export default function BounceCards({
         height: containerHeight,
       }}
     >
-      {images.map((src, idx) => (
+      {cards.map((content, idx) => (
         <div
           key={idx}
-          className={`card card-${idx} absolute w-[200px] aspect-square border-8 border-white rounded-[30px] overflow-hidden`}
+          className={`card card-${idx} absolute w-[200px] aspect-square border-8 border-white rounded-[30px] overflow-hidden bg-white/5 backdrop-blur-sm flex items-center justify-center`}
           style={{
             boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
             transform: transformStyles[idx] || "none",
@@ -146,11 +146,7 @@ export default function BounceCards({
           onMouseEnter={() => pushSiblings(idx)}
           onMouseLeave={resetSiblings}
         >
-          <img
-            className="w-full h-full object-cover"
-            src={src}
-            alt={`card-${idx}`}
-          />
+          {content}
         </div>
       ))}
     </div>

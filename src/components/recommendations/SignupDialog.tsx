@@ -6,26 +6,58 @@ import {
   DialogClose,
   DialogContent,
   DialogTitle,
-} from "@/components/ui/dialog"; // Import custom dialog components without DialogClose
-import {Button} from "@/components/ui/button"; // Import your Button component
-import {useTranslation} from "@/i18n-client"; // Import translation hook
+} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {useTranslation} from "@/i18n-client";
+import BounceCards from "@/components/ui/Components/BounceCards/BounceCards";
+import CompanyCard from "@/components/ui/Components/BounceCards/CompanyCard";
+import { RecommendationResult } from "@/lib/openai/client";
 
 interface SignupDialogProps {
   open: boolean;
   onClose: () => void;
-  lng: string; // Add lng prop for translations
+  lng: string;
+  recommendations: RecommendationResult[];
 }
 
-const SignupDialog: React.FC<SignupDialogProps> = ({open, onClose, lng}) => {
-  const {t} = useTranslation(lng, "ai"); // Use translation for text
+const SignupDialog: React.FC<SignupDialogProps> = ({
+  open,
+  onClose,
+  lng,
+  recommendations,
+}) => {
+  const {t} = useTranslation(lng, "ai");
+
+  // Create company cards for the first 5 recommendations
+  const companyCards = recommendations
+    .slice(0, 5)
+    .map((rec) => (
+      <CompanyCard
+        key={rec.id || rec.company.id}
+        name={rec.company.name}
+        logoUrl={rec.company.logo_url}
+      />
+    ));
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-500/10">
-        <DialogTitle className="text-2xl font-bold text-center text-white">
+      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[1200px] w-full max-h-[90vh] overflow-y-auto">
+        <DialogTitle className="mb-6 text-2xl font-bold text-center text-white">
           {t("cta.title") || "Ready to unlock your perfect career match?"}
         </DialogTitle>
-        <div className="grid grid-cols-1 gap-4 mt-4 text-center md:grid-cols-3">
+
+        {/* Company Cards */}
+        <div className="px-6 py-4 -mx-6 overflow-x-hidden">
+          <BounceCards
+            cards={companyCards}
+            containerWidth={Math.min(1000, window.innerWidth - 64)}
+            containerHeight={280}
+            className="mx-auto"
+            enableHover={true}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 mt-2 text-center md:grid-cols-3">
           <div className="p-4 border rounded-lg bg-white/5 backdrop-blur-sm border-white/10">
             <div className="mb-2">
               <svg
