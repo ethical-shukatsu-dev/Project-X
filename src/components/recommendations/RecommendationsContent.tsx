@@ -503,6 +503,7 @@ export default function RecommendationsContent({
           open={isSignupDialogOpen}
           onClose={() => setSignupDialogOpen(false)}
           lng={lng}
+          recommendations={recommendations}
         />
       </div>
     </div>
