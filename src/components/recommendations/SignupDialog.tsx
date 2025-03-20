@@ -11,7 +11,7 @@ import {Button} from "@/components/ui/button";
 import {useTranslation} from "@/i18n-client";
 import BounceCards from "@/components/ui/Components/BounceCards/BounceCards";
 import CompanyCard from "@/components/ui/Components/BounceCards/CompanyCard";
-import { RecommendationResult } from "@/lib/openai/client";
+import {RecommendationResult} from "@/lib/openai/client";
 
 interface SignupDialogProps {
   open: boolean;
@@ -41,103 +41,24 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[1200px] w-full max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[60vw]  max-h-[90vh] overflow-y-auto">
         <DialogTitle className="mb-6 text-2xl font-bold text-center text-white">
           {t("cta.title") || "Ready to unlock your perfect career match?"}
         </DialogTitle>
 
         {/* Company Cards */}
-        <div className="px-6 py-4 -mx-6 overflow-x-hidden">
+        <div className="px-6 pt-8 -mx-6 overflow-x-hidden">
           <BounceCards
             cards={companyCards}
-            containerWidth={Math.min(1000, window.innerWidth - 64)}
+            containerWidth={Math.min(100, window.innerWidth - 64)}
             containerHeight={280}
             className="mx-auto"
             enableHover={true}
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 mt-2 text-center md:grid-cols-3">
-          <div className="p-4 border rounded-lg bg-white/5 backdrop-blur-sm border-white/10">
-            <div className="mb-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8 mx-auto text-blue-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="font-medium text-white">
-              {t("cta.benefit1.title") || "Personalized Matches"}
-            </h3>
-            <p className="text-sm text-white/70">
-              {t("cta.benefit1.description") || "Powered by BaseMe AI"}
-            </p>
-          </div>
-          <div className="p-4 border rounded-lg bg-white/5 backdrop-blur-sm border-white/10">
-            <div className="mb-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8 mx-auto text-blue-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
-            </div>
-            <h3 className="font-medium text-white">
-              {t("cta.benefit2.title") || "Get Discovered"}
-            </h3>
-            <p className="text-sm text-white/70">
-              {t("cta.benefit2.description") || "By company scouts"}
-            </p>
-          </div>
-          <div className="p-4 border rounded-lg bg-white/5 backdrop-blur-sm border-white/10">
-            <div className="mb-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8 mx-auto text-blue-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
-              </svg>
-            </div>
-            <h3 className="font-medium text-white">
-              {t("cta.benefit3.title") || "Browse Companies"}
-            </h3>
-            <p className="text-sm text-white/70">
-              {t("cta.benefit3.description") || "Access partner listings"}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
+        {/* Signup Buttons */}
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Button
             size="lg"
             className="w-full transition-all sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
@@ -174,6 +95,8 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
             {t("cta.secondaryButton") || "Continue with Google"}
           </Button>
         </div>
+
+        {/* Disclaimer */}
         <div className="mt-4 text-sm text-center text-white/60">
           <p>
             {t("cta.disclaimer") ||
