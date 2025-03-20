@@ -1,12 +1,12 @@
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useEffect, useRef, useState } from "react";
+import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar";
+import {useEffect, useRef, useState} from "react";
 
 interface CompanyCardProps {
   name: string;
   logoUrl?: string | null;
 }
 
-export default function CompanyCard({ name, logoUrl }: CompanyCardProps) {
+export default function CompanyCard({name, logoUrl}: CompanyCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [avatarSize, setAvatarSize] = useState(96); // Default 24 * 4 = 96px
 
@@ -34,32 +34,35 @@ export default function CompanyCard({ name, logoUrl }: CompanyCardProps) {
   }, []);
 
   return (
-    <div 
-      ref={containerRef} 
-      className="flex flex-col items-center justify-center w-full h-full gap-3 p-4 bg-white"
+    <div
+      ref={containerRef}
+      className="flex flex-col items-center justify-center w-full h-full gap-3 p-4 bg-white/90"
     >
-      <Avatar 
-        className="bg-white border-4 border-white shadow-lg ring-1 ring-black/10"
-        style={{ 
+      <Avatar
+        className="bg-white border-4 border-white shadow-lg ring-1 ring-black/5"
+        style={{
           width: avatarSize,
-          height: avatarSize
+          height: avatarSize,
         }}
       >
         <AvatarImage src={logoUrl || ""} alt={name} />
-        <AvatarFallback 
-          className="text-[length:calc(var(--avatar-size)*0.4)]" 
-          style={{ '--avatar-size': `${avatarSize}px` } as React.CSSProperties}
+        <AvatarFallback
+          className="text-[length:calc(var(--avatar-size)*0.4)]"
+          style={{"--avatar-size": `${avatarSize}px`} as React.CSSProperties}
         >
           {name.substring(0, 2).toUpperCase()}
         </AvatarFallback>
       </Avatar>
-      <h3 className="w-full font-semibold text-center text-black truncate drop-shadow-lg" 
-          style={{ 
-            fontSize: `${Math.max(0.875, avatarSize * 0.016)}rem`,
-            maxWidth: `${avatarSize * 2}px`
-          }}>
+      
+      <h3
+        className="hidden w-full font-semibold text-center truncate text-black/80 sm:block drop-shadow-lg"
+        style={{
+          fontSize: `${Math.max(0.875, avatarSize * 0.016)}rem`,
+          maxWidth: `${avatarSize * 2}px`,
+        }}
+      >
         {name}
       </h3>
     </div>
   );
-} 
+}
