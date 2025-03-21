@@ -17,7 +17,7 @@ import {RecommendationResult} from "@/lib/openai/client";
 import {useTranslation} from "@/i18n-client";
 import SignupDialog from "@/components/recommendations/SignupDialog";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import { RECOMMENDATION_COUNT } from "@/lib/constants/recommendations";
+import {RECOMMENDATION_COUNT} from "@/lib/constants/recommendations";
 
 interface RecommendationsContentProps {
   lng: string;
@@ -137,12 +137,20 @@ export default function RecommendationsContent({
       );
 
       // Increment feedback count
-      setFeedbackCount((prevCount) => prevCount + 1);
+      setFeedbackCount((prevCount) => {
+        const newCount = prevCount + 1;
 
-      // Open the sign-up dialog after feedback for all recommendations
-      if (feedbackCount + 1 === RECOMMENDATION_COUNT) {
-        setSignupDialogOpen(true);
-      }
+        // If this is the last recommendation, wait for the reveal animation
+        // before showing the signup dialog
+        if (feedbackCount === RECOMMENDATION_COUNT) {
+          // Wait for the reveal animation (2000ms) plus a small buffer
+          setTimeout(() => {
+            setSignupDialogOpen(true);
+          }, 3000);
+        }
+
+        return newCount;
+      });
     } catch (err) {
       console.error("Error submitting feedback:", err);
       // Show error message to user
