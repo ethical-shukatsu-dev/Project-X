@@ -52,7 +52,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
         logoUrl={rec.company.logo_url}
         shouldAnonymize={!rec.feedback}
       />
-    ));
+    )).reverse();
 
   // The content to be displayed both in dialog and in-page mode
   const content = (
