@@ -72,12 +72,12 @@ export default function FeaturesSection({ title, features }: FeaturesSectionProp
         </AnimatedContent>
 
         <div className="grid gap-6 px-2 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 sm:px-0">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <AnimatedContent
               key={feature.title}
               direction="vertical"
               distance={40}
-              delay={400 + index * 200}
+              delay={200}
             >
               <FeatureCard
                 title={feature.title}

@@ -3,9 +3,8 @@ import {Inter} from "next/font/google";
 import "../globals.css";
 import {dir} from "i18next";
 import {languages} from "../../i18n-config";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import {ReactNode} from "react";
-import Link from "next/link";
+import Header from "@/components/Header";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -37,19 +36,7 @@ export default function RootLayout({
         className={inter.className}
       >
         <body>
-          <header className="sticky top-0 z-50 transition-all duration-200 border-b backdrop-blur-sm bg-background/80 border-border">
-            <div className="mx-auto max-w-7xl">
-              <div className="flex items-center justify-between p-4">
-                <Link 
-                  href="/" 
-                  className="text-xl font-bold transition-colors duration-200 hover:text-primary"
-                >
-                  Project X
-                </Link>
-                <LanguageSwitcher />
-              </div>
-            </div>
-          </header>
+          <Header />
           {children}
         </body>
       </html>
