@@ -285,6 +285,9 @@ export default function ValuesQuestionnaire({
   };
 
   const handleSubmit = async () => {
+    // Scroll to top of page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     setIsSubmitting(true);
     try {
       // Convert values to numeric format for better AI processing
