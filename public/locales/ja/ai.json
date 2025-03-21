@@ -20,40 +20,34 @@
     "no_images": "この質問に利用可能な画像がありません。次の質問に進んでください。",
     "image_questions": {
       "work_values": {
-        "question": "あなたの仕事の価値観を最もよく表す画像を選んでください："
+        "question": "あなたが最も大事にしたい仕事の価値観は何ですか？"
       },
-      "leadership_values": {
-        "question": "あなたの理想のリーダーシップスタイルを反映する画像を選んでください："
+      "corporate_culture": {
+        "question": "あなたが求める企業文化はどれですか？"
       },
-      "company_culture": {
-        "question": "あなたの理想の企業文化を表す画像を選んでください："
+      "leadership": {
+        "question": "あなたが理想とするリーダーシップはどれですか？"
       },
-      "work_environment": {
-        "question": "どの職場環境があなたに最も魅力的ですか？"
+      "workplace_environment": {
+        "question": "あなたが求める職場環境はどれですか？"
       },
-      "innovation": {
-        "question": "あなたにとってのイノベーションを表す画像を選んでください："
+      "humanity": {
+        "question": "あなたに強く備わっている人間性はどれですか？"
       },
-      "personal_professional_growth": {
-        "question": "あなたの成長への願望を表す画像を選んでください："
+      "interpersonal_skills": {
+        "question": "あなたの強みの対人能力はどれですか？"
       },
-      "work_life_balance": {
-        "question": "あなたの理想的なワークライフバランスを表す画像を選んでください："
+      "cognitive_abilities": {
+        "question": "あなたの強みの思考力はどれですか？"
       },
-      "financial_job_security": {
-        "question": "あなたにとっての経済的安定を最もよく表す画像はどれですか？"
+      "self_growth": {
+        "question": "あなたに最も強く備わっている自己成長力はどれですか？"
       },
-      "impact_purpose": {
-        "question": "あなたにとって意義のある影響を表す画像を選んでください："
+      "job_performance": {
+        "question": "あなたの強みの業務遂行力はどれですか？"
       },
-      "communication_transparency": {
-        "question": "理想的なコミュニケーションを表す画像を選んでください："
-      },
-      "recognition_appreciation": {
-        "question": "認識と感謝を表す画像を選んでください："
-      },
-      "hobbies": {
-        "question": "仕事以外のあなたのお気に入りの趣味や興味を表す画像を選んでください："
+      "mental_strength": {
+        "question": "あなたの強みの精神力はどれですか？"
       }
     },
     "interests": {
@@ -71,31 +65,94 @@
       "nonprofit": "非営利団体"
     },
     "questions": {
-      "work_environment": {
-        "question": "どのような職場環境が好ましいですか？",
+      "work_values": {
+        "question": "あなたが最も大事にしたい仕事の価値観は何ですか？",
         "options": {
-          "collaborative": "協力的でチーム志向",
-          "autonomous": "自律的で独立的",
-          "structured": "構造化された組織的な環境",
-          "flexible": "柔軟で適応性のある環境"
+          "growth": "成長",
+          "contribution": "貢献",
+          "challenge": "挑戦",
+          "result_oriented": "成果主義"
         }
       },
-      "company_culture": {
-        "question": "会社の文化で最も重要な側面は何ですか？",
+      "corporate_culture": {
+        "question": "あなたが求める企業文化はどれですか？",
         "options": {
-          "innovation": "イノベーションと創造性",
-          "work_life_balance": "ワークライフバランス",
-          "growth": "専門的な成長の機会",
-          "social_impact": "社会的影響と目的"
+          "innovation": "イノベーション",
+          "collaboration": "コラボレーション",
+          "diversity": "多様性（ダイバーシティ）",
+          "customer_orientation": "顧客志向"
         }
       },
-      "leadership_style": {
-        "question": "どのようなリーダーシップスタイルが最も合いますか？",
+      "leadership": {
+        "question": "あなたが理想とするリーダーシップはどれですか？",
         "options": {
-          "mentorship": "メンターシップとガイダンス",
-          "empowerment": "エンパワーメントと自律性",
-          "transparent": "透明性とオープンなコミュニケーション",
-          "results_oriented": "結果重視の直接的なスタイル"
+          "vision": "ビジョン",
+          "influence": "影響力",
+          "inclusive": "包容力",
+          "decision_making": "決断力"
+        }
+      },
+      "workplace_environment": {
+        "question": "あなたが求める職場環境はどれですか？",
+        "options": {
+          "workability": "働きやすさ",
+          "growth_opportunities": "成長機会",
+          "sense_of_security": "安心感",
+          "mutual_support": "支え合い"
+        }
+      },
+      "humanity": {
+        "question": "あなたに強く備わっている人間性はどれですか？",
+        "options": {
+          "integrity": "誠実さ",
+          "responsibility": "責任感",
+          "ethics": "倫理観",
+          "fairness": "公正さ"
+        }
+      },
+      "interpersonal_skills": {
+        "question": "あなたの強みの対人能力はどれですか？",
+        "options": {
+          "cooperation": "協調性",
+          "empathy": "共感力",
+          "teamwork": "チームワーク",
+          "communication": "コミュニケーション能力"
+        }
+      },
+      "cognitive_abilities": {
+        "question": "あなたの強みの思考力はどれですか？",
+        "options": {
+          "logical_thinking": "論理的思考",
+          "problem_solving": "問題解決力",
+          "insight": "洞察力",
+          "critical_thinking": "クリティカルシンキング"
+        }
+      },
+      "self_growth": {
+        "question": "あなたに最も強く備わっている自己成長力はどれですか？",
+        "options": {
+          "change_orientation": "変革志向",
+          "willingness_to_learn": "学習意欲",
+          "curiosity": "探求心",
+          "adaptability": "適応力"
+        }
+      },
+      "job_performance": {
+        "question": "あなたの強みの業務遂行力はどれですか？",
+        "options": {
+          "persistence": "継続力",
+          "time_management": "時間管理能力",
+          "efficiency": "効率性",
+          "planning": "計画力"
+        }
+      },
+      "mental_strength": {
+        "question": "あなたの強みの精神力はどれですか？",
+        "options": {
+          "resilience": "回復力",
+          "open_mindedness": "オープンマインド",
+          "stress_tolerance": "ストレス耐性",
+          "flexibility": "柔軟性"
         }
       },
       "company_size": {
@@ -105,15 +162,6 @@
           "small": "小規模（51-200人）",
           "medium": "中規模（201-1000人）",
           "large": "大規模（1000人以上）"
-        }
-      },
-      "work_priorities": {
-        "question": "仕事で最も優先することは何ですか？",
-        "options": {
-          "compensation": "競争力のある報酬",
-          "learning": "学習とスキル開発",
-          "impact": "意義のある影響を与えること",
-          "stability": "仕事の安定性とセキュリティ"
         }
       }
     }

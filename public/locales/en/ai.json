@@ -20,40 +20,34 @@
     "no_images": "No images available for this question. Please continue to the next question.",
     "image_questions": {
       "work_values": {
-        "question": "Select an image that best represents your work values:"
+        "question": "What are the work values that are most important to you?"
       },
-      "leadership_values": {
-        "question": "Choose an image that reflects your ideal leadership style:"
+      "corporate_culture": {
+        "question": "What type of corporate culture are you looking for?"
       },
-      "company_culture": {
-        "question": "Select an image that represents your ideal company culture:"
+      "leadership": {
+        "question": "What type of leadership do you aspire to?"
       },
-      "work_environment": {
-        "question": "Which work environment appeals to you most?"
+      "workplace_environment": {
+        "question": "What kind of workplace environment do you seek?"
       },
-      "innovation": {
-        "question": "Select an image that represents innovation to you:"
+      "humanity": {
+        "question": "Which aspect of humanity do you strongly embody?"
       },
-      "personal_professional_growth": {
-        "question": "Choose an image that represents your growth aspirations:"
+      "interpersonal_skills": {
+        "question": "What interpersonal skill is your strongest?"
       },
-      "work_life_balance": {
-        "question": "Select an image that represents your ideal work-life balance:"
+      "cognitive_abilities": {
+        "question": "What cognitive strength do you possess?"
       },
-      "financial_job_security": {
-        "question": "Which image best represents financial security to you?"
+      "self_growth": {
+        "question": "Which aspect of self-growth are you most strong in?"
       },
-      "impact_purpose": {
-        "question": "Select an image that represents meaningful impact to you:"
+      "job_performance": {
+        "question": "What is your greatest strength in job performance?"
       },
-      "communication_transparency": {
-        "question": "Choose an image that represents ideal communication:"
-      },
-      "recognition_appreciation": {
-        "question": "Select an image that represents recognition and appreciation:"
-      },
-      "hobbies": {
-        "question": "Select an image that represents your favorite hobbies or interests outside of work:"
+      "mental_strength": {
+        "question": "What is your strongest mental strength?"
       }
     },
     "interests": {
@@ -71,31 +65,94 @@
       "nonprofit": "Nonprofit"
     },
     "questions": {
-      "work_environment": {
-        "question": "What type of work environment do you prefer?",
+      "work_values": {
+        "question": "What are the work values that are most important to you?",
         "options": {
-          "collaborative": "Collaborative and team-oriented",
-          "autonomous": "Autonomous and independent",
-          "structured": "Structured and organized",
-          "flexible": "Flexible and adaptable"
+          "growth": "Growth",
+          "contribution": "Contribution",
+          "challenge": "Challenge",
+          "result_oriented": "Result-oriented"
         }
       },
-      "company_culture": {
-        "question": "What company culture aspects are most important to you?",
+      "corporate_culture": {
+        "question": "What type of corporate culture are you looking for?",
         "options": {
-          "innovation": "Innovation and creativity",
-          "work_life_balance": "Work-life balance",
-          "growth": "Professional growth opportunities",
-          "social_impact": "Social impact and purpose"
+          "innovation": "Innovation",
+          "collaboration": "Collaboration",
+          "diversity": "Diversity",
+          "customer_orientation": "Customer Orientation"
         }
       },
-      "leadership_style": {
-        "question": "What leadership style do you work best with?",
+      "leadership": {
+        "question": "What type of leadership do you aspire to?",
         "options": {
-          "mentorship": "Mentorship and guidance",
-          "empowerment": "Empowerment and autonomy",
-          "transparent": "Transparent and open communication",
-          "results_oriented": "Results-oriented and direct"
+          "vision": "Vision",
+          "influence": "Influence",
+          "inclusive": "Inclusive",
+          "decision_making": "Decision-Making"
+        }
+      },
+      "workplace_environment": {
+        "question": "What kind of workplace environment do you seek?",
+        "options": {
+          "workability": "Workability",
+          "growth_opportunities": "Growth Opportunities",
+          "sense_of_security": "Sense of Security",
+          "mutual_support": "Mutual Support"
+        }
+      },
+      "humanity": {
+        "question": "Which aspect of humanity do you strongly embody?",
+        "options": {
+          "integrity": "Integrity",
+          "responsibility": "Responsibility",
+          "ethics": "Ethics",
+          "fairness": "Fairness"
+        }
+      },
+      "interpersonal_skills": {
+        "question": "What interpersonal skill is your strongest?",
+        "options": {
+          "cooperation": "Cooperation",
+          "empathy": "Empathy",
+          "teamwork": "Teamwork",
+          "communication": "Communication"
+        }
+      },
+      "cognitive_abilities": {
+        "question": "What cognitive strength do you possess?",
+        "options": {
+          "logical_thinking": "Logical Thinking",
+          "problem_solving": "Problem-Solving",
+          "insight": "Insight",
+          "critical_thinking": "Critical Thinking"
+        }
+      },
+      "self_growth": {
+        "question": "Which aspect of self-growth are you most strong in?",
+        "options": {
+          "change_orientation": "Change Orientation",
+          "willingness_to_learn": "Willingness to Learn",
+          "curiosity": "Curiosity",
+          "adaptability": "Adaptability"
+        }
+      },
+      "job_performance": {
+        "question": "What is your greatest strength in job performance?",
+        "options": {
+          "persistence": "Persistence",
+          "time_management": "Time Management",
+          "efficiency": "Efficiency",
+          "planning": "Planning"
+        }
+      },
+      "mental_strength": {
+        "question": "What is your strongest mental strength?",
+        "options": {
+          "resilience": "Resilience",
+          "open_mindedness": "Open-Mindedness",
+          "stress_tolerance": "Stress Tolerance",
+          "flexibility": "Flexibility"
         }
       },
       "company_size": {
@@ -105,15 +162,6 @@
           "small": "Small (51-200 employees)",
           "medium": "Medium (201-1000 employees)",
           "large": "Large (1000+ employees)"
-        }
-      },
-      "work_priorities": {
-        "question": "What are your top priorities in a job?",
-        "options": {
-          "compensation": "Competitive compensation",
-          "learning": "Learning and skill development",
-          "impact": "Making a meaningful impact",
-          "stability": "Job stability and security"
         }
       }
     }
