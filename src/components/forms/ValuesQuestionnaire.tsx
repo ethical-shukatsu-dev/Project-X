@@ -565,18 +565,18 @@ const HARD_CODED_IMAGE_DATA: HardCodedImageData = {
   ]
 };
 
-// Since we now have 10 questions, don't need to select a random subset
-// const NUM_RANDOM_IMAGE_QUESTIONS = 10;
+// Set number of random questions to select from the 10 available ones
+const NUM_RANDOM_QUESTIONS = 5;
 
 // Helper function to shuffle an array (Fisher-Yates algorithm)
-// function shuffleArray<T>(array: T[]): T[] {
-//   const newArray = [...array];
-//   for (let i = newArray.length - 1; i > 0; i--) {
-//     const j = Math.floor(Math.random() * (i + 1));
-//     [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-//   }
-//   return newArray;
-// }
+function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
 
 interface ValuesQuestionnaireProps {
   lng: string;
@@ -601,25 +601,35 @@ export default function ValuesQuestionnaire({
   const [isLoadingImages, setIsLoadingImages] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // Store selected random questions
+  const [randomQuestions, setRandomQuestions] = useState<typeof QUESTIONS>([]);
+  const [randomImageQuestions, setRandomImageQuestions] = useState<typeof ALL_IMAGE_QUESTIONS>([]);
+
   // Determine if we should use only image questions based on the prop
   const useOnlyImageQuestions = questionnaireType === "image";
-
-  // Randomly select a subset of image questions on component mount
-  const [randomImageQuestions, setRandomImageQuestions] = useState<
-    typeof ALL_IMAGE_QUESTIONS
-  >([]);
 
   useEffect(() => {
     // Scroll to top of page
     window.scrollTo({top: 0, behavior: "smooth"});
     
-    // For our new implementation, we use all image questions instead of a random subset
-    setRandomImageQuestions(ALL_IMAGE_QUESTIONS);
+    // Randomly select 5 questions from the 10 available
+    const shuffledQuestions = shuffleArray([...QUESTIONS]);
+    const selectedQuestions = shuffledQuestions.slice(0, NUM_RANDOM_QUESTIONS);
+    setRandomQuestions(selectedQuestions);
+    
+    // Randomly select 5 image questions from the 10 available
+    // We need to make sure the selected image questions correspond to the same categories as the text questions
+    const selectedCategories = selectedQuestions.map(q => q.id);
+    const selectedImageQuestions = ALL_IMAGE_QUESTIONS.filter(q => 
+      selectedCategories.includes(q.category)
+    );
+    setRandomImageQuestions(selectedImageQuestions);
+    
     setIsInitialized(true);
   }, []);
 
   // Calculate total questions based on questionnaire type
-  const totalTextQuestions = QUESTIONS.length;
+  const totalTextQuestions = randomQuestions.length;
   const totalImageQuestions = randomImageQuestions.length;
   const totalQuestions = useOnlyImageQuestions
     ? totalImageQuestions
@@ -760,7 +770,7 @@ export default function ValuesQuestionnaire({
   const renderQuestion = () => {
     // Text-based questions - only shown if useOnlyImageQuestions is false
     if (!useOnlyImageQuestions && currentQuestion < totalTextQuestions) {
-      const question = QUESTIONS[currentQuestion];
+      const question = randomQuestions[currentQuestion];
       return (
         <>
           <CardHeader>
