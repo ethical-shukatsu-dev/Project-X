@@ -7,12 +7,11 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {Button} from "@/components/ui/button";
 import {useTranslation} from "@/i18n-client";
 import BounceCards from "@/components/ui/Components/BounceCards/BounceCards";
 import CompanyCard from "@/components/ui/Components/BounceCards/CompanyCard";
 import {RecommendationResult} from "@/lib/openai/client";
-import GoogleSignUpButton from "../ui/GoogleSignUpButton";
+import {Button} from "../ui/button";
 
 interface SignupDialogProps {
   open: boolean;
@@ -76,13 +75,15 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
         {/* Signup Buttons */}
         <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Button
-            size="lg"
-            className="w-full transition-all sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
+            onClick={() => {
+              window.location.href = "https://baseme.app/auth/students/signup";
+            }}
+            className="w-full p-4 text-white transition-all rounded-md sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
           >
             {t("cta.primaryButton") || "Sign up with Email"}
           </Button>
-          
-          <GoogleSignUpButton t={t} />
+
+          {/* <GoogleSignUpButton t={t} /> */}
         </div>
 
         {/* Disclaimer */}
