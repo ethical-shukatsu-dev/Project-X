@@ -12,6 +12,7 @@ import BounceCards from "@/components/ui/Components/BounceCards/BounceCards";
 import CompanyCard from "@/components/ui/Components/BounceCards/CompanyCard";
 import {RecommendationResult} from "@/lib/openai/client";
 import {Button} from "../ui/button";
+import { trackSignupClick, trackEvent } from "@/lib/analytics";
 
 // Extend the RecommendationResult type to include the feedback property
 interface ExtendedRecommendationResult extends RecommendationResult {
@@ -54,6 +55,38 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
       />
     )).reverse();
 
+  // Handle sign up button click with tracking
+  const handleSignupClick = () => {
+    // Track the signup click event
+    trackSignupClick('signup_dialog', {
+      dialog_type: showInPage ? 'in_page' : 'modal',
+      revealed_companies: filteredRecommendations.filter(rec => rec.feedback).length,
+      total_companies: recommendations.length,
+    }).catch(error => {
+      console.error('Error tracking signup click:', error);
+    });
+
+    // Navigate to signup page
+    window.location.href = "https://baseme.app/auth/students/signup";
+  };
+
+  // Handle dialog close with tracking
+  const handleDialogClose = () => {
+    // Only track dismissal if not in in-page mode (since there's no close button in in-page mode)
+    if (!showInPage) {
+      trackEvent('dialog_close', {
+        dialog_type: 'signup',
+        revealed_companies: filteredRecommendations.filter(rec => rec.feedback).length,
+        total_companies: recommendations.length,
+      }).catch(error => {
+        console.error('Error tracking dialog close:', error);
+      });
+    }
+    
+    // Call the parent's onClose handler
+    onClose();
+  };
+
   // The content to be displayed both in dialog and in-page mode
   const content = (
     <>
@@ -90,9 +123,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
       {/* Signup Buttons */}
       <div className="flex flex-col justify-center gap-4 sm:flex-row">
         <Button
-          onClick={() => {
-            window.location.href = "https://baseme.app/auth/students/signup";
-          }}
+          onClick={handleSignupClick}
           className="w-full p-4 text-white transition-all rounded-md sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
         >
           {t("cta.primaryButton") || "Sign up with Email"}
@@ -122,7 +153,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
 
   // Otherwise render as modal dialog
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[50vw] max-h-[90vh] overflow-y-auto">
         <DialogTitle className="sr-only">
           {t("cta.title") || "Ready to unlock your perfect career match?"}
