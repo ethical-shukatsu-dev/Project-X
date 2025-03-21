@@ -55,7 +55,7 @@ export default function CompanyCard({
       // Reset the revealing animation state after animation completes
       const timer = setTimeout(() => {
         setIsRevealing(false);
-      }, 2000); // Match this with the CSS animation duration
+      }, 2800); // Match this with the CSS animation duration
 
       return () => clearTimeout(timer);
     }
@@ -155,7 +155,7 @@ export default function CompanyCard({
     isRevealing ? "shadow-lg" : ""
   } ${wasAnonymous && feedback ? "revealed-card" : ""}`;
 
-  const revealOverlayClasses = `absolute inset-0 z-10 flex items-center justify-center bg-primary/10 backdrop-blur-sm transition-opacity duration-700 ${
+  const revealOverlayClasses = `fixed inset-0 z-50 flex items-center justify-center bg-primary/10 backdrop-blur-sm transition-opacity duration-700 ${
     isRevealing ? "opacity-100" : "opacity-0 pointer-events-none"
   }`;
 
@@ -174,11 +174,22 @@ export default function CompanyCard({
       {/* Reveal animation overlay */}
       {wasAnonymous && (
         <div className={revealOverlayClasses}>
-          <div className="p-6 text-center rounded-lg shadow-lg bg-background/80">
-            <div className="mb-2 text-2xl font-bold text-white reveal-text">
+          <div className="flex flex-col items-center justify-center p-6 text-center rounded-lg shadow-lg bg-background/80">
+            {company.logo_url && !logoError ? (
+              <Avatar className="mb-2 w-14 h-14 ring-1 ring-white">
+                <AvatarImage
+                  src={company.logo_url}
+                  onError={() => setLogoError(true)}
+                />
+                <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
+              </Avatar>
+            ) : null}
+
+            <div className="mb-2 text-2xl font-bold text-black/80 reveal-text">
               {company.name}
             </div>
-            <p className="text-sm text-white opacity-80 reveal-text-delay">
+
+            <p className="text-sm text-muted-foreground reveal-text-delay">
               {t(
                 feedback === "interested"
                   ? "recommendations.feedback.companyRevealed.interested"
