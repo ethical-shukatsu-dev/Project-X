@@ -1,5 +1,6 @@
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 import FeatureCard from "@/components/ui/FeatureCard/FeatureCard";
+import QuestionnaireOptions from "@/components/ui/QuestionnaireOptions/QuestionnaireOptions";
 
 interface FeaturesSectionProps {
   title: string;
@@ -8,9 +9,22 @@ interface FeaturesSectionProps {
     description: string;
     color: "blue" | "purple" | "pink";
   }[];
+  showQuestionnaireOptions?: boolean;
+  selectText?: string;
+  textQuestionnaireText?: string;
+  imageQuestionnaireText?: string;
+  lng?: string;
 }
 
-export default function FeaturesSection({ title, features }: FeaturesSectionProps) {
+export default function FeaturesSection({
+  title,
+  features,
+  showQuestionnaireOptions = false,
+  selectText = "",
+  textQuestionnaireText = "",
+  imageQuestionnaireText = "",
+  lng = "",
+}: FeaturesSectionProps) {
   const icons = {
     blue: (
       <svg
@@ -88,7 +102,24 @@ export default function FeaturesSection({ title, features }: FeaturesSectionProp
             </AnimatedContent>
           ))}
         </div>
+
+        {showQuestionnaireOptions &&
+          lng &&
+          selectText &&
+          textQuestionnaireText &&
+          imageQuestionnaireText && (
+            <div className="flex items-center justify-center mt-16 text-center">
+              <QuestionnaireOptions
+                selectText={selectText}
+                textQuestionnaireText={textQuestionnaireText}
+                imageQuestionnaireText={imageQuestionnaireText}
+                lng={lng}
+                showAnimation={true}
+                animationDelay={100}
+              />
+            </div>
+          )}
       </div>
     </section>
   );
-} 
+}
