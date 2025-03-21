@@ -135,7 +135,7 @@ export default function AnalyticsDashboard() {
   };
 
   return (
-    <div className="container py-8">
+    <div className="container flex flex-col justify-center p-8">
       <h1 className="mb-6 text-3xl font-bold">Analytics Dashboard</h1>
 
       {/* Time range selector */}
