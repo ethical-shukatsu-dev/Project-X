@@ -2,9 +2,9 @@ import {Suspense} from "react";
 import {Skeleton} from "@/components/ui/skeleton";
 import RecommendationsContent from "@/components/recommendations/RecommendationsContent";
 import {getTranslation} from "@/i18n-server";
-import Aurora from "@/components/ui/Backgrounds/Aurora/Aurora";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import FloatingElement from "@/components/ui/FloatingElement";
+import BackgroundEffects from "@/components/ui/BackgroundEffects/BackgroundEffects";
+import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
 
 // Loading fallback component
 async function RecommendationsLoading({lng}: {lng: string}) {
@@ -40,59 +40,8 @@ export default function RecommendationsPage({
 
     return (
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
-        {/* Background Aurora Effect */}
-        <div className="absolute inset-0 z-0 opacity-40">
-          <Aurora
-            colorStops={["#3B82F6", "#8B5CF6", "#EC4899"]}
-            amplitude={1.5}
-            blend={0.6}
-          />
-        </div>
-
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 z-0 opacity-5"
-          style={{
-            backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: "50px 50px",
-          }}
-        ></div>
-
-        {/* Grain overlay using CSS pattern */}
-        <div
-          className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-10"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            backgroundRepeat: "repeat",
-          }}
-        ></div>
-
-        {/* Decorative floating elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-5">
-          <FloatingElement
-            className="absolute top-[15%] left-[8%]"
-            baseSpeed={9}
-            intensity={15}
-          >
-            <div className="bg-blue-500 rounded-full w-14 h-14 opacity-20 blur-xl"></div>
-          </FloatingElement>
-
-          <FloatingElement
-            className="absolute top-[40%] right-[12%]"
-            baseSpeed={7}
-            intensity={1.5}
-          >
-            <div className="w-16 h-16 bg-purple-500 rounded-full opacity-20 blur-xl"></div>
-          </FloatingElement>
-
-          <FloatingElement
-            className="absolute bottom-[30%] left-[20%]"
-            baseSpeed={6}
-            intensity={1.2}
-          >
-            <div className="w-20 h-20 bg-pink-500 rounded-full opacity-20 blur-xl"></div>
-          </FloatingElement>
-        </div>
+        <BackgroundEffects />
+        <FloatingDecorations />
 
         <main className="relative z-20 flex-1">
           <Suspense fallback={<RecommendationsLoading lng={lng} />}>

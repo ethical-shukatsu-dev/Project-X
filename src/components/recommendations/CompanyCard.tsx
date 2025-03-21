@@ -205,11 +205,11 @@ export default function CompanyCard({
       {/* Reveal animation overlay */}
       {wasAnonymous && (
         <div className={revealOverlayClasses}>
-          <div className="text-center p-6 rounded-lg bg-background/80 shadow-lg">
-            <div className="text-2xl font-bold mb-2 reveal-text text-white">
+          <div className="p-6 text-center rounded-lg shadow-lg bg-background/80">
+            <div className="mb-2 text-2xl font-bold text-white reveal-text">
               {company.name}
             </div>
-            <p className="text-sm opacity-80 reveal-text-delay text-white">
+            <p className="text-sm text-white opacity-80 reveal-text-delay">
               {t(
                 feedback === "interested"
                   ? "recommendations.feedback.companyRevealed.interested"
@@ -221,11 +221,11 @@ export default function CompanyCard({
       )}
 
       <Card className={cardClasses}>
-        <CardHeader className="flex flex-row items-center gap-4">
+        <CardHeader className="flex flex-row items-center gap-2 px-3 sm:gap-4 ">
           {!shouldAnonymize ? (
             <Link href={company.site_url || "/"} target="_blank">
               <Avatar
-                className={`h-14 w-14 ring-1 ring-white ${
+                className={`h-10 w-10 sm:h-14 sm:w-14 ring-1 ring-white ${
                   wasAnonymous && feedback ? "reveal-avatar" : ""
                 }`}
               >
@@ -249,7 +249,7 @@ export default function CompanyCard({
               </Avatar>
             </Link>
           ) : (
-            <Avatar className="h-14 w-14 relative">
+            <Avatar className="relative h-14 w-14">
               <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
                 <EyeOff size={20} className="opacity-70" />
               </div>
@@ -295,13 +295,13 @@ export default function CompanyCard({
           </div>
         </CardHeader>
 
-        <CardContent>
-          <div className="mb-4">
-            <h3 className="text-sm font-medium mb-2 text-white">
+        <CardContent className="px-3 sm:px-6">
+          <div className="mb-3 sm:mb-4">
+            <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
               {t("recommendations.about")}
             </h3>
             <p
-              className={`text-sm text-white/80 ${
+              className={`text-xs sm:text-sm text-white/80 ${
                 wasAnonymous && feedback ? "reveal-text-delay" : ""
               }`}
             >
@@ -311,10 +311,10 @@ export default function CompanyCard({
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-medium mb-2 text-white">
+            <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
               {t("recommendations.whyMatch")}
             </h3>
-            <ul className="list-disc pl-5 text-sm text-white/80">
+            <ul className="pl-4 text-xs list-disc sm:pl-5 sm:text-sm text-white/80">
               {matchingPoints && matchingPoints.length > 0 ? (
                 matchingPoints.map((point, index) => (
                   <li
@@ -339,7 +339,7 @@ export default function CompanyCard({
 
         <CardFooter className="flex justify-end gap-4">
           {feedback ? (
-            <div className="w-full flex justify-center items-center gap-2 text-sm text-white">
+            <div className="flex items-center justify-center w-full gap-2 text-sm text-white">
               {getFeedbackIcon()}
               <span>
                 {feedback === "interested"
@@ -349,18 +349,18 @@ export default function CompanyCard({
             </div>
           ) : (
             <>
-              <Button
+              {/* <Button
                 variant="outline"
                 onClick={() => handleFeedback("not_interested")}
                 className=" text-white/90 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105 active:scale-95 bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10"
               >
                 <ThumbsDown className="w-4 h-4 mr-2 text-red-500" />
                 {t("recommendations.feedback.notInterested")}
-              </Button>
+              </Button> */}
 
               <Button
                 onClick={() => handleFeedback("interested")}
-                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all hover:scale-105 active:scale-95"
+                className="w-full transition-all sm:w-fit bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
               >
                 <PartyPopper className="w-4 h-4 mr-2 text-white" />
                 {t("recommendations.feedback.interested")}
