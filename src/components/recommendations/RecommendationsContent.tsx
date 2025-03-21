@@ -297,7 +297,7 @@ export default function RecommendationsContent({
                 key={recommendation.id || recommendation.company.id}
                 direction="vertical"
                 distance={20}
-                delay={index === 0 ? 1050 : 100}
+                delay={index === 0 ? 900 : 100}
               >
                 <CompanyCard
                   key={recommendation.id || recommendation.company.id}

@@ -141,7 +141,7 @@ export default function RecommendationTabs({
       </AnimatedContent> */}
 
       {/* Company Size Tabs */}
-      <AnimatedContent direction="vertical" distance={20} delay={900}>
+      <AnimatedContent direction="vertical" distance={20} delay={600}>
         <Tabs
           defaultValue="all-sizes"
           className="w-full mb-3 sm:mb-6"
