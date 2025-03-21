@@ -12,7 +12,8 @@ import BounceCards from "@/components/ui/Components/BounceCards/BounceCards";
 import CompanyCard from "@/components/ui/Components/BounceCards/CompanyCard";
 import {RecommendationResult} from "@/lib/openai/client";
 import {Button} from "../ui/button";
-import { trackSignupClick, trackEvent } from "@/lib/analytics";
+import {trackSignupClick, trackEvent} from "@/lib/analytics";
+import {useIsMobile} from "../../hooks/useIsMobile";
 
 // Extend the RecommendationResult type to include the feedback property
 interface ExtendedRecommendationResult extends RecommendationResult {
@@ -37,13 +38,14 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   showRevealedOnly = false,
 }) => {
   const {t} = useTranslation(lng, "ai");
+  const isMobile = useIsMobile();
 
   // Create company cards for the first 5 recommendations
   // If showRevealedOnly is true, only show companies with feedback
   const filteredRecommendations = showRevealedOnly
-    ? recommendations.filter(rec => rec.feedback)
+    ? recommendations.filter((rec) => rec.feedback)
     : recommendations;
-    
+
   const companyCards = filteredRecommendations
     .slice(0, 5)
     .map((rec) => (
@@ -53,17 +55,19 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
         logoUrl={rec.company.logo_url}
         shouldAnonymize={!rec.feedback}
       />
-    )).reverse();
+    ))
+    .reverse();
 
   // Handle sign up button click with tracking
   const handleSignupClick = () => {
     // Track the signup click event
-    trackSignupClick('signup_dialog', {
-      dialog_type: showInPage ? 'in_page' : 'modal',
-      revealed_companies: filteredRecommendations.filter(rec => rec.feedback).length,
+    trackSignupClick("signup_dialog", {
+      dialog_type: showInPage ? "in_page" : "modal",
+      revealed_companies: filteredRecommendations.filter((rec) => rec.feedback)
+        .length,
       total_companies: recommendations.length,
-    }).catch(error => {
-      console.error('Error tracking signup click:', error);
+    }).catch((error) => {
+      console.error("Error tracking signup click:", error);
     });
 
     // Navigate to signup page
@@ -74,15 +78,17 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   const handleDialogClose = () => {
     // Only track dismissal if not in in-page mode (since there's no close button in in-page mode)
     if (!showInPage) {
-      trackEvent('dialog_close', {
-        dialog_type: 'signup',
-        revealed_companies: filteredRecommendations.filter(rec => rec.feedback).length,
+      trackEvent("dialog_close", {
+        dialog_type: "signup",
+        revealed_companies: filteredRecommendations.filter(
+          (rec) => rec.feedback
+        ).length,
         total_companies: recommendations.length,
-      }).catch(error => {
-        console.error('Error tracking dialog close:', error);
+      }).catch((error) => {
+        console.error("Error tracking dialog close:", error);
       });
     }
-    
+
     // Call the parent's onClose handler
     onClose();
   };
@@ -90,41 +96,59 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   // The content to be displayed both in dialog and in-page mode
   const content = (
     <>
-      <div className="text-xl font-bold text-center text-white whitespace-pre-line md:text-2xl">
+      <div className="px-6 text-xl font-bold text-center text-white whitespace-pre-line md:text-2xl">
         {t("cta.title") || "Ready to unlock your perfect career match?"}
       </div>
 
       {/* Company Cards */}
-      <div className="relative flex items-center justify-center w-full">
+      <div className="relative flex items-center justify-center w-full overflow-hidden">
         <div className="w-full overflow-hidden">
           <BounceCards
             cards={companyCards}
             containerWidth={Math.min(
               600,
-              Math.max(280, typeof window !== "undefined" ? window.innerWidth * 0.6 - 48 : 280)
+              Math.max(
+                280,
+                typeof window !== "undefined"
+                  ? window.innerWidth * 0.6 - 48
+                  : 280
+              )
             )}
             containerHeight={Math.min(
               300,
-              Math.max(200, typeof window !== "undefined" ? window.innerWidth * 0.35 : 200)
+              Math.max(
+                200,
+                typeof window !== "undefined" ? window.innerWidth * 0.35 : 200
+              )
             )}
             className="mx-auto"
             enableHover={true}
-            transformStyles={[
-              "rotate(5deg) translate(-180px)",
-              "rotate(0deg) translate(-100px)",
-              "rotate(-5deg)",
-              "rotate(5deg) translate(100px)",
-              "rotate(-5deg) translate(180px)",
-            ]}
+            transformStyles={
+              isMobile
+                ? [
+                    "rotate(5deg) translate(-130px, -10px)",
+                    "rotate(-10deg) translate(-80px, 10px)",
+                    "rotate(0deg) translate(0px, -40px)",
+                    "rotate(5deg) translate(60px, 30px)",
+                    "rotate(-15deg) translate(140px, 10px)",
+                  ]
+                : [
+                    "rotate(5deg) translate(-180px)",
+                    "rotate(0deg) translate(-100px)",
+                    "rotate(-5deg)",
+                    "rotate(5deg) translate(100px)",
+                    "rotate(-5deg) translate(180px)",
+                  ]
+            }
           />
         </div>
       </div>
 
       {/* Signup Buttons */}
-      <div className="flex flex-col justify-center gap-4 sm:flex-row">
+      <div className="flex flex-col justify-center gap-4 px-6 sm:flex-row">
         <Button
           onClick={handleSignupClick}
-          className="w-full p-4 text-white transition-all rounded-md sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
+          className="w-full p-4 font-bold text-white transition-all rounded-md sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
         >
           {t("cta.primaryButton") || "Sign up with Email"}
         </Button>
@@ -133,7 +157,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
       </div>
 
       {/* Disclaimer */}
-      <div className="mt-4 text-sm text-center text-white/60">
+      <div className="px-6 mt-4 text-sm text-center text-white/60">
         <p>
           {t("cta.disclaimer") ||
             "By signing up, you agree to our Terms and Privacy Policy."}
@@ -154,13 +178,13 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   // Otherwise render as modal dialog
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[50vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 py-6 px-0 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[50vw] max-h-[90vh] overflow-y-auto">
         <DialogTitle className="sr-only">
           {t("cta.title") || "Ready to unlock your perfect career match?"}
         </DialogTitle>
 
         {content}
-        
+
         <DialogClose className="absolute p-2 transition-colors bg-white rounded-sm right-4 top-4 hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/40" />
       </DialogContent>
     </Dialog>
