@@ -34,7 +34,6 @@ export default function CompanyCard({
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [isRevealing, setIsRevealing] = useState<boolean>(false);
   const [wasAnonymous, setWasAnonymous] = useState<boolean>(false);
-  const [confetti, setConfetti] = useState<boolean>(false);
 
   // Check if we're in a browser environment before accessing localStorage
   useEffect(() => {
@@ -53,16 +52,10 @@ export default function CompanyCard({
       setWasAnonymous(true);
       setIsRevealing(true);
 
-      // Show confetti animation for "interested" feedback
-      if (feedback === "interested") {
-        setConfetti(true);
-        setTimeout(() => setConfetti(false), 3000);
-      }
-
       // Reset the revealing animation state after animation completes
       const timer = setTimeout(() => {
         setIsRevealing(false);
-      }, 2000); // Match this with the CSS animation duration
+      }, 2800); // Match this with the CSS animation duration
 
       return () => clearTimeout(timer);
     }
@@ -162,7 +155,7 @@ export default function CompanyCard({
     isRevealing ? "shadow-lg" : ""
   } ${wasAnonymous && feedback ? "revealed-card" : ""}`;
 
-  const revealOverlayClasses = `absolute inset-0 z-10 flex items-center justify-center bg-primary/10 backdrop-blur-sm transition-opacity duration-700 ${
+  const revealOverlayClasses = `fixed inset-0 z-50 flex items-center justify-center bg-primary/10 backdrop-blur-sm transition-opacity duration-700 ${
     isRevealing ? "opacity-100" : "opacity-0 pointer-events-none"
   }`;
 
@@ -176,40 +169,27 @@ export default function CompanyCard({
     );
   };
 
-  // Generate the confetti elements
-  const renderConfetti = () => {
-    if (!confetti) return null;
-
-    return (
-      <div className="confetti-container">
-        {Array.from({length: 50}).map((_, i) => (
-          <div
-            key={i}
-            className="confetti"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              backgroundColor: `hsl(${Math.random() * 360}, 80%, 60%)`,
-            }}
-          />
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className="relative">
-      {/* Confetti celebration */}
-      {renderConfetti()}
-
       {/* Reveal animation overlay */}
       {wasAnonymous && (
         <div className={revealOverlayClasses}>
-          <div className="p-6 text-center rounded-lg shadow-lg bg-background/80">
-            <div className="mb-2 text-2xl font-bold text-white reveal-text">
+          <div className="flex flex-col items-center justify-center p-6 text-center rounded-lg shadow-lg bg-background/80">
+            {company.logo_url && !logoError ? (
+              <Avatar className="mb-2 w-14 h-14 ring-1 ring-white">
+                <AvatarImage
+                  src={company.logo_url}
+                  onError={() => setLogoError(true)}
+                />
+                <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
+              </Avatar>
+            ) : null}
+
+            <div className="mb-2 text-2xl font-bold text-black/80 reveal-text">
               {company.name}
             </div>
-            <p className="text-sm text-white opacity-80 reveal-text-delay">
+
+            <p className="text-sm text-muted-foreground reveal-text-delay">
               {t(
                 feedback === "interested"
                   ? "recommendations.feedback.companyRevealed.interested"
@@ -360,7 +340,7 @@ export default function CompanyCard({
 
               <Button
                 onClick={() => handleFeedback("interested")}
-                className="w-full transition-all sm:w-fit bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
+                className="w-full font-bold transition-all sm:w-fit bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
               >
                 <PartyPopper className="w-4 h-4 mr-2 text-white" />
                 {t("recommendations.feedback.interested")}

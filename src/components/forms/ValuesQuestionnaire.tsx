@@ -233,6 +233,9 @@ export default function ValuesQuestionnaire({
   >([]);
 
   useEffect(() => {
+    // Scroll to top of page
+    window.scrollTo({top: 0, behavior: "smooth"});
+    
     // Randomly select NUM_RANDOM_IMAGE_QUESTIONS from ALL_IMAGE_QUESTIONS
     const randomQuestions = shuffleArray(ALL_IMAGE_QUESTIONS).slice(
       0,
@@ -285,9 +288,6 @@ export default function ValuesQuestionnaire({
   };
 
   const handleSubmit = async () => {
-    // Scroll to top of page
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    
     setIsSubmitting(true);
     try {
       // Convert values to numeric format for better AI processing

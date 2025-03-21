@@ -16,9 +16,8 @@ import {RecommendationResult} from "@/lib/openai/client";
 import {useTranslation} from "@/i18n-client";
 import SignupDialog from "@/components/recommendations/SignupDialog";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import {RECOMMENDATION_COUNT} from "@/lib/constants/recommendations";
 import RecommendationTabs from "@/components/recommendations/RecommendationTabs";
-
+import {useIsMobile} from "@/hooks/useIsMobile";
 interface RecommendationsContentProps {
   lng: string;
 }
@@ -29,6 +28,8 @@ export default function RecommendationsContent({
   const searchParams = useSearchParams();
   const userId = searchParams?.get("userId") || "";
   const {t, loaded} = useTranslation(lng, "ai");
+  const isMobile = useIsMobile();
+  const CARD_TO_SHOW_SIGNUP_DIALOG = 1;
 
   const [recommendations, setRecommendations] = useState<
     (RecommendationResult & {
@@ -42,8 +43,12 @@ export default function RecommendationsContent({
   const [activeSizeTab, setActiveSizeTab] = useState("all-sizes");
   const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
   const [, setFeedbackCount] = useState(0);
+  const [hasClosedDialog, setHasClosedDialog] = useState(false);
 
   useEffect(() => {
+    // Scroll to top of page
+    window.scrollTo({top: 0, behavior: "smooth"});
+
     const fetchRecommendations = async (refresh = false) => {
       if (!userId) {
         setError(t("recommendations.errors.missing_user_id"));
@@ -142,7 +147,7 @@ export default function RecommendationsContent({
 
         // If this is the last recommendation, wait for the reveal animation
         // before showing the signup dialog
-        if (newCount === RECOMMENDATION_COUNT) {
+        if (newCount === CARD_TO_SHOW_SIGNUP_DIALOG) {
           // Wait for the reveal animation (2000ms) plus a small buffer
           setTimeout(() => {
             setSignupDialogOpen(true);
@@ -155,6 +160,12 @@ export default function RecommendationsContent({
       console.error("Error submitting feedback:", err);
       // Show error message to user
     }
+  };
+
+  // Handle dialog close to track when user has dismissed the dialog
+  const handleDialogClose = () => {
+    setSignupDialogOpen(false);
+    setHasClosedDialog(true);
   };
 
   // Function to get the filtered recommendations based on both tabs
@@ -280,13 +291,52 @@ export default function RecommendationsContent({
           </p>
         </AnimatedContent>
 
-        <AnimatedContent direction="vertical" distance={20} delay={600}>
-          <div className="flex justify-end mb-2 sm:mb-4">
+        <RecommendationTabs
+          lng={lng}
+          recommendations={recommendations}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          activeSizeTab={activeSizeTab}
+          setActiveSizeTab={setActiveSizeTab}
+        />
+
+        {/* Display filtered recommendations */}
+        <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
+          {getFilteredRecommendations().length > 0 ? (
+            getFilteredRecommendations().map((recommendation, index) => (
+              <AnimatedContent
+                key={recommendation.id || recommendation.company.id}
+                direction="vertical"
+                distance={20}
+                delay={isMobile ? (index === 0 ? 900 : 100) : index === 0 ? 900 : 400}
+              >
+                <CompanyCard
+                  key={recommendation.id || recommendation.company.id}
+                  company={recommendation.company}
+                  matchingPoints={recommendation.matching_points}
+                  feedback={recommendation.feedback}
+                  onFeedback={(feedback) =>
+                    recommendation.id &&
+                    handleFeedback(recommendation.id, feedback)
+                  }
+                  lng={lng}
+                />
+              </AnimatedContent>
+            ))
+          ) : (
+            <div className="py-8 text-center">
+              <p className="text-gray-300">{t("recommendations.no_matches")}</p>
+            </div>
+          )}
+        </div>
+
+        <AnimatedContent direction="vertical" distance={20} delay={100}>
+          <div className="flex justify-end my-6">
             <Button
               onClick={handleRefresh}
               disabled={refreshing}
               variant="outline"
-              className="flex items-center gap-2 text-sm sm:text-base bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
+              className="w-full flex items-center gap-2 text-sm sm:text-base bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
             >
               {refreshing ? (
                 <>
@@ -335,52 +385,26 @@ export default function RecommendationsContent({
           </div>
         </AnimatedContent>
 
-        <RecommendationTabs
-          lng={lng}
-          recommendations={recommendations}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          activeSizeTab={activeSizeTab}
-          setActiveSizeTab={setActiveSizeTab}
-        />
-
-        {/* Display filtered recommendations */}
-        <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
-          {getFilteredRecommendations().length > 0 ? (
-            getFilteredRecommendations().map((recommendation, index) => (
-              <AnimatedContent
-                key={recommendation.id || recommendation.company.id}
-                direction="vertical"
-                distance={20}
-                delay={index === 0 ? 1050 : 100}
-              >
-                <CompanyCard
-                  key={recommendation.id || recommendation.company.id}
-                  company={recommendation.company}
-                  matchingPoints={recommendation.matching_points}
-                  feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
-                    recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
-                  }
-                  lng={lng}
-                />
-              </AnimatedContent>
-            ))
-          ) : (
-            <div className="py-8 text-center">
-              <p className="text-gray-300">{t("recommendations.no_matches")}</p>
-            </div>
-          )}
-        </div>
-
         <SignupDialog
           open={isSignupDialogOpen}
-          onClose={() => setSignupDialogOpen(false)}
+          onClose={handleDialogClose}
           lng={lng}
           recommendations={recommendations}
         />
+        
+        {/* Show SignupDialog as in-page component after user has closed the modal */}
+        {hasClosedDialog && (
+          <SignupDialog
+            open={false}
+            onClose={() => {}}
+            lng={lng}
+            recommendations={recommendations}
+            showInPage={true}
+            showRevealedOnly={true}
+          />
+        )}
       </div>
     </div>
   );
 }
+

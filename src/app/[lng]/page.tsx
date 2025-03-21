@@ -30,25 +30,34 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
       },
     ];
 
+    const heroProps = {
+      title: t("homepage.title"),
+      description: t("homepage.description"),
+      selectText: t("homepage.selectQuestionnaireType"),
+      textQuestionnaireText: t("homepage.textQuestionnaire"),
+      imageQuestionnaireText: t("homepage.imageQuestionnaire"),
+      lng: lng,
+    };
+
+    const featuresProps = {
+      title: t("features.quick.title") || "Why Choose Us",
+      features: features,
+      showQuestionnaireOptions: true,
+      selectText: t("homepage.selectQuestionnaireType"),
+      textQuestionnaireText: t("homepage.textQuestionnaire"),
+      imageQuestionnaireText: t("homepage.imageQuestionnaire"),
+      lng: lng,
+    };
+
     return (
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
         <BackgroundEffects />
         <FloatingDecorations />
 
         <main className="relative z-20 flex-1">
-          <HeroSection
-            title={t("homepage.title")}
-            description={t("homepage.description")}
-            selectText={t("homepage.selectQuestionnaireType")}
-            textQuestionnaireText={t("homepage.textQuestionnaire")}
-            imageQuestionnaireText={t("homepage.imageQuestionnaire")}
-            lng={lng}
-          />
+          <HeroSection {...heroProps} />
 
-          <FeaturesSection
-            title={t("features.quick.title") || "Why Choose Us"}
-            features={features}
-          />
+          <FeaturesSection {...featuresProps} />
         </main>
 
         <Footer copyright={t("footer.copyright")} />

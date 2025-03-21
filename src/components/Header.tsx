@@ -1,0 +1,29 @@
+"use client";
+
+import { useScrollDirection } from "@/hooks";
+import Link from "next/link";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+
+export default function Header() {
+  const { scrollDirection } = useScrollDirection(5);
+  
+  return (
+    <header 
+      className={`sticky top-0 z-50 transition-all duration-300 border-b backdrop-blur-sm bg-background/80 border-border ${
+        scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"
+      }`}
+    >
+      <div className="mx-auto max-w-7xl">
+        <div className="flex items-center justify-between p-4">
+          <Link 
+            href="/" 
+            className="text-xl font-bold transition-colors duration-200 hover:text-primary"
+          >
+            Project X
+          </Link>
+          <LanguageSwitcher />
+        </div>
+      </div>
+    </header>
+  );
+} 
