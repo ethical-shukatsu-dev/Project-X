@@ -221,7 +221,7 @@ export default function CompanyCard({
       )}
 
       <Card className={cardClasses}>
-        <CardHeader className="flex flex-row items-center gap-2 sm:gap-4 p-3 sm:p-6">
+        <CardHeader className="flex flex-row items-center gap-2 px-3 sm:gap-4 ">
           {!shouldAnonymize ? (
             <Link href={company.site_url || "/"} target="_blank">
               <Avatar
@@ -295,9 +295,9 @@ export default function CompanyCard({
           </div>
         </CardHeader>
 
-        <CardContent className="p-3 sm:p-6">
+        <CardContent className="px-3 sm:px-6">
           <div className="mb-3 sm:mb-4">
-            <h3 className="mb-1 sm:mb-2 text-sm font-medium text-white">
+            <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
               {t("recommendations.about")}
             </h3>
             <p
@@ -311,10 +311,10 @@ export default function CompanyCard({
             </p>
           </div>
           <div>
-            <h3 className="mb-1 sm:mb-2 text-sm font-medium text-white">
+            <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
               {t("recommendations.whyMatch")}
             </h3>
-            <ul className="pl-4 sm:pl-5 text-xs sm:text-sm list-disc text-white/80">
+            <ul className="pl-4 text-xs list-disc sm:pl-5 sm:text-sm text-white/80">
               {matchingPoints && matchingPoints.length > 0 ? (
                 matchingPoints.map((point, index) => (
                   <li

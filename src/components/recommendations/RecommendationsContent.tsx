@@ -345,10 +345,15 @@ export default function RecommendationsContent({
         />
 
         {/* Display filtered recommendations */}
-        <AnimatedContent direction="vertical" distance={30} delay={1050}>
-          <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
-            {getFilteredRecommendations().length > 0 ? (
-              getFilteredRecommendations().map((recommendation) => (
+        <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
+          {getFilteredRecommendations().length > 0 ? (
+            getFilteredRecommendations().map((recommendation, index) => (
+              <AnimatedContent
+                key={recommendation.id || recommendation.company.id}
+                direction="vertical"
+                distance={20}
+                delay={index === 0 ? 1050 : 100}
+              >
                 <CompanyCard
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
@@ -360,16 +365,14 @@ export default function RecommendationsContent({
                   }
                   lng={lng}
                 />
-              ))
-            ) : (
-              <div className="py-8 text-center">
-                <p className="text-gray-300">
-                  {t("recommendations.no_matches")}
-                </p>
-              </div>
-            )}
-          </div>
-        </AnimatedContent>
+              </AnimatedContent>
+            ))
+          ) : (
+            <div className="py-8 text-center">
+              <p className="text-gray-300">{t("recommendations.no_matches")}</p>
+            </div>
+          )}
+        </div>
 
         <SignupDialog
           open={isSignupDialogOpen}
