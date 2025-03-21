@@ -1,10 +1,9 @@
-import Link from "next/link";
 import {getTranslation} from "@/i18n-server";
-import AnonymousModeToggle from "@/components/AnonymousModeToggle";
-import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import Aurora from "@/components/ui/Backgrounds/Aurora/Aurora";
-import StarBorder from "@/components/ui/Animations/StarBorder/StarBorder";
-import FloatingElement from "@/components/ui/FloatingElement";
+import BackgroundEffects from "@/components/ui/BackgroundEffects/BackgroundEffects";
+import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
+import HeroSection from "@/components/sections/HeroSection/HeroSection";
+import FeaturesSection from "@/components/sections/FeaturesSection/FeaturesSection";
+import Footer from "@/components/ui/Footer/Footer";
 
 export default function Home({params}: {params: Promise<{lng: string}>}) {
   // Use an async IIFE to handle the Promise
@@ -13,320 +12,46 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
     const lng = resolvedParams.lng;
     const {t} = await getTranslation(lng, "common");
 
+    const features = [
+      {
+        title: t("features.quick.title"),
+        description: t("features.quick.description"),
+        color: "blue" as const,
+      },
+      {
+        title: t("features.values.title"),
+        description: t("features.values.description"),
+        color: "purple" as const,
+      },
+      {
+        title: t("features.insights.title"),
+        description: t("features.insights.description"),
+        color: "pink" as const,
+      },
+    ];
+
     return (
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
-        {/* Background Aurora Effect */}
-        <div className="absolute inset-0 z-0 opacity-40 sm:opacity-50">
-          <Aurora
-            colorStops={["#3B82F6", "#8B5CF6", "#EC4899"]}
-            amplitude={1.5}
-            blend={0.6}
-          />
-        </div>
-
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 z-0 opacity-5"
-          style={{
-            backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: "50px 50px",
-          }}
-        ></div>
-
-        {/* Grain overlay using CSS pattern */}
-        <div
-          className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-10"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            backgroundRepeat: "repeat",
-          }}
-        ></div>
-
-        {/* Decorative floating elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-5">
-          <FloatingElement
-            className="absolute top-[5%] left-[2%] sm:top-[10%] sm:left-[5%]"
-            baseSpeed={10}
-            intensity={20}
-          >
-            <div className="w-8 h-8 bg-blue-500 rounded-full sm:w-12 sm:h-12 opacity-20 blur-xl"></div>
-          </FloatingElement>
-
-          <FloatingElement
-            className="absolute top-[20%] right-[5%] sm:top-[30%] sm:right-[10%]"
-            baseSpeed={8}
-            intensity={1.2}
-          >
-            <div className="w-10 h-10 bg-purple-500 rounded-full sm:w-16 sm:h-16 opacity-20 blur-xl"></div>
-          </FloatingElement>
-
-          <FloatingElement
-            className="absolute bottom-[15%] left-[8%] sm:bottom-[20%] sm:left-[15%]"
-            baseSpeed={5}
-            intensity={1}
-          >
-            <div className="w-12 h-12 bg-pink-500 rounded-full sm:w-20 sm:h-20 opacity-20 blur-xl"></div>
-          </FloatingElement>
-
-          <FloatingElement
-            className="absolute top-[50%] right-[8%] sm:top-[60%] sm:right-[15%]"
-            baseSpeed={7}
-            intensity={0.9}
-          >
-            <div className="w-10 h-10 bg-blue-500 rounded-full sm:w-14 sm:h-14 opacity-20 blur-xl"></div>
-          </FloatingElement>
-        </div>
+        <BackgroundEffects />
+        <FloatingDecorations />
 
         <main className="relative z-20 flex-1">
-          <section className="relative w-full pt-16 pb-24 overflow-hidden sm:pt-20 md:pt-24 sm:pb-28 md:pb-32">
-            <div className="container max-w-6xl px-4 mx-auto md:px-6">
-              <div className="flex flex-col items-center space-y-4 text-center sm:space-y-6 md:space-y-10">
-                <AnimatedContent direction="vertical" distance={40} delay={300}>
-                  <h1 className="px-2 text-4xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 sm:text-5xl md:text-7xl lg:text-8xl">
-                    {t("homepage.title")}
-                  </h1>
-                </AnimatedContent>
+          <HeroSection
+            title={t("homepage.title")}
+            description={t("homepage.description")}
+            selectText={t("homepage.selectQuestionnaireType")}
+            textQuestionnaireText={t("homepage.textQuestionnaire")}
+            imageQuestionnaireText={t("homepage.imageQuestionnaire")}
+            lng={lng}
+          />
 
-                <AnimatedContent direction="vertical" distance={30} delay={600}>
-                  <p className="max-w-[600px] text-gray-300 text-base sm:text-lg md:text-xl leading-relaxed px-4 sm:px-6">
-                    {t("homepage.description")}
-                  </p>
-                </AnimatedContent>
-
-                <AnimatedContent direction="vertical" distance={30} delay={900}>
-                  <div className="px-4 mt-4 space-y-4 sm:space-y-6 sm:mt-6 md:mt-10">
-                    <p className="text-base font-medium text-gray-200 sm:text-lg">
-                      {t("homepage.selectQuestionnaireType")}
-                    </p>
-
-                    <div className="flex flex-col justify-center w-full gap-4 sm:flex-row sm:gap-5 sm:w-auto">
-                      <Link
-                        href={`/${lng}/questionnaire?type=text`}
-                      >
-                        <StarBorder
-                          as="div"
-                          color="#3B82F6"
-                          className="transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]"
-                        >
-                          <span className="flex items-center justify-center gap-2">
-                          <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                              ></path>
-                            </svg>
-                            {t("homepage.textQuestionnaire")}
-                          </span>
-                        </StarBorder>
-                      </Link>
-
-                      <Link
-                        href={`/${lng}/questionnaire?type=image`}
-                        className="block"
-                      >
-                        <StarBorder
-                          as="div"
-                          color="#EC4899"
-                          className="transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(236,72,153,0.5)]"
-                        >
-                          <span className="flex items-center justify-center gap-2">
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                              ></path>
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                              ></path>
-                            </svg>
-
-                            {t("homepage.imageQuestionnaire")}
-                          </span>
-                        </StarBorder>
-                      </Link>
-                    </div>
-
-                    <AnimatedContent
-                      direction="vertical"
-                      distance={20}
-                      delay={1200}
-                    >
-                      <div className="flex justify-center pt-3 mt-6">
-                        <AnonymousModeToggle lng={lng} />
-                      </div>
-                    </AnimatedContent>
-                  </div>
-                </AnimatedContent>
-              </div>
-            </div>
-
-            {/* Decorative elements */}
-            <div className="absolute hidden w-40 h-40 bg-blue-500 rounded-full sm:block -left-20 top-1/3 opacity-20 blur-3xl"></div>
-            <div className="absolute hidden bg-purple-500 rounded-full sm:block -right-20 top-2/3 w-60 h-60 opacity-10 blur-3xl"></div>
-          </section>
-
-          <section className="relative z-10 w-full pb-16 overflow-hidden sm:pb-20 md:pb-24 lg:pb-32">
-            <div className="container max-w-6xl px-4 mx-auto md:px-6">
-              <AnimatedContent direction="vertical" distance={40} delay={300}>
-                <h2 className="px-2 mb-12 text-2xl font-bold text-center text-transparent sm:text-3xl md:text-4xl sm:mb-16 bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                  {t("features.quick.title") || "Why Choose Us"}
-                </h2>
-              </AnimatedContent>
-
-              <div className="grid gap-6 px-2 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 sm:px-0">
-                <AnimatedContent direction="vertical" distance={40} delay={400}>
-                  <div className="relative p-6 md:p-8 rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 group transition-all hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-500/50 duration-300">
-                    <div className="flex items-center justify-center mb-6 transition-all duration-300 rounded-full w-14 h-14 bg-blue-500/10 group-hover:bg-blue-500/20">
-                      <svg
-                        className="text-blue-400 w-7 h-7"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M13 10V3L4 14h7v7l9-11h-7z"
-                        ></path>
-                      </svg>
-                    </div>
-                    <h3 className="mb-3 text-xl font-semibold text-white transition-colors group-hover:text-blue-400">
-                      {t("features.quick.title")}
-                    </h3>
-                    <p className="text-gray-400 transition-colors group-hover:text-gray-300">
-                      {t("features.quick.description")}
-                    </p>
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
-                  </div>
-                </AnimatedContent>
-
-                <AnimatedContent direction="vertical" distance={40} delay={600}>
-                  <div className="relative p-6 md:p-8 rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 group transition-all hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-500/50 duration-300">
-                    <div className="flex items-center justify-center mb-6 transition-all duration-300 rounded-full w-14 h-14 bg-purple-500/10 group-hover:bg-purple-500/20">
-                      <svg
-                        className="text-purple-400 w-7 h-7"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                        ></path>
-                      </svg>
-                    </div>
-                    <h3 className="mb-3 text-xl font-semibold text-white transition-colors group-hover:text-purple-400">
-                      {t("features.values.title")}
-                    </h3>
-                    <p className="text-gray-400 transition-colors group-hover:text-gray-300">
-                      {t("features.values.description")}
-                    </p>
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
-                  </div>
-                </AnimatedContent>
-
-                <AnimatedContent direction="vertical" distance={40} delay={800}>
-                  <div className="relative p-6 md:p-8 rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 group transition-all hover:shadow-xl hover:shadow-pink-500/10 hover:border-pink-500/50 duration-300">
-                    <div className="flex items-center justify-center mb-6 transition-all duration-300 rounded-full w-14 h-14 bg-pink-500/10 group-hover:bg-pink-500/20">
-                      <svg
-                        className="text-pink-400 w-7 h-7"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                        ></path>
-                      </svg>
-                    </div>
-                    <h3 className="mb-3 text-xl font-semibold text-white transition-colors group-hover:text-pink-400">
-                      {t("features.insights.title")}
-                    </h3>
-                    <p className="text-gray-400 transition-colors group-hover:text-gray-300">
-                      {t("features.insights.description")}
-                    </p>
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-500 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
-                  </div>
-                </AnimatedContent>
-              </div>
-            </div>
-
-            {/* Decorative elements */}
-            <div className="absolute bottom-0 bg-blue-500 rounded-full left-1/4 w-80 h-80 opacity-10 blur-3xl -z-10"></div>
-          </section>
+          <FeaturesSection
+            title={t("features.quick.title") || "Why Choose Us"}
+            features={features}
+          />
         </main>
 
-        <footer className="relative z-20 w-full py-6 border-t sm:py-8 border-white/10">
-          <div className="container px-4 mx-auto md:px-6">
-            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <p className="text-xs text-center text-gray-400 sm:text-sm sm:text-left">
-                {t("footer.copyright")}
-              </p>
-              <div className="flex space-x-4 sm:space-x-6">
-                <a
-                  href="#"
-                  className="text-gray-400 transition-colors hover:text-white"
-                >
-                  <span className="sr-only">Twitter</span>
-                  <svg
-                    className="w-6 h-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287a4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-                  </svg>
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 transition-colors hover:text-white"
-                >
-                  <span className="sr-only">GitHub</span>
-                  <svg
-                    className="w-6 h-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </div>
-        </footer>
+        <Footer copyright={t("footer.copyright")} />
       </div>
     );
   };
