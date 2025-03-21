@@ -16,7 +16,6 @@ import {RecommendationResult} from "@/lib/openai/client";
 import {useTranslation} from "@/i18n-client";
 import SignupDialog from "@/components/recommendations/SignupDialog";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import {RECOMMENDATION_COUNT} from "@/lib/constants/recommendations";
 import RecommendationTabs from "@/components/recommendations/RecommendationTabs";
 import {useIsMobile} from "@/hooks/useIsMobile";
 interface RecommendationsContentProps {
@@ -30,6 +29,7 @@ export default function RecommendationsContent({
   const userId = searchParams?.get("userId") || "";
   const {t, loaded} = useTranslation(lng, "ai");
   const isMobile = useIsMobile();
+  const CARD_TO_SHOW_SIGNUP_DIALOG = 1;
 
   const [recommendations, setRecommendations] = useState<
     (RecommendationResult & {
@@ -146,7 +146,7 @@ export default function RecommendationsContent({
 
         // If this is the last recommendation, wait for the reveal animation
         // before showing the signup dialog
-        if (newCount === RECOMMENDATION_COUNT) {
+        if (newCount === CARD_TO_SHOW_SIGNUP_DIALOG) {
           // Wait for the reveal animation (2000ms) plus a small buffer
           setTimeout(() => {
             setSignupDialogOpen(true);
