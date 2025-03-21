@@ -221,11 +221,11 @@ export default function CompanyCard({
       )}
 
       <Card className={cardClasses}>
-        <CardHeader className="flex flex-row items-center gap-4">
+        <CardHeader className="flex flex-row items-center gap-2 sm:gap-4 p-3 sm:p-6">
           {!shouldAnonymize ? (
             <Link href={company.site_url || "/"} target="_blank">
               <Avatar
-                className={`h-14 w-14 ring-1 ring-white ${
+                className={`h-10 w-10 sm:h-14 sm:w-14 ring-1 ring-white ${
                   wasAnonymous && feedback ? "reveal-avatar" : ""
                 }`}
               >
@@ -295,13 +295,13 @@ export default function CompanyCard({
           </div>
         </CardHeader>
 
-        <CardContent>
-          <div className="mb-4">
-            <h3 className="mb-2 text-sm font-medium text-white">
+        <CardContent className="p-3 sm:p-6">
+          <div className="mb-3 sm:mb-4">
+            <h3 className="mb-1 sm:mb-2 text-sm font-medium text-white">
               {t("recommendations.about")}
             </h3>
             <p
-              className={`text-sm text-white/80 ${
+              className={`text-xs sm:text-sm text-white/80 ${
                 wasAnonymous && feedback ? "reveal-text-delay" : ""
               }`}
             >
@@ -311,10 +311,10 @@ export default function CompanyCard({
             </p>
           </div>
           <div>
-            <h3 className="mb-2 text-sm font-medium text-white">
+            <h3 className="mb-1 sm:mb-2 text-sm font-medium text-white">
               {t("recommendations.whyMatch")}
             </h3>
-            <ul className="pl-5 text-sm list-disc text-white/80">
+            <ul className="pl-4 sm:pl-5 text-xs sm:text-sm list-disc text-white/80">
               {matchingPoints && matchingPoints.length > 0 ? (
                 matchingPoints.map((point, index) => (
                   <li

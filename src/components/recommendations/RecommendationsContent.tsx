@@ -322,27 +322,27 @@ export default function RecommendationsContent({
   };
 
   return (
-    <div className="container px-4 py-8 mx-auto">
+    <div className="container px-4 py-4 mx-auto sm:py-8">
       <div className="max-w-4xl mx-auto">
         <AnimatedContent direction="vertical" distance={40} delay={300}>
-          <h1 className="mb-8 text-3xl font-bold text-center text-transparent md:text-4xl bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+          <h1 className="mb-4 text-2xl font-bold text-center text-transparent sm:text-3xl md:text-4xl sm:mb-8 bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
             {t("recommendations.title")}
           </h1>
         </AnimatedContent>
 
         <AnimatedContent direction="vertical" distance={30} delay={450}>
-          <p className="mb-8 text-lg text-center text-gray-300">
+          <p className="mb-4 text-base text-center text-gray-300 sm:text-lg sm:mb-8">
             {t("recommendations.description")}
           </p>
         </AnimatedContent>
 
         <AnimatedContent direction="vertical" distance={20} delay={600}>
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-end mb-2 sm:mb-4">
             <Button
               onClick={handleRefresh}
               disabled={refreshing}
               variant="outline"
-              className="flex items-center gap-2 bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
+              className="flex items-center gap-2 text-sm sm:text-base bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
             >
               {refreshing ? (
                 <>
@@ -397,34 +397,34 @@ export default function RecommendationsContent({
         <AnimatedContent direction="vertical" distance={20} delay={750}>
           <Tabs
             defaultValue="all"
-            className="w-full mb-6"
+            className="w-full mb-3 sm:mb-6"
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <TabsList className="flex flex-wrap h-full gap-2 p-1 bg-gradient-to-b from-white/10 to-white/[0.02] backdrop-blur-sm border border-white/10">
+            <TabsList className="flex flex-wrap h-full gap-1 p-1 sm:gap-2 bg-gradient-to-b from-white/10 to-white/[0.02] backdrop-blur-sm border border-white/10">
               <TabsTrigger
                 value="all"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
               >
                 {t("recommendations.tabs.all")} ({recommendations.length})
               </TabsTrigger>
               <TabsTrigger
                 value="pending"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
               >
                 {t("recommendations.tabs.pending")} (
                 {pendingRecommendations.length})
               </TabsTrigger>
               <TabsTrigger
                 value="interested"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
               >
                 {t("recommendations.tabs.interested")} (
                 {interestedRecommendations.length})
               </TabsTrigger>
               <TabsTrigger
                 value="not-interested"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
               >
                 {t("recommendations.tabs.not_interested")} (
                 {notInterestedRecommendations.length})
@@ -437,41 +437,41 @@ export default function RecommendationsContent({
         <AnimatedContent direction="vertical" distance={20} delay={900}>
           <Tabs
             defaultValue="all-sizes"
-            className="w-full mb-6"
+            className="w-full mb-3 sm:mb-6"
             value={activeSizeTab}
             onValueChange={setActiveSizeTab}
           >
-            <TabsList className="flex flex-wrap h-full gap-2 p-1 bg-gradient-to-b from-white/10 to-white/[0.02] backdrop-blur-sm border border-white/10">
+            <TabsList className="flex flex-wrap h-full gap-1 p-1 sm:gap-2 bg-gradient-to-b from-white/10 to-white/[0.02] backdrop-blur-sm border border-white/10">
               <TabsTrigger
                 value="all-sizes"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
               >
                 {t("recommendations.size_tabs.all")} ({recommendations.length})
               </TabsTrigger>
               <TabsTrigger
                 value="startup"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
               >
                 {t("recommendations.size_tabs.startup")} (
                 {startupRecommendations.length})
               </TabsTrigger>
               <TabsTrigger
                 value="small"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
               >
                 {t("recommendations.size_tabs.small")} (
                 {smallRecommendations.length})
               </TabsTrigger>
               <TabsTrigger
                 value="medium"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
               >
                 {t("recommendations.size_tabs.medium")} (
                 {mediumRecommendations.length})
               </TabsTrigger>
               <TabsTrigger
                 value="large"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
               >
                 {t("recommendations.size_tabs.large")} (
                 {largeRecommendations.length})
@@ -482,7 +482,7 @@ export default function RecommendationsContent({
 
         {/* Display filtered recommendations */}
         <AnimatedContent direction="vertical" distance={30} delay={1050}>
-          <div className="mt-6 space-y-6">
+          <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
             {getFilteredRecommendations().length > 0 ? (
               getFilteredRecommendations().map((recommendation) => (
                 <CompanyCard
