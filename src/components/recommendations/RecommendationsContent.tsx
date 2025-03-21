@@ -157,6 +157,55 @@ export default function RecommendationsContent({
     }
   };
 
+  // Function to get the filtered recommendations based on both tabs
+  const getFilteredRecommendations = () => {
+    // Helper function to determine company size category
+    const getSizeCategory = (sizeText: string, industry?: string): string => {
+      const normalizedSize = sizeText.toLowerCase();
+      const normalizedIndustry = industry?.toLowerCase() || "";
+
+      if (
+        normalizedSize.includes("startup") ||
+        normalizedSize.includes("スタートアップ") ||
+        normalizedIndustry.includes("startup") ||
+        normalizedIndustry.includes("スタートアップ")
+      ) {
+        return "startup";
+      }
+      if (normalizedSize.includes("small") || normalizedSize.includes("小")) {
+        return "small";
+      }
+      if (normalizedSize.includes("medium") || normalizedSize.includes("中")) {
+        return "medium";
+      }
+      if (normalizedSize.includes("large") || normalizedSize.includes("大")) {
+        return "large";
+      }
+      return "unknown";
+    };
+
+    // First filter by feedback status
+    let filtered = [...recommendations];
+    if (activeTab === "interested") {
+      filtered = filtered.filter((rec) => rec.feedback === "interested");
+    } else if (activeTab === "not-interested") {
+      filtered = filtered.filter((rec) => rec.feedback === "not_interested");
+    } else if (activeTab === "pending") {
+      filtered = filtered.filter((rec) => !rec.feedback);
+    }
+
+    // Then filter by size if not "all-sizes"
+    if (activeSizeTab !== "all-sizes") {
+      filtered = filtered.filter(
+        (rec) =>
+          getSizeCategory(rec.company.size, rec.company.industry) ===
+          activeSizeTab.replace("-sizes", "")
+      );
+    }
+
+    return filtered;
+  };
+
   // Show loading state while translations are loading
   if (!loaded) {
     return (
@@ -216,111 +265,6 @@ export default function RecommendationsContent({
     );
   }
 
-  const interestedRecommendations = recommendations.filter(
-    (rec) => rec.feedback === "interested"
-  );
-  const notInterestedRecommendations = recommendations.filter(
-    (rec) => rec.feedback === "not_interested"
-  );
-  const pendingRecommendations = recommendations.filter((rec) => !rec.feedback);
-
-  // Helper function to determine company size category
-  const getSizeCategory = (sizeText: string, industry?: string): string => {
-    const normalizedSize = sizeText.toLowerCase();
-    const normalizedIndustry = industry?.toLowerCase() || "";
-
-    // Check for startup - also consider industry
-    if (
-      normalizedSize.includes("startup") ||
-      normalizedSize.includes("スタートアップ") ||
-      normalizedIndustry.includes("startup") ||
-      normalizedIndustry.includes("スタートアップ")
-    ) {
-      return "startup";
-    }
-
-    // Check for small
-    if (normalizedSize.includes("small") || normalizedSize.includes("小")) {
-      return "small";
-    }
-
-    // Check for medium - also check for cases where a company might be between small and large
-    if (normalizedSize.includes("medium") || normalizedSize.includes("中")) {
-      return "medium";
-    }
-
-    // Check for large
-    if (normalizedSize.includes("large") || normalizedSize.includes("大")) {
-      return "large";
-    }
-
-    // Default to unknown if no match
-    return "unknown";
-  };
-
-  // Filter recommendations by company size using the helper function
-  const startupRecommendations = recommendations.filter(
-    (rec) =>
-      getSizeCategory(rec.company.size, rec.company.industry) === "startup"
-  );
-
-  const smallRecommendations = recommendations.filter(
-    (rec) => getSizeCategory(rec.company.size, rec.company.industry) === "small"
-  );
-
-  const mediumRecommendations = recommendations.filter(
-    (rec) =>
-      getSizeCategory(rec.company.size, rec.company.industry) === "medium"
-  );
-
-  const largeRecommendations = recommendations.filter(
-    (rec) => getSizeCategory(rec.company.size, rec.company.industry) === "large"
-  );
-
-  // Function to get the filtered recommendations based on both tabs
-  const getFilteredRecommendations = () => {
-    // First filter by feedback status
-    let filtered: (RecommendationResult & {
-      feedback?: "interested" | "not_interested";
-    })[] = [];
-    if (activeTab === "all") {
-      filtered = [...recommendations];
-    } else if (activeTab === "interested") {
-      filtered = [...interestedRecommendations];
-    } else if (activeTab === "not-interested") {
-      filtered = [...notInterestedRecommendations];
-    } else if (activeTab === "pending") {
-      filtered = [...pendingRecommendations];
-    }
-
-    // Then filter by size if not "all-sizes"
-    if (activeSizeTab === "all-sizes") {
-      return filtered;
-    } else if (activeSizeTab === "startup") {
-      return filtered.filter(
-        (rec) =>
-          getSizeCategory(rec.company.size, rec.company.industry) === "startup"
-      );
-    } else if (activeSizeTab === "small") {
-      return filtered.filter(
-        (rec) =>
-          getSizeCategory(rec.company.size, rec.company.industry) === "small"
-      );
-    } else if (activeSizeTab === "medium") {
-      return filtered.filter(
-        (rec) =>
-          getSizeCategory(rec.company.size, rec.company.industry) === "medium"
-      );
-    } else if (activeSizeTab === "large") {
-      return filtered.filter(
-        (rec) =>
-          getSizeCategory(rec.company.size, rec.company.industry) === "large"
-      );
-    }
-
-    return filtered;
-  };
-
   return (
     <div className="container px-4 py-4 mx-auto sm:py-8">
       <div className="max-w-4xl mx-auto">
@@ -363,8 +307,7 @@ export default function RecommendationsContent({
                     <path
                       className="opacity-75"
                       fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042
- 1.135 5.824 3 7.938l3-2.647z"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
                   {t("recommendations.refreshing")}
@@ -382,8 +325,7 @@ export default function RecommendationsContent({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 
-0 01-15.357-2m15.357 2H15"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
                   {t("recommendations.refresh")}
@@ -400,13 +342,6 @@ export default function RecommendationsContent({
           setActiveTab={setActiveTab}
           activeSizeTab={activeSizeTab}
           setActiveSizeTab={setActiveSizeTab}
-          startupRecommendations={startupRecommendations}
-          smallRecommendations={smallRecommendations}
-          mediumRecommendations={mediumRecommendations}
-          largeRecommendations={largeRecommendations}
-          interestedRecommendations={interestedRecommendations}
-          notInterestedRecommendations={notInterestedRecommendations}
-          pendingRecommendations={pendingRecommendations}
         />
 
         {/* Display filtered recommendations */}

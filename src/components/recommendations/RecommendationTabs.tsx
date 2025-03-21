@@ -5,6 +5,7 @@ import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useTranslation} from "@/i18n-client";
 import {RecommendationResult} from "@/lib/openai/client";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
+import {useMemo} from "react";
 
 interface RecommendationTabsProps {
   lng: string;
@@ -15,27 +16,6 @@ interface RecommendationTabsProps {
   setActiveTab: (value: string) => void;
   activeSizeTab: string;
   setActiveSizeTab: (value: string) => void;
-  startupRecommendations: (RecommendationResult & {
-    feedback?: "interested" | "not_interested";
-  })[];
-  smallRecommendations: (RecommendationResult & {
-    feedback?: "interested" | "not_interested";
-  })[];
-  mediumRecommendations: (RecommendationResult & {
-    feedback?: "interested" | "not_interested";
-  })[];
-  largeRecommendations: (RecommendationResult & {
-    feedback?: "interested" | "not_interested";
-  })[];
-  interestedRecommendations: (RecommendationResult & {
-    feedback?: "interested" | "not_interested";
-  })[];
-  notInterestedRecommendations: (RecommendationResult & {
-    feedback?: "interested" | "not_interested";
-  })[];
-  pendingRecommendations: (RecommendationResult & {
-    feedback?: "interested" | "not_interested";
-  })[];
 }
 
 export default function RecommendationTabs({
@@ -45,20 +25,84 @@ export default function RecommendationTabs({
   setActiveTab,
   activeSizeTab,
   setActiveSizeTab,
-  startupRecommendations,
-  smallRecommendations,
-  mediumRecommendations,
-  largeRecommendations,
-  interestedRecommendations,
-  notInterestedRecommendations,
-  pendingRecommendations,
 }: RecommendationTabsProps) {
   const {t} = useTranslation(lng, "ai");
+
+  // Memoized filtered recommendations
+  const {
+    interestedRecommendations,
+    notInterestedRecommendations,
+    pendingRecommendations,
+    startupRecommendations,
+    smallRecommendations,
+    mediumRecommendations,
+    largeRecommendations,
+  } = useMemo(() => {
+    // Filter by feedback status
+    const interested = recommendations.filter(
+      (rec) => rec.feedback === "interested"
+    );
+    const notInterested = recommendations.filter(
+      (rec) => rec.feedback === "not_interested"
+    );
+    const pending = recommendations.filter((rec) => !rec.feedback);
+
+    // Helper function to determine company size category
+    const getSizeCategory = (sizeText: string, industry?: string): string => {
+      const normalizedSize = sizeText.toLowerCase();
+      const normalizedIndustry = industry?.toLowerCase() || "";
+
+      if (
+        normalizedSize.includes("startup") ||
+        normalizedSize.includes("スタートアップ") ||
+        normalizedIndustry.includes("startup") ||
+        normalizedIndustry.includes("スタートアップ")
+      ) {
+        return "startup";
+      }
+      if (normalizedSize.includes("small") || normalizedSize.includes("小")) {
+        return "small";
+      }
+      if (normalizedSize.includes("medium") || normalizedSize.includes("中")) {
+        return "medium";
+      }
+      if (normalizedSize.includes("large") || normalizedSize.includes("大")) {
+        return "large";
+      }
+      return "unknown";
+    };
+
+    // Filter by company size
+    const startup = recommendations.filter(
+      (rec) =>
+        getSizeCategory(rec.company.size, rec.company.industry) === "startup"
+    );
+    const small = recommendations.filter(
+      (rec) => getSizeCategory(rec.company.size, rec.company.industry) === "small"
+    );
+    const medium = recommendations.filter(
+      (rec) =>
+        getSizeCategory(rec.company.size, rec.company.industry) === "medium"
+    );
+    const large = recommendations.filter(
+      (rec) => getSizeCategory(rec.company.size, rec.company.industry) === "large"
+    );
+
+    return {
+      interestedRecommendations: interested,
+      notInterestedRecommendations: notInterested,
+      pendingRecommendations: pending,
+      startupRecommendations: startup,
+      smallRecommendations: small,
+      mediumRecommendations: medium,
+      largeRecommendations: large,
+    };
+  }, [recommendations]);
 
   return (
     <>
       {/* Feedback Status Tabs */}
-      {/* <AnimatedContent direction="vertical" distance={20} delay={750}>
+      <AnimatedContent direction="vertical" distance={20} delay={750}>
         <Tabs
           defaultValue="all"
           className="w-full mb-3 sm:mb-6"
@@ -94,7 +138,7 @@ export default function RecommendationTabs({
             </TabsTrigger>
           </TabsList>
         </Tabs>
-      </AnimatedContent> */}
+      </AnimatedContent>
 
       {/* Company Size Tabs */}
       <AnimatedContent direction="vertical" distance={20} delay={900}>
