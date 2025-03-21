@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import {Loader2} from "lucide-react";
+import {Loader2, Copy, Check} from "lucide-react";
 import {ValueImage} from "@/lib/supabase/client";
 import {
   Tooltip,
@@ -13,9 +13,21 @@ import {
 
 // Image card as a memoized component to prevent unnecessary re-renders
 export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
+  const [copied, setCopied] = React.useState(false);
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(image.image_url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+    } catch (err) {
+      console.error("Failed to copy URL:", err);
+    }
+  };
+
   return (
     <div className="relative group">
-      <div className="aspect-square relative rounded-md overflow-hidden">
+      <div className="relative overflow-hidden rounded-md aspect-square">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -38,7 +50,7 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
 
         {/* Attribution for images */}
         {image.attribution && (
-          <div className="text-xs mt-1 text-gray-500">
+          <div className="mt-1 text-xs text-gray-500">
             Photo by{" "}
             <a
               href={image.attribution.photographer_url}
@@ -78,13 +90,31 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
             {image.tags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
+                className="inline-block px-2 py-1 text-xs text-gray-800 bg-gray-100 rounded"
               >
                 {tag}
               </span>
             ))}
           </div>
         )}
+
+        {/* Copy URL Button */}
+        <button
+          onClick={copyToClipboard}
+          className="flex items-center justify-center w-full gap-2 px-2 py-1.5 mt-2 text-xs text-gray-600 transition-colors bg-gray-100 rounded-md hover:bg-gray-200"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3 h-3" />
+              Copied!
+            </>
+          ) : (
+            <>
+              <Copy className="w-3 h-3" />
+              Copy image URL
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
@@ -102,7 +132,7 @@ const EmptyState = React.memo(
           {" "}
           <button
             onClick={resetAction}
-            className="text-primary underline hover:text-primary/80"
+            className="underline text-primary hover:text-primary/80"
           >
             reset them
           </button>
@@ -117,8 +147,8 @@ EmptyState.displayName = "EmptyState";
 
 // Loading component
 const LoadingState = React.memo(() => (
-  <div className="flex justify-center items-center py-8">
-    <Loader2 className="h-8 w-8 animate-spin" />
+  <div className="flex items-center justify-center py-8">
+    <Loader2 className="w-8 h-8 animate-spin" />
     <span className="ml-2">Loading images...</span>
   </div>
 ));
@@ -158,7 +188,7 @@ export const ImageGallery = React.memo(
     }
 
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {images.map((image) => (
           <TooltipProvider key={image.id}>
             <Tooltip>

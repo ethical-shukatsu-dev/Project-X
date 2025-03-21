@@ -263,8 +263,8 @@ export default function AdminValueImagesPage() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Value Images Admin</h1>
+    <div className="container py-8 mx-auto">
+      <h1 className="mb-8 text-3xl font-bold">Value Images Admin</h1>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="grid w-full grid-cols-3">
@@ -286,18 +286,18 @@ export default function AdminValueImagesPage() {
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
                 {error && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                  <div className="px-4 py-3 text-red-700 bg-red-100 border border-red-400 rounded">
                     {error}
                   </div>
                 )}
 
                 {success && (
-                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                  <div className="px-4 py-3 text-green-700 bg-green-100 border border-green-400 rounded">
                     {success}
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="image">Image *</Label>
                     <Input
@@ -322,7 +322,7 @@ export default function AdminValueImagesPage() {
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="category" className="mb-2 block">
+                      <Label htmlFor="category" className="block mb-2">
                         Category *
                       </Label>
                       <Select
@@ -389,7 +389,7 @@ export default function AdminValueImagesPage() {
                 <Button type="submit" disabled={isUploading}>
                   {isUploading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Uploading...
                     </>
                   ) : (
@@ -413,20 +413,20 @@ export default function AdminValueImagesPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <div className="px-4 py-3 text-red-700 bg-red-100 border border-red-400 rounded">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div className="px-4 py-3 text-green-700 bg-green-100 border border-green-400 rounded">
                   {success}
                 </div>
               )}
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="pexels-category" className="mb-2 block">
+                  <Label htmlFor="pexels-category" className="block mb-2">
                     Category (optional)
                   </Label>
                   <Select
@@ -445,7 +445,7 @@ export default function AdminValueImagesPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="mt-1 text-sm text-gray-500">
                     Leave empty to fetch images for all categories.
                   </p>
                 </div>
@@ -462,7 +462,7 @@ export default function AdminValueImagesPage() {
                       setPexelsCount(parseInt(e.target.value) || 10)
                     }
                   />
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="mt-1 text-sm text-gray-500">
                     For a single category, this is the total number of images.
                     For all categories, this is per category.
                   </p>
@@ -477,7 +477,7 @@ export default function AdminValueImagesPage() {
               >
                 {isFetchingPexels ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Fetching Images...
                   </>
                 ) : (
@@ -500,20 +500,20 @@ export default function AdminValueImagesPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <div className="px-4 py-3 text-red-700 bg-red-100 border border-red-400 rounded">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div className="px-4 py-3 text-green-700 bg-green-100 border border-green-400 rounded">
                   {success}
                 </div>
               )}
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="unsplash-category" className="mb-2 block">
+                  <Label htmlFor="unsplash-category" className="block mb-2">
                     Category (optional)
                   </Label>
                   <Select
@@ -532,7 +532,7 @@ export default function AdminValueImagesPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="mt-1 text-sm text-gray-500">
                     Leave empty to fetch images for all categories.
                   </p>
                 </div>
@@ -549,7 +549,7 @@ export default function AdminValueImagesPage() {
                       setUnsplashCount(parseInt(e.target.value) || 10)
                     }
                   />
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="mt-1 text-sm text-gray-500">
                     For a single category, this is the total number of images.
                     For all categories, this is per category.
                   </p>
@@ -564,7 +564,7 @@ export default function AdminValueImagesPage() {
               >
                 {isFetchingUnsplash ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Fetching Images...
                   </>
                 ) : (
