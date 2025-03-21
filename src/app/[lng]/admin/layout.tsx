@@ -1,13 +1,15 @@
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
-  params: { lng }
+  params,
 }: {
   children: React.ReactNode;
-  params: { lng: string };
+  params: Promise<{ lng: string }>;
 }) {
+  const { lng } = await params;
+  
   return (
     <div className="flex flex-col min-h-screen">
       {/* Admin Header */}
@@ -54,9 +56,7 @@ export default function AdminLayout({
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow bg-gray-50 dark:bg-gray-900">
-        {children}
-      </main>
+      <main className="flex-grow bg-gray-50 dark:bg-gray-900">{children}</main>
 
       {/* Admin Footer */}
       <footer className="px-6 py-3 text-white bg-gray-900 border-t border-gray-800">
@@ -66,4 +66,4 @@ export default function AdminLayout({
       </footer>
     </div>
   );
-} 
+}
