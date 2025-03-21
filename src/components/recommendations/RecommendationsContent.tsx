@@ -18,7 +18,7 @@ import SignupDialog from "@/components/recommendations/SignupDialog";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 import {RECOMMENDATION_COUNT} from "@/lib/constants/recommendations";
 import RecommendationTabs from "@/components/recommendations/RecommendationTabs";
-
+import {useIsMobile} from "@/hooks/useIsMobile";
 interface RecommendationsContentProps {
   lng: string;
 }
@@ -29,6 +29,7 @@ export default function RecommendationsContent({
   const searchParams = useSearchParams();
   const userId = searchParams?.get("userId") || "";
   const {t, loaded} = useTranslation(lng, "ai");
+  const isMobile = useIsMobile();
 
   const [recommendations, setRecommendations] = useState<
     (RecommendationResult & {
@@ -300,7 +301,7 @@ export default function RecommendationsContent({
                 key={recommendation.id || recommendation.company.id}
                 direction="vertical"
                 distance={20}
-                delay={index === 0 ? 900 : 100}
+                delay={isMobile ? (index === 0 ? 900 : 100) : 900}
               >
                 <CompanyCard
                   key={recommendation.id || recommendation.company.id}
