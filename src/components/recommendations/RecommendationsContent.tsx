@@ -280,13 +280,52 @@ export default function RecommendationsContent({
           </p>
         </AnimatedContent>
 
-        <AnimatedContent direction="vertical" distance={20} delay={600}>
-          <div className="flex justify-end mb-2 sm:mb-4">
+        <RecommendationTabs
+          lng={lng}
+          recommendations={recommendations}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          activeSizeTab={activeSizeTab}
+          setActiveSizeTab={setActiveSizeTab}
+        />
+
+        {/* Display filtered recommendations */}
+        <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
+          {getFilteredRecommendations().length > 0 ? (
+            getFilteredRecommendations().map((recommendation, index) => (
+              <AnimatedContent
+                key={recommendation.id || recommendation.company.id}
+                direction="vertical"
+                distance={20}
+                delay={index === 0 ? 1050 : 100}
+              >
+                <CompanyCard
+                  key={recommendation.id || recommendation.company.id}
+                  company={recommendation.company}
+                  matchingPoints={recommendation.matching_points}
+                  feedback={recommendation.feedback}
+                  onFeedback={(feedback) =>
+                    recommendation.id &&
+                    handleFeedback(recommendation.id, feedback)
+                  }
+                  lng={lng}
+                />
+              </AnimatedContent>
+            ))
+          ) : (
+            <div className="py-8 text-center">
+              <p className="text-gray-300">{t("recommendations.no_matches")}</p>
+            </div>
+          )}
+        </div>
+
+        <AnimatedContent direction="vertical" distance={20} delay={100}>
+          <div className="flex justify-end my-6">
             <Button
               onClick={handleRefresh}
               disabled={refreshing}
               variant="outline"
-              className="flex items-center gap-2 text-sm sm:text-base bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
+              className="w-full flex items-center gap-2 text-sm sm:text-base bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
             >
               {refreshing ? (
                 <>
@@ -334,45 +373,6 @@ export default function RecommendationsContent({
             </Button>
           </div>
         </AnimatedContent>
-
-        <RecommendationTabs
-          lng={lng}
-          recommendations={recommendations}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          activeSizeTab={activeSizeTab}
-          setActiveSizeTab={setActiveSizeTab}
-        />
-
-        {/* Display filtered recommendations */}
-        <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
-          {getFilteredRecommendations().length > 0 ? (
-            getFilteredRecommendations().map((recommendation, index) => (
-              <AnimatedContent
-                key={recommendation.id || recommendation.company.id}
-                direction="vertical"
-                distance={20}
-                delay={index === 0 ? 1050 : 100}
-              >
-                <CompanyCard
-                  key={recommendation.id || recommendation.company.id}
-                  company={recommendation.company}
-                  matchingPoints={recommendation.matching_points}
-                  feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
-                    recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
-                  }
-                  lng={lng}
-                />
-              </AnimatedContent>
-            ))
-          ) : (
-            <div className="py-8 text-center">
-              <p className="text-gray-300">{t("recommendations.no_matches")}</p>
-            </div>
-          )}
-        </div>
 
         <SignupDialog
           open={isSignupDialogOpen}
