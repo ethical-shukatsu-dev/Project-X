@@ -69,7 +69,10 @@ export default function HeroSection({
                   </StarBorder>
                 </Link>
 
-                <Link href={`/${lng}/questionnaire?type=image`} className="block">
+                <Link
+                  href={`/${lng}/questionnaire?type=image`}
+                  className="block"
+                >
                   <StarBorder
                     as="div"
                     color="#EC4899"
@@ -103,7 +106,7 @@ export default function HeroSection({
               </div>
 
               <AnimatedContent direction="vertical" distance={20} delay={1200}>
-                <div className="flex justify-center pt-3 mt-6">
+                <div className="flex justify-center hidden pt-3 mt-6">
                   <AnonymousModeToggle lng={lng} />
                 </div>
               </AnimatedContent>
@@ -113,4 +116,4 @@ export default function HeroSection({
       </div>
     </section>
   );
-} 
+}
