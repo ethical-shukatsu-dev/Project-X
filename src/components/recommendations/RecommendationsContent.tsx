@@ -44,6 +44,9 @@ export default function RecommendationsContent({
   const [, setFeedbackCount] = useState(0);
 
   useEffect(() => {
+    // Scroll to top of page
+    window.scrollTo({top: 0, behavior: "smooth"});
+
     const fetchRecommendations = async (refresh = false) => {
       if (!userId) {
         setError(t("recommendations.errors.missing_user_id"));
