@@ -37,11 +37,18 @@ export default function RootLayout({
         className={inter.className}
       >
         <body>
-          <header className="flex items-center justify-between p-4 border-b">
-            <Link href="/" className="text-xl font-bold">
-              Project X
-            </Link>
-            <LanguageSwitcher />
+          <header className="sticky top-0 z-50 transition-all duration-200 border-b backdrop-blur-sm bg-background/80 border-border">
+            <div className="mx-auto max-w-7xl">
+              <div className="flex items-center justify-between p-4">
+                <Link 
+                  href="/" 
+                  className="text-xl font-bold transition-colors duration-200 hover:text-primary"
+                >
+                  Project X
+                </Link>
+                <LanguageSwitcher />
+              </div>
+            </div>
           </header>
           {children}
         </body>
