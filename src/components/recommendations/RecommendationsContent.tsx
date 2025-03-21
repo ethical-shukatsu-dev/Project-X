@@ -41,7 +41,7 @@ export default function RecommendationsContent({
   const [activeTab, setActiveTab] = useState("all");
   const [activeSizeTab, setActiveSizeTab] = useState("all-sizes");
   const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
-  const [feedbackCount, setFeedbackCount] = useState(0);
+  const [, setFeedbackCount] = useState(0);
 
   useEffect(() => {
     const fetchRecommendations = async (refresh = false) => {
@@ -142,7 +142,7 @@ export default function RecommendationsContent({
 
         // If this is the last recommendation, wait for the reveal animation
         // before showing the signup dialog
-        if (feedbackCount === RECOMMENDATION_COUNT) {
+        if (newCount === RECOMMENDATION_COUNT) {
           // Wait for the reveal animation (2000ms) plus a small buffer
           setTimeout(() => {
             setSignupDialogOpen(true);
@@ -180,9 +180,9 @@ export default function RecommendationsContent({
             {t("recommendations.loading.description")}
           </p>
           <div className="max-w-4xl mx-auto">
-            <Skeleton className="h-[200px] w-full mb-4" />
-            <Skeleton className="h-[200px] w-full mb-4" />
-            <Skeleton className="h-[200px] w-full" />
+            <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <Skeleton className="h-[200px] w-full bg-white/10 border border-white/10 backdrop-blur-sm" />
           </div>
         </div>
       </div>
