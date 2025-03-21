@@ -169,7 +169,7 @@
   "recommendations": {
     "title": "あなたにマッチする企業",
     "description": "あなたの価値観と興味に基づいて、あなたに合うかもしれないこれらの企業を見つけました。",
-    "viewDetails": "詳細を見る",
+    "viewDetails": "企業の詳細をみる",
     "noMatches": "マッチする企業が見つかりませんでした。設定を調整してみてください。",
     "noMatchingPoints": "特定のマッチングポイントはありません",
     "about": "企業概要",
@@ -191,7 +191,7 @@
     "tabs": {
       "all": "すべて",
       "pending": "保留中",
-      "interested": "この企業の詳細をみる",
+      "interested": "企業の詳細をみる",
       "not_interested": "興味なし"
     },
     "size_tabs": {
@@ -202,7 +202,7 @@
       "large": "大規模 (10,000人以上)"
     },
     "feedback": {
-      "interested": "興味あり",
+      "interested": "企業の詳細をみる",
       "notInterested": "興味なし",
       "markedInterested": "興味ありとマークしました",
       "markedNotInterested": "興味なしとマークしました",
