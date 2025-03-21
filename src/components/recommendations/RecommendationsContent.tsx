@@ -43,6 +43,7 @@ export default function RecommendationsContent({
   const [activeSizeTab, setActiveSizeTab] = useState("all-sizes");
   const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
   const [, setFeedbackCount] = useState(0);
+  const [hasClosedDialog, setHasClosedDialog] = useState(false);
 
   useEffect(() => {
     // Scroll to top of page
@@ -159,6 +160,12 @@ export default function RecommendationsContent({
       console.error("Error submitting feedback:", err);
       // Show error message to user
     }
+  };
+
+  // Handle dialog close to track when user has dismissed the dialog
+  const handleDialogClose = () => {
+    setSignupDialogOpen(false);
+    setHasClosedDialog(true);
   };
 
   // Function to get the filtered recommendations based on both tabs
@@ -380,11 +387,24 @@ export default function RecommendationsContent({
 
         <SignupDialog
           open={isSignupDialogOpen}
-          onClose={() => setSignupDialogOpen(false)}
+          onClose={handleDialogClose}
           lng={lng}
           recommendations={recommendations}
         />
+        
+        {/* Show SignupDialog as in-page component after user has closed the modal */}
+        {hasClosedDialog && (
+          <SignupDialog
+            open={false}
+            onClose={() => {}}
+            lng={lng}
+            recommendations={recommendations}
+            showInPage={true}
+            showRevealedOnly={true}
+          />
+        )}
       </div>
     </div>
   );
 }
+

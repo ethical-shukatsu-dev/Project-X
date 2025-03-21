@@ -1,12 +1,14 @@
 import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar";
 import {useEffect, useRef, useState} from "react";
+import {EyeOff} from "lucide-react";
 
 interface CompanyCardProps {
   name: string;
   logoUrl?: string | null;
+  shouldAnonymize?: boolean;
 }
 
-export default function CompanyCard({name, logoUrl}: CompanyCardProps) {
+export default function CompanyCard({name, logoUrl, shouldAnonymize = false}: CompanyCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [avatarSize, setAvatarSize] = useState(96); // Default 24 * 4 = 96px
 
@@ -33,26 +35,44 @@ export default function CompanyCard({name, logoUrl}: CompanyCardProps) {
     };
   }, []);
 
+  const getAnonymousName = () => {
+    return `Company ${name.substring(0, 3).toUpperCase()}`;
+  };
+
   return (
     <div
       ref={containerRef}
       className="flex flex-col items-center justify-center w-full h-full gap-3 p-4 bg-white/90"
     >
-      <Avatar
-        className="bg-white border-4 border-white shadow-lg ring-1 ring-black/5"
-        style={{
-          width: avatarSize,
-          height: avatarSize,
-        }}
-      >
-        <AvatarImage src={logoUrl || ""} alt={name} />
-        <AvatarFallback
-          className="text-[length:calc(var(--avatar-size)*0.4)]"
-          style={{"--avatar-size": `${avatarSize}px`} as React.CSSProperties}
+      {shouldAnonymize ? (
+        <Avatar
+          className="bg-white border-4 border-white shadow-lg ring-1 ring-black/5"
+          style={{
+            width: avatarSize,
+            height: avatarSize,
+          }}
         >
-          {name.substring(0, 2).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+          <div className="flex items-center justify-center w-full h-full bg-gray-200">
+            <EyeOff className="opacity-70" size={avatarSize * 0.4} />
+          </div>
+        </Avatar>
+      ) : (
+        <Avatar
+          className="bg-white border-4 border-white shadow-lg ring-1 ring-black/5"
+          style={{
+            width: avatarSize,
+            height: avatarSize,
+          }}
+        >
+          <AvatarImage src={logoUrl || ""} alt={name} />
+          <AvatarFallback
+            className="text-[length:calc(var(--avatar-size)*0.4)]"
+            style={{"--avatar-size": `${avatarSize}px`} as React.CSSProperties}
+          >
+            {name.substring(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+      )}
       
       <h3
         className="hidden w-full font-semibold text-center truncate text-black/80 sm:block drop-shadow-lg"
@@ -61,7 +81,7 @@ export default function CompanyCard({name, logoUrl}: CompanyCardProps) {
           maxWidth: `${avatarSize * 2}px`,
         }}
       >
-        {name}
+        {shouldAnonymize ? getAnonymousName() : name}
       </h3>
     </div>
   );
