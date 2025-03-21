@@ -102,7 +102,7 @@ export default function RecommendationTabs({
   return (
     <>
       {/* Feedback Status Tabs */}
-      <AnimatedContent direction="vertical" distance={20} delay={750}>
+      {/* <AnimatedContent direction="vertical" distance={20} delay={750}>
         <Tabs
           defaultValue="all"
           className="w-full mb-3 sm:mb-6"
@@ -138,7 +138,7 @@ export default function RecommendationTabs({
             </TabsTrigger>
           </TabsList>
         </Tabs>
-      </AnimatedContent>
+      </AnimatedContent> */}
 
       {/* Company Size Tabs */}
       <AnimatedContent direction="vertical" distance={20} delay={900}>
