@@ -143,7 +143,7 @@
     "tabs": {
       "all": "すべて",
       "pending": "保留中",
-      "interested": "興味あり",
+      "interested": "この企業の詳細をみる",
       "not_interested": "興味なし"
     },
     "size_tabs": {
