@@ -368,9 +368,12 @@ export default function ValuesQuestionnaire({
   // If translations are not loaded yet, show a loading state
   if (!loaded || isLoadingImages || !isInitialized) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="text-xl">Loading...</CardTitle>
+      <Card className="w-full max-w-md mx-auto bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
+        <CardHeader className="flex flex-col items-center justify-center py-8">
+          <div className="w-12 h-12 mb-4 border-4 rounded-full border-t-blue-500 border-r-purple-500 border-b-blue-500 border-l-purple-500 border-t-transparent animate-spin" />
+          <CardTitle className="text-xl text-gray-300 animate-pulse">
+            Loading...
+          </CardTitle>
         </CardHeader>
       </Card>
     );
