@@ -33,15 +33,15 @@ export default function AnonymousModeToggle({ lng }: AnonymousModeToggleProps) {
   }
 
   return (
-    <div className="flex items-center space-x-2 mt-4">
-      <Card className="p-4 flex flex-col sm:flex-row items-center gap-3">
+    <div className="flex items-center mt-4 space-x-2">
+      <Card className="flex flex-row items-center gap-3 p-4">
         <div className="flex items-center space-x-2">
           <Switch
             id="anonymous-mode"
             checked={isAnonymous}
             onCheckedChange={toggleAnonymousMode}
           />
-          <Label htmlFor="anonymous-mode" className="text-sm sm:text-base cursor-pointer">
+          <Label htmlFor="anonymous-mode" className="text-sm cursor-pointer sm:text-base">
             {t("homepage.anonymousMode")}
           </Label>
         </div>

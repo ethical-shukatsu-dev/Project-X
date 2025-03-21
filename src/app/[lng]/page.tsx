@@ -14,9 +14,9 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
     const {t} = await getTranslation(lng, "common");
 
     return (
-      <div className="flex flex-col min-h-screen overflow-hidden bg-black text-white relative">
+      <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
         {/* Background Aurora Effect */}
-        <div className="absolute inset-0 z-0 opacity-40">
+        <div className="absolute inset-0 z-0 opacity-40 sm:opacity-50">
           <Aurora
             colorStops={["#3B82F6", "#8B5CF6", "#EC4899"]}
             amplitude={1.5}
@@ -45,64 +45,63 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
         {/* Decorative floating elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-5">
           <FloatingElement
-            className="absolute top-[10%] left-[5%]"
+            className="absolute top-[5%] left-[2%] sm:top-[10%] sm:left-[5%]"
             baseSpeed={10}
             intensity={20}
           >
-            <div className="w-12 h-12 rounded-full bg-blue-500 opacity-20 blur-xl"></div>
+            <div className="w-8 h-8 bg-blue-500 rounded-full sm:w-12 sm:h-12 opacity-20 blur-xl"></div>
           </FloatingElement>
 
           <FloatingElement
-            className="absolute top-[30%] right-[10%]"
+            className="absolute top-[20%] right-[5%] sm:top-[30%] sm:right-[10%]"
             baseSpeed={8}
             intensity={1.2}
           >
-            <div className="w-16 h-16 rounded-full bg-purple-500 opacity-20 blur-xl"></div>
+            <div className="w-10 h-10 bg-purple-500 rounded-full sm:w-16 sm:h-16 opacity-20 blur-xl"></div>
           </FloatingElement>
 
           <FloatingElement
-            className="absolute bottom-[20%] left-[15%]"
+            className="absolute bottom-[15%] left-[8%] sm:bottom-[20%] sm:left-[15%]"
             baseSpeed={5}
             intensity={1}
           >
-            <div className="w-20 h-20 rounded-full bg-pink-500 opacity-20 blur-xl"></div>
+            <div className="w-12 h-12 bg-pink-500 rounded-full sm:w-20 sm:h-20 opacity-20 blur-xl"></div>
           </FloatingElement>
 
           <FloatingElement
-            className="absolute top-[60%] right-[15%]"
+            className="absolute top-[50%] right-[8%] sm:top-[60%] sm:right-[15%]"
             baseSpeed={7}
             intensity={0.9}
           >
-            <div className="w-14 h-14 rounded-full bg-blue-500 opacity-20 blur-xl"></div>
+            <div className="w-10 h-10 bg-blue-500 rounded-full sm:w-14 sm:h-14 opacity-20 blur-xl"></div>
           </FloatingElement>
         </div>
 
-        <main className="flex-1 relative z-20">
-          <section className="w-full pt-24 pb-32 relative overflow-hidden">
-            <div className="container mx-auto px-4 md:px-6 max-w-6xl">
-              <div className="flex flex-col items-center space-y-6 md:space-y-10 text-center">
+        <main className="relative z-20 flex-1">
+          <section className="relative w-full pt-16 pb-24 overflow-hidden sm:pt-20 md:pt-24 sm:pb-28 md:pb-32">
+            <div className="container max-w-6xl px-4 mx-auto md:px-6">
+              <div className="flex flex-col items-center space-y-4 text-center sm:space-y-6 md:space-y-10">
                 <AnimatedContent direction="vertical" distance={40} delay={300}>
-                  <h1 className="font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-5xl md:text-7xl lg:text-8xl">
+                  <h1 className="px-2 text-4xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 sm:text-5xl md:text-7xl lg:text-8xl">
                     {t("homepage.title")}
                   </h1>
                 </AnimatedContent>
 
                 <AnimatedContent direction="vertical" distance={30} delay={600}>
-                  <p className="max-w-[600px] text-gray-300 text-lg md:text-xl leading-relaxed">
+                  <p className="max-w-[600px] text-gray-300 text-base sm:text-lg md:text-xl leading-relaxed px-4 sm:px-6">
                     {t("homepage.description")}
                   </p>
                 </AnimatedContent>
 
                 <AnimatedContent direction="vertical" distance={30} delay={900}>
-                  <div className="space-y-6 mt-6 md:mt-10">
-                    <p className="text-lg font-medium text-gray-200">
+                  <div className="px-4 mt-4 space-y-4 sm:space-y-6 sm:mt-6 md:mt-10">
+                    <p className="text-base font-medium text-gray-200 sm:text-lg">
                       {t("homepage.selectQuestionnaireType")}
                     </p>
 
-                    <div className="flex flex-col sm:flex-row gap-5 justify-center">
+                    <div className="flex flex-col justify-center w-full gap-4 sm:flex-row sm:gap-5 sm:w-auto">
                       <Link
                         href={`/${lng}/questionnaire?type=text`}
-                        className="block"
                       >
                         <StarBorder
                           as="div"
@@ -110,7 +109,7 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
                           className="transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]"
                         >
                           <span className="flex items-center justify-center gap-2">
-                            <svg
+                          <svg
                               className="w-5 h-5"
                               fill="none"
                               stroke="currentColor"
@@ -171,7 +170,7 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
                       distance={20}
                       delay={1200}
                     >
-                      <div className="flex justify-center mt-6 pt-3">
+                      <div className="flex justify-center pt-3 mt-6">
                         <AnonymousModeToggle lng={lng} />
                       </div>
                     </AnimatedContent>
@@ -181,24 +180,24 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
             </div>
 
             {/* Decorative elements */}
-            <div className="absolute -left-20 top-1/3 w-40 h-40 rounded-full bg-blue-500 opacity-20 blur-3xl"></div>
-            <div className="absolute -right-20 top-2/3 w-60 h-60 rounded-full bg-purple-500 opacity-20 blur-3xl"></div>
+            <div className="absolute hidden w-40 h-40 bg-blue-500 rounded-full sm:block -left-20 top-1/3 opacity-20 blur-3xl"></div>
+            <div className="absolute hidden bg-purple-500 rounded-full sm:block -right-20 top-2/3 w-60 h-60 opacity-10 blur-3xl"></div>
           </section>
 
-          <section className="relative z-10 w-full py-24 md:py-32 overflow-hidden">
-            <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+          <section className="relative z-10 w-full pb-16 overflow-hidden sm:pb-20 md:pb-24 lg:pb-32">
+            <div className="container max-w-6xl px-4 mx-auto md:px-6">
               <AnimatedContent direction="vertical" distance={40} delay={300}>
-                <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                <h2 className="px-2 mb-12 text-2xl font-bold text-center text-transparent sm:text-3xl md:text-4xl sm:mb-16 bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                   {t("features.quick.title") || "Why Choose Us"}
                 </h2>
               </AnimatedContent>
 
-              <div className="grid gap-8 md:grid-cols-3">
+              <div className="grid gap-6 px-2 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 sm:px-0">
                 <AnimatedContent direction="vertical" distance={40} delay={400}>
                   <div className="relative p-6 md:p-8 rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 group transition-all hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-500/50 duration-300">
-                    <div className="flex items-center justify-center w-14 h-14 rounded-full bg-blue-500/10 mb-6 group-hover:bg-blue-500/20 transition-all duration-300">
+                    <div className="flex items-center justify-center mb-6 transition-all duration-300 rounded-full w-14 h-14 bg-blue-500/10 group-hover:bg-blue-500/20">
                       <svg
-                        className="w-7 h-7 text-blue-400"
+                        className="text-blue-400 w-7 h-7"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -212,10 +211,10 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
                         ></path>
                       </svg>
                     </div>
-                    <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-blue-400 transition-colors">
+                    <h3 className="mb-3 text-xl font-semibold text-white transition-colors group-hover:text-blue-400">
                       {t("features.quick.title")}
                     </h3>
-                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors">
+                    <p className="text-gray-400 transition-colors group-hover:text-gray-300">
                       {t("features.quick.description")}
                     </p>
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
@@ -224,9 +223,9 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
 
                 <AnimatedContent direction="vertical" distance={40} delay={600}>
                   <div className="relative p-6 md:p-8 rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 group transition-all hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-500/50 duration-300">
-                    <div className="flex items-center justify-center w-14 h-14 rounded-full bg-purple-500/10 mb-6 group-hover:bg-purple-500/20 transition-all duration-300">
+                    <div className="flex items-center justify-center mb-6 transition-all duration-300 rounded-full w-14 h-14 bg-purple-500/10 group-hover:bg-purple-500/20">
                       <svg
-                        className="w-7 h-7 text-purple-400"
+                        className="text-purple-400 w-7 h-7"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -240,10 +239,10 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
                         ></path>
                       </svg>
                     </div>
-                    <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-purple-400 transition-colors">
+                    <h3 className="mb-3 text-xl font-semibold text-white transition-colors group-hover:text-purple-400">
                       {t("features.values.title")}
                     </h3>
-                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors">
+                    <p className="text-gray-400 transition-colors group-hover:text-gray-300">
                       {t("features.values.description")}
                     </p>
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
@@ -252,9 +251,9 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
 
                 <AnimatedContent direction="vertical" distance={40} delay={800}>
                   <div className="relative p-6 md:p-8 rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 group transition-all hover:shadow-xl hover:shadow-pink-500/10 hover:border-pink-500/50 duration-300">
-                    <div className="flex items-center justify-center w-14 h-14 rounded-full bg-pink-500/10 mb-6 group-hover:bg-pink-500/20 transition-all duration-300">
+                    <div className="flex items-center justify-center mb-6 transition-all duration-300 rounded-full w-14 h-14 bg-pink-500/10 group-hover:bg-pink-500/20">
                       <svg
-                        className="w-7 h-7 text-pink-400"
+                        className="text-pink-400 w-7 h-7"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -268,10 +267,10 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
                         ></path>
                       </svg>
                     </div>
-                    <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-pink-400 transition-colors">
+                    <h3 className="mb-3 text-xl font-semibold text-white transition-colors group-hover:text-pink-400">
                       {t("features.insights.title")}
                     </h3>
-                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors">
+                    <p className="text-gray-400 transition-colors group-hover:text-gray-300">
                       {t("features.insights.description")}
                     </p>
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-500 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
@@ -281,22 +280,24 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
             </div>
 
             {/* Decorative elements */}
-            <div className="absolute left-1/4 bottom-0 w-80 h-80 rounded-full bg-blue-500 opacity-10 blur-3xl -z-10"></div>
+            <div className="absolute bottom-0 bg-blue-500 rounded-full left-1/4 w-80 h-80 opacity-10 blur-3xl -z-10"></div>
           </section>
         </main>
 
-        <footer className="relative z-20 py-8 w-full border-t border-white/10">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-gray-400">{t("footer.copyright")}</p>
-              <div className="flex space-x-6">
+        <footer className="relative z-20 w-full py-6 border-t sm:py-8 border-white/10">
+          <div className="container px-4 mx-auto md:px-6">
+            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+              <p className="text-xs text-center text-gray-400 sm:text-sm sm:text-left">
+                {t("footer.copyright")}
+              </p>
+              <div className="flex space-x-4 sm:space-x-6">
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 transition-colors hover:text-white"
                 >
                   <span className="sr-only">Twitter</span>
                   <svg
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
@@ -306,11 +307,11 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
                 </a>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 transition-colors hover:text-white"
                 >
                   <span className="sr-only">GitHub</span>
                   <svg
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
