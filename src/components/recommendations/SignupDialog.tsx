@@ -14,6 +14,7 @@ import {RecommendationResult} from "@/lib/openai/client";
 import {Button} from "../ui/button";
 import {trackSignupClick, trackEvent} from "@/lib/analytics";
 import {useIsMobile} from "../../hooks/useIsMobile";
+import {useRouter} from "next/router";
 
 // Extend the RecommendationResult type to include the feedback property
 interface ExtendedRecommendationResult extends RecommendationResult {
@@ -39,6 +40,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
 }) => {
   const {t} = useTranslation(lng, "ai");
   const isMobile = useIsMobile();
+  const router = useRouter();
 
   // Create company cards for the first 5 recommendations
   // If showRevealedOnly is true, only show companies with feedback
@@ -71,7 +73,12 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
     });
 
     // Navigate to signup page
-    window.location.href = "https://baseme.app/auth/students/signup";
+    router.push({
+      pathname: "https://baseme.app/auth/students/signup",
+      query: {
+        ...router.query,
+      },
+    });
   };
 
   // Handle dialog close with tracking
