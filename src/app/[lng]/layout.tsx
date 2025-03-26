@@ -5,6 +5,8 @@ import {dir} from "i18next";
 import {languages} from "../../i18n-config";
 import {ReactNode} from "react";
 import Header from "@/components/Header";
+import GoogleAuthHead from "@/components/ui/GoogleAuthHead";
+import Head from "next/head";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -35,6 +37,9 @@ export default function RootLayout({
         dir={dir(resolvedParams.lng)}
         className={inter.className}
       >
+        <Head>
+          <GoogleAuthHead />
+        </Head>
         <body>
           <Header />
           {children}

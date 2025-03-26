@@ -14,7 +14,8 @@ import {RecommendationResult} from "@/lib/openai/client";
 import {Button} from "../ui/button";
 import {trackSignupClick, trackEvent} from "@/lib/analytics";
 import {useIsMobile} from "../../hooks/useIsMobile";
-import {useRouter} from "next/router";
+import GoogleSignUpButton from "../ui/GoogleSignUpButton";
+import { useRouter } from "next/router";
 
 // Extend the RecommendationResult type to include the feedback property
 interface ExtendedRecommendationResult extends RecommendationResult {
@@ -160,7 +161,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
           {t("cta.primaryButton") || "Sign up with Email"}
         </Button>
 
-        {/* <GoogleSignUpButton t={t} /> */}
+        <GoogleSignUpButton t={t} />
       </div>
 
       {/* Disclaimer */}
