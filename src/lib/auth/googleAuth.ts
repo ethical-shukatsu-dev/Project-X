@@ -3,6 +3,7 @@
  */
 
 import {trackEvent} from "../analytics";
+import { BASE_URL } from "../constants/domain";
 
 // Type declarations for Google API
 declare global {
@@ -149,7 +150,7 @@ const handleGoogleSignInSuccess = async (googleUser: GoogleUser): Promise<void> 
     const affiliateCode = urlParams.get("student_affiliate_code");
     if (affiliateCode) {
       try {
-        await fetch("https://staging.baseme.app/api/v1/affiliate_codes/check", {
+        await fetch(`${BASE_URL}/api/v1/affiliate_codes/check`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -196,7 +197,7 @@ const handleGoogleSignInSuccess = async (googleUser: GoogleUser): Promise<void> 
     }).catch(err => console.error("Error tracking signup:", err));
 
     // Post the data to BaseMe API endpoint
-    const response = await fetch("https://staging.baseme.app/api/v1/accounts/google_oauth2", {
+    const response = await fetch(`${BASE_URL}/api/v1/accounts/google_oauth2`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -297,18 +298,18 @@ const redirectAfterLogin = (userData: BaseMeUserData): void => {
   // Otherwise redirect based on account type and status
   if (userData.operation_status === "init") {
     if (userData.selected_account_type === "company") {
-      window.location.href = `https://staging.baseme.app/accounts/new/company${queryString}`;
+      window.location.href = `${BASE_URL}/accounts/new/company${queryString}`;
     } else if (userData.sign_up_version === "2") {
-      window.location.href = `https://staging.baseme.app/accounts/new/user${queryString}`;
+      window.location.href = `${BASE_URL}/accounts/new/user${queryString}`;
     } else {
-      window.location.href = `https://staging.baseme.app/accounts/new/student${queryString}`;
+      window.location.href = `${BASE_URL}/accounts/new/student${queryString}`;
     }
   } else {
     // Redirect to appropriate dashboard
     if (userData.selected_account_type === "company" && userData.current_company_id) {
-      window.location.href = `https://staging.baseme.app/dashboard${queryString}`;
+      window.location.href = `${BASE_URL}/dashboard${queryString}`;
     } else {
-      window.location.href = `https://staging.baseme.app/${queryString}`;
+      window.location.href = `${BASE_URL}/${queryString}`;
     }
   }
 };
