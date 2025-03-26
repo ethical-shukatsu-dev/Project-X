@@ -149,7 +149,7 @@ const handleGoogleSignInSuccess = async (googleUser: GoogleUser): Promise<void> 
     const affiliateCode = urlParams.get("student_affiliate_code");
     if (affiliateCode) {
       try {
-        await fetch("https://baseme.app/api/v1/affiliate_codes/check", {
+        await fetch("https://staging.baseme.app/api/v1/affiliate_codes/check", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -257,7 +257,7 @@ const setCookie = (name: string, value: string, days: number): void => {
   
   const d = new Date();
   d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-  document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;domain=.baseme.app`;
+  document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;domain=.staging.baseme.app`;
 };
 
 // Helper function to remove localStorage parameters
@@ -297,23 +297,23 @@ const redirectAfterLogin = (userData: BaseMeUserData): void => {
   // Otherwise redirect based on account type and status
   if (userData.operation_status === "init") {
     if (userData.selected_account_type === "company") {
-      window.location.href = `https://baseme.app/accounts/new/company${queryString}`;
+      window.location.href = `https://staging.baseme.app/accounts/new/company${queryString}`;
     } else if (userData.sign_up_version === "2") {
-      window.location.href = `https://baseme.app/accounts/new/user${queryString}`;
+      window.location.href = `https://staging.baseme.app/accounts/new/user${queryString}`;
     } else {
-      window.location.href = `https://baseme.app/accounts/new/student${queryString}`;
+      window.location.href = `https://staging.baseme.app/accounts/new/student${queryString}`;
     }
   } else {
     // Redirect to appropriate dashboard
     if (userData.selected_account_type === "company" && userData.current_company_id) {
-      window.location.href = `https://baseme.app/dashboard${queryString}`;
+      window.location.href = `https://staging.baseme.app/dashboard${queryString}`;
     } else {
-      window.location.href = `https://baseme.app/${queryString}`;
+      window.location.href = `https://staging.baseme.app/${queryString}`;
     }
   }
 };
 
 // Helper function to delete a cookie
 const deleteCookie = (name: string): void => {
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.baseme.app`;
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.staging.baseme.app`;
 }; 
