@@ -67,10 +67,11 @@ export const loadGoogleApiScript = (): Promise<void> => {
       reject(new Error("Google Client ID is not configured"));
       return;
     }
-
+    
     // Set up callback function for when the script is loaded
     window.onGoogleScriptLoad = () => {
       window.gapi.load("auth2", () => {
+        console.log("clientId", clientId);
         try {
           window.gapi.auth2.init({
             client_id: clientId,
@@ -93,6 +94,7 @@ export const loadGoogleApiScript = (): Promise<void> => {
 
     // Add the script to the document
     const script = document.createElement("script");
+    console.log("script", script);
     script.id = "google-platform-script";
     script.src = "https://apis.google.com/js/platform.js?onload=onGoogleScriptLoad";
     script.async = true;
