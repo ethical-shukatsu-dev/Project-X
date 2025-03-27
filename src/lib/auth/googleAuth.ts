@@ -4,6 +4,7 @@
 
 import {trackEvent} from "../analytics";
 import { BASE_URL } from "../constants/domain";
+import { GoogleUser } from "../../types/google-auth";
 
 interface BaseMeUserData {
   operation_status: string;
@@ -12,25 +13,30 @@ interface BaseMeUserData {
   current_company_id?: string;
 }
 
-// Get Client ID from environment variables
-const getClientId = (): string => {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  if (!clientId) {
-    console.error("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not defined in environment variables");
+// Get Client ID securely from API endpoint
+const getClientId = async (): Promise<string> => {
+  try {
+    const response = await fetch('/api/auth/google-config');
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google client ID');
+    }
+    const data = await response.json();
+    return data.clientId;
+  } catch (error) {
+    console.error("Failed to get Google Client ID:", error);
     return "";
   }
-  return clientId;
 };
 
 // Load the Google API script
-export const loadGoogleApiScript = (): Promise<void> => {
-  return new Promise((resolve, reject) => {
+export const loadGoogleApiScript = async (): Promise<void> => {
+  return new Promise(async (resolve, reject) => {
     if (typeof window === "undefined") {
       reject(new Error("Cannot load Google API in server-side context"));
       return;
     }
 
-    const clientId = getClientId();
+    const clientId = await getClientId();
     if (!clientId) {
       reject(new Error("Google Client ID is not configured"));
       return;

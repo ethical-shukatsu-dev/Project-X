@@ -15,8 +15,8 @@ import {Button} from "../ui/button";
 import {trackSignupClick, trackEvent} from "@/lib/analytics";
 import {useIsMobile} from "../../hooks/useIsMobile";
 import GoogleSignUpButton from "../ui/GoogleSignUpButton";
-import { useRouter } from "next/navigation";
-import { BASE_URL } from "@/lib/constants/domain";
+import {useRouter} from "next/navigation";
+import {BASE_URL} from "@/lib/constants/domain";
 
 // Extend the RecommendationResult type to include the feedback property
 interface ExtendedRecommendationResult extends RecommendationResult {
@@ -73,19 +73,19 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
     }).catch((error) => {
       console.error("Error tracking signup click:", error);
     });
-    
+
     // Get current URL search params
     const currentUrl = new URL(window.location.href);
     const searchParams = new URLSearchParams(currentUrl.search);
-    
+
     // Remove userId and locale params if they exist
-    searchParams.delete('userId');
-    searchParams.delete('locale');
-    
+    searchParams.delete("userId");
+    searchParams.delete("locale");
+
     // Generate the query string
     const queryString = searchParams.toString();
-    const queryPrefix = queryString ? '?' : '';
-    
+    const queryPrefix = queryString ? "?" : "";
+
     // Navigate to signup page with preserved query params
     router.push(`${BASE_URL}/auth/students/signup${queryPrefix}${queryString}`);
   };
@@ -163,8 +163,9 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
       {/* Signup Buttons */}
       <div className="flex flex-col justify-center gap-4 px-6 sm:flex-row">
         <Button
+          size="lg"
           onClick={handleSignupClick}
-          className="w-full p-4 font-bold text-white transition-all rounded-md sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
+          className="w-full p-4 font-bold border border-white text-white transition-all rounded-md sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
         >
           {t("cta.primaryButton") || "Sign up with Email"}
         </Button>
