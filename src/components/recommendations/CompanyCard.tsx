@@ -255,7 +255,7 @@ export default function CompanyCard({
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/70 hover:text-primary"
+                  className="text-white/70 transition-all hover:text-white"
                   aria-label={`Visit ${company.name} website`}
                 >
                   <ExternalLink size={16} />

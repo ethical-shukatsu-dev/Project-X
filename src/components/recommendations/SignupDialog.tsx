@@ -14,6 +14,9 @@ import {RecommendationResult} from "@/lib/openai/client";
 import {Button} from "../ui/button";
 import {trackSignupClick, trackEvent} from "@/lib/analytics";
 import {useIsMobile} from "../../hooks/useIsMobile";
+import GoogleSignUpButton from "../ui/GoogleSignUpButton";
+import { useRouter } from "next/navigation";
+import { BASE_URL } from "@/lib/constants/domain";
 
 // Extend the RecommendationResult type to include the feedback property
 interface ExtendedRecommendationResult extends RecommendationResult {
@@ -39,6 +42,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
 }) => {
   const {t} = useTranslation(lng, "ai");
   const isMobile = useIsMobile();
+  const router = useRouter();
 
   // Create company cards for the first 5 recommendations
   // If showRevealedOnly is true, only show companies with feedback
@@ -69,9 +73,21 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
     }).catch((error) => {
       console.error("Error tracking signup click:", error);
     });
-
-    // Navigate to signup page
-    window.location.href = "https://baseme.app/auth/students/signup";
+    
+    // Get current URL search params
+    const currentUrl = new URL(window.location.href);
+    const searchParams = new URLSearchParams(currentUrl.search);
+    
+    // Remove userId and locale params if they exist
+    searchParams.delete('userId');
+    searchParams.delete('locale');
+    
+    // Generate the query string
+    const queryString = searchParams.toString();
+    const queryPrefix = queryString ? '?' : '';
+    
+    // Navigate to signup page with preserved query params
+    router.push(`${BASE_URL}/auth/students/signup${queryPrefix}${queryString}`);
   };
 
   // Handle dialog close with tracking
@@ -153,7 +169,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
           {t("cta.primaryButton") || "Sign up with Email"}
         </Button>
 
-        {/* <GoogleSignUpButton t={t} /> */}
+        <GoogleSignUpButton t={t} />
       </div>
 
       {/* Disclaimer */}
