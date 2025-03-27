@@ -35,7 +35,7 @@ export default function GoogleAuthHead() {
       <meta name="google-signin-client_id" content={googleClientId} />
       <meta
         httpEquiv="Content-Security-Policy"
-        content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.gstatic.com https://accounts.google.com"
+        content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.gstatic.com https://accounts.google.com; style-src 'self' 'unsafe-inline'"
       />
     </>
   );

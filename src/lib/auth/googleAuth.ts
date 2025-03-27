@@ -94,6 +94,7 @@ export const initiateGoogleSignIn = async (): Promise<void> => {
     // Trigger Google Sign-In
     const googleUser = await auth2.signIn();
     
+    console.log("googleUser", googleUser);
     // Process successful sign-in
     await handleGoogleSignInSuccess(googleUser);
   } catch (error) {

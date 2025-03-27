@@ -61,7 +61,7 @@ export function middleware(request: NextRequest) {
   // Add the CSP header
   response.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.gstatic.com https://accounts.google.com; connect-src 'self' https://apis.google.com https://*.gstatic.com https://accounts.google.com; frame-src 'self' https://accounts.google.com; img-src 'self' data: https://*.googleusercontent.com https://*.gstatic.com"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https:///*.gstatic.com https://accounts.google.com; connect-src 'self' https://apis.google.com https://*.gstatic.com https://accounts.google.com; frame-src 'self' https://accounts.google.com; img-src 'self' data: https://*.googleusercontent.com https://*.gstatic.com; style-src 'self' 'unsafe-inline'"
   );
 
   return response;
