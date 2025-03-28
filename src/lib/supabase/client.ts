@@ -33,6 +33,7 @@ export type Company = {
   site_url?: string | null;
   data_source: string;
   last_updated: string;
+  company_values?: string; // Text description of company values
 };
 
 export type Recommendation = {
@@ -42,6 +43,10 @@ export type Recommendation = {
   created_at: string;
   matching_points: string[]; // Array of matching value points
   feedback?: "interested" | "not_interested"; // User feedback
+  value_match_ratings?: Record<string, number>; // Ratings (1-10) for value matches
+  strength_match_ratings?: Record<string, number>; // Ratings (1-10) for strength matches
+  value_matching_details?: Record<string, string>; // Detailed explanations for value matches
+  strength_matching_details?: Record<string, string>; // Detailed explanations for strength matches
 };
 
 // Type for image attribution

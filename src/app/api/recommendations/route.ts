@@ -70,6 +70,10 @@ export async function GET(request: Request) {
       user_id: userId,
       company_id: rec.company.id,
       matching_points: rec.matching_points,
+      value_match_ratings: rec.value_match_ratings || null,
+      strength_match_ratings: rec.strength_match_ratings || null,
+      value_matching_details: rec.value_matching_details || null,
+      strength_matching_details: rec.strength_matching_details || null,
     }));
 
     const {data: insertedRecommendations, error: insertError} = await supabase

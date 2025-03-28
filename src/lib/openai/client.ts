@@ -4,7 +4,6 @@ import {v4 as uuid} from "uuid";
 import {getOrCreateCompany} from "../companies/client";
 import fs from 'fs';
 import path from 'path';
-import { RECOMMENDATION_COUNT } from "../constants/recommendations";
 
 // Initialize the OpenAI client
 const openaiClient = new OpenAI({
@@ -15,14 +14,24 @@ export type RecommendationResult = {
   id: string;
   company: Company;
   matching_points: string[];
+  value_match_ratings?: Record<string, number>;
+  strength_match_ratings?: Record<string, number>;
+  value_matching_details?: Record<string, string>;
+  strength_matching_details?: Record<string, string>;
+  company_values?: string;
 }
 
 // Define type for recommendation response from OpenAI
 type OpenAIRecommendation = {
-  id: string;
+  id?: string;
   name: string;
   industry: string;
   matching_points: string[];
+  company_values?: string;
+  value_match_ratings?: Record<string, number>;
+  strength_match_ratings?: Record<string, number>;
+  value_matching_details?: Record<string, string>;
+  strength_matching_details?: Record<string, string>;
 };
 
 type OpenAIRecommendationResponse = {
@@ -39,6 +48,7 @@ type OpenAICompanyData = {
   headquarters?: string;
   japan_presence?: string;
   site_url?: string;
+  company_values?: string;
 };
 
 // Function to load AI translations
@@ -74,7 +84,7 @@ export async function generateRecommendations(
 
   const promptTemplate = locale === 'ja' 
     ? `
-    ユーザーの価値観に基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。
+    ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業10社を推薦してください。誰もが知っている企業だけでなく、あまり知られていない企業も含んでください。なお、過去に提示した企業の重複は避けてください。
 
     重要: すべての回答は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。
     
@@ -87,59 +97,117 @@ export async function generateRecommendations(
     
     これらの画像ベースの価値観は、ユーザーが視覚的に選択した価値観を表しています。テキストベースの価値観と同様に重要視してください。
     ` : ''}
+    ${userData.interests ? `
+    
+    ユーザーの強み:
+    ${JSON.stringify(userData.interests)}
+    ` : ''}
     
     各企業について、以下の情報を提供してください:
     - 企業名: 日本語で表記してください。英語名の場合は日本語での一般的な呼び方を使用してください。
-    - 業界: 日本語で表記してください。
-    - この企業がユーザーの価値観に合う理由を説明する3〜5つの具体的なポイント: すべて日本語で記述してください。
+    - 業界: 日本語で表記してください。指定された業界カテゴリとサブカテゴリから選んでください。
+    - 大事にする価値観：この企業が大事にする価値観を100文字程度で記述してください。
+    - 各価値観や強みとのマッチ度：ユーザーの各価値観や強みとのマッチ度を1-10で示してください。
+    - 各価値観とのマッチングポイント: この企業がユーザーの各価値観に合う理由をすべて日本語で記述してください。プロダクトやサービスに触れるなどして具体的にマッチしている点を明確に示してください。
+    - 各強みとのマッチングポイント：ユーザーの各強みがこの企業で活かされると思う具体的な状況とその根拠を示してください。
     
-    マッチングポイントについては、この企業はあなたと同じように...という形式で、ユーザーの価値観と企業の価値観の具体的な一致点を明確に示してください。表面的な説明ではなく、具体的な例や証拠を含めてください。
-
     マッチングポイントの良い例:
-    - 「富士通はあなたと同じようにワークライフバランスを重視しています。あなたは柔軟な勤務環境を求めており、富士通はフレックスタイム制度や在宅勤務制度を積極的に導入しています。」
-    - 「楽天はあなたと同じようにイノベーションを重視しています。あなたは創造的な環境で働きたいと考えており、楽天は新しいアイデアを奨励し、社内ベンチャー制度を設けています。」
-    - 「資生堂はあなたと同じように社会的影響を重視しています。あなたは社会貢献活動に関心があり、資生堂は環境保全活動や女性支援プログラムなど多くの社会貢献活動を行っています。」
+    - 「富士通ではイノベーションを生み出す環境を大事にしており、フレックスタイム制度や在宅勤務制度を積極的に導入しています。」
+    - 「楽天ではストレス耐性が高い人材を求めています。流れの早いオンラインコマースの業界において、顧客のニーズに合わせて柔軟にソリューションを変えていくため、色々な変化が起きやすくストレス耐性のある人材を求めています。」
+    - 「資生堂ではチームワークを重視しています。新規商品開発も一人の天才が生み出すより、チームで話し合って出てきたアイディアを大事にしています。」
 
     マッチングポイントの悪い例:
     - 「この企業はイノベーションを重視しています」（ユーザーとの具体的な関連性が示されていない）
     - 「良い職場環境を提供しています」（具体性に欠ける）
     - 「ユーザーの価値観に合っています」（具体的な一致点が示されていない）
     
-    推薦する企業を選ぶ際は、以下の点を考慮してください:
-    - 企業の公式な価値観だけでなく、実際の職場環境や社員の経験も考慮してください
-    - 企業の公式声明と実際の行動の間にギャップがある場合は、実際の行動を優先してください
-    - ユーザーの価値観と企業文化の間の本質的な適合性を評価してください
-    - 企業の社会的評判、従業員満足度、業界での評価も考慮してください
-    
     必ず以下の企業規模をすべて含めた多様な企業を推薦してください：
-    - スタートアップ: 少なくとも1社（会社の規模は正確に「スタートアップ（50人未満）」と表記）
-    - 小規模企業: 少なくとも1社（会社の規模は正確に「小規模（50-200人）」と表記）
-    - 中規模企業: 少なくとも1社（会社の規模は正確に「中規模 200-1000人」と表記）
-    - 大規模企業: 少なくとも1社（会社の規模は正確に「大規模 1000人以上」と表記）
+    - 「スタートアップ（50人未満）」: 少なくとも1社
+    - 「小規模（50-200人）」: 少なくとも1社 
+    - 「中規模（1000-5000人）」: 少なくとも1社
+    - 「大規模（10000人以上）」: 少なくとも1社
     
-    企業の規模はフィルタリングと検索の目的で重要なので、必ず上記の正確な形式で表記してください。
-    
-    また、以下の業界からそれぞれ少なくとも1社を含めてください。全ての業界から選ぶ必要はありませんが、少なくとも5つの異なる業界からの企業を含めてください：
-    - テクノロジー/IT
-    - 医療/ヘルスケア
-    - 金融/銀行
-    - 教育
-    - サステナビリティ/環境
-    - 小売/消費財
-    - 製造業
-    - メディア/エンターテインメント
-    - コンサルティング
-    - 非営利/社会的企業
-    
-    これにより、学生が様々な業界の選択肢を検討できるようになります。
+    また、該当企業の業界は下記のカテゴリとサブカテゴリから選んで表示してください。提示する企業は同じ業界にならないようにしてください。
+
+    - メーカー
+    食品・農林・水産
+    建設・住宅・インテリア
+    繊維・化学・薬品・化粧品
+    鉄鋼・金属・鉱業
+    機械・プラント
+    電子・電気機器
+    自動車・輸送用機器
+    精密・医療機器
+    印刷・事務機器関連
+    スポーツ・玩具
+    その他メーカー
+    - サービス・インフラ
+    不動産
+    鉄道・航空・運輸・物流
+    電力・ガス・エネルギー
+    フードサービス
+    ホテル・旅行
+    医療・福祉
+    アミューズメント・レジャー
+    その他サービス
+    コンサルティング・調査
+    人材サービス
+    教育
+    - 商社
+    総合商社
+    専門商社
+    - ソフトウェア
+    ソフトウェア
+    インターネット
+    通信
+    - 小売
+    百貨店・スーパー
+    コンビニ
+    専門店
+    - 広告・出版・マスコミ
+    放送
+    新聞
+    出版
+    広告
+    - 金融
+    銀行・証券
+    クレジット
+    信販・リース
+    その他金融
+    生保・損保
+    - 官公庁・公社・団体
+    公社・団体
+    官公庁
     
     以下の構造でJSONフォーマットで回答してください: 
     {
       "recommendations": [
         { 
+          "id": "unique-id-1",
           "name": "企業名（日本語のみ）", 
-          "industry": "業界（日本語のみ）", 
-          "matching_points": ["ポイント1（日本語のみ）", "ポイント2（日本語のみ）", ...] 
+          "industry": "業界（日本語のみ）",
+          "company_values": "この企業が大事にする価値観（100文字程度）",
+          "value_match_ratings": {
+            "価値観1": 8,
+            "価値観2": 9
+            // ユーザーの各価値観に対するマッチ度（1-10）
+          },
+          "strength_match_ratings": {
+            "強み1": 7,
+            "強み2": 9
+            // ユーザーの各強みに対するマッチ度（1-10）
+          },
+          "value_matching_details": {
+            "価値観1": "この価値観に対する詳細なマッチングポイント",
+            "価値観2": "この価値観に対する詳細なマッチングポイント"
+            // ユーザーの各価値観に対する詳細な説明
+          },
+          "strength_matching_details": {
+            "強み1": "この強みに対する詳細なマッチングポイント",
+            "強み2": "この強みに対する詳細なマッチングポイント"
+            // ユーザーの各強みに対する詳細な説明
+          },
+          "matching_points": ["総合的なマッチングポイント1（日本語のみ）", "総合的なマッチングポイント2（日本語のみ）", ...] 
         },
         // 他の企業...
       ]
@@ -148,8 +216,8 @@ export async function generateRecommendations(
     再度強調しますが、すべての出力は日本語のみで提供してください。英語の単語や文を混在させないでください。
     `
     : `
-    Based on the user's values, recommend ${RECOMMENDATION_COUNT} real companies in Japan 
-    that would be good matches for a university student seeking employment.
+    Based on the user's values and strengths, recommend 10 real companies in Japan 
+    that would be good matches for a university student seeking employment. Include both well-known and lesser-known companies, and avoid duplicating companies that have been suggested previously.
 
     Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
     
@@ -162,59 +230,118 @@ export async function generateRecommendations(
     
     These image-based values represent the values that the user selected visually. Please consider them as important as the text-based values.
     ` : ''}
+    ${userData.interests ? `
+    
+    User's strengths:
+    ${JSON.stringify(userData.interests)}
+    ` : ''}
     
     For each company, provide:
     - Company name: Use the English name or the commonly used English translation.
-    - Industry: Provide in English.
-    - 3-5 specific points explaining why this company matches the user's values: All in English.
-    
-    For the matching points, clearly show the specific connections between the user's values and the company's values using a "This company, like you, values..." format. Include specific examples or evidence rather than surface-level explanations.
+    - Industry: Provide in English, selecting from the categories and subcategories listed below.
+    - Company values: Describe in about 100 words the values that this company cares about.
+    - Match ratings for each value and strength: Show how well the company matches each of the user's values and strengths on a scale of 1-10.
+    - Matching points for each value: Explain in detail why this company matches each of the user's values. Be specific about how it matches, mentioning products or services if relevant.
+    - Matching points for each strength: Explain specific situations where the user's strengths would be valued at the company and provide reasoning.
+    - 3-5 overall matching points explaining why this company matches the user's values: All in English.
 
     Good examples of matching points:
-    - "Sony, like you, values innovation. You seek a creative environment, and Sony encourages new ideas through its innovation programs and dedicated R&D budget."
-    - "Toyota, like you, prioritizes work-life balance. You value flexible working arrangements, and Toyota has implemented comprehensive flexible work policies and family support programs."
-    - "Rakuten, like you, emphasizes career growth. You are looking for professional development opportunities, and Rakuten offers structured career advancement paths and extensive training programs."
+    - "Sony prioritizes innovation by maintaining a creative environment where employees can propose and develop new ideas through dedicated R&D programs."
+    - "Rakuten seeks employees with high stress tolerance. In the fast-paced e-commerce industry, employees need to adapt solutions to customer needs quickly, requiring resilience during constant changes."
+    - "Shiseido values teamwork, believing that collaborative ideation produces better products than individual genius, encouraging group discussions for new product development."
 
     Poor examples of matching points:
     - "The company values innovation" (doesn't show specific connection to user)
     - "Provides a good work environment" (lacks specificity)
     - "Aligns with user values" (doesn't identify specific matching points)
     
-    When selecting companies to recommend, consider:
-    - Not just official company values but also actual workplace environment and employee experiences
-    - When there's a gap between official company statements and actual practices, prioritize actual practices
-    - Evaluate the intrinsic fit between user values and company culture
-    - Consider the company's social reputation, employee satisfaction, and industry standing
-    
     You must include companies of all the following sizes in your recommendations:
     - Startup: at least 1 company (use the exact text "Startup (less than 50 employees)" for company size)
     - Small company: at least 1 company (use the exact text "Small (50-200 employees)" for company size)
-    - Medium company: at least 1 company (use the exact text "Medium (200-1000 employees)" for company size)
-    - Large company: at least 1 company (use the exact text "Large (1000+ employees)" for company size)
+    - Medium company: at least 1 company (use the exact text "Medium (1000-5000 employees)" for company size)
+    - Large company: at least 1 company (use the exact text "Large (10000+ employees)" for company size)
     
-    Company size is important for filtering and search purposes, so please use these exact formats.
-    
-    Additionally, please include at least one company from each of these industries. You don't need to include all industries, but ensure that at least 5 different industries are represented:
-    - Technology/IT
-    - Healthcare/Medical
-    - Finance/Banking
-    - Education
-    - Sustainability/Environment
-    - Retail/Consumer Goods
+    Choose the company industries from the following categories and subcategories. Ensure the recommended companies are from different industries:
+
     - Manufacturing
-    - Media/Entertainment
-    - Consulting
-    - Nonprofit/Social Enterprise
-    
-    This will help students consider options across various industries.
+    Food/Agriculture/Fishery
+    Construction/Housing/Interior
+    Textiles/Chemicals/Pharmaceuticals/Cosmetics
+    Steel/Metal/Mining
+    Machinery/Plant
+    Electronic/Electrical Equipment
+    Automotive/Transportation Equipment
+    Precision/Medical Equipment
+    Printing/Office Equipment
+    Sports/Toys
+    Other Manufacturing
+    - Service/Infrastructure
+    Real Estate
+    Railway/Aviation/Transportation/Logistics
+    Power/Gas/Energy
+    Food Service
+    Hotel/Travel
+    Medical/Welfare
+    Amusement/Leisure
+    Other Services
+    Consulting/Research
+    Human Resources
+    Education
+    - Trading
+    General Trading
+    Specialized Trading
+    - Software
+    Software
+    Internet
+    Telecommunications
+    - Retail
+    Department Stores/Supermarkets
+    Convenience Stores
+    Specialty Stores
+    - Advertising/Publishing/Media
+    Broadcasting
+    Newspaper
+    Publishing
+    Advertising
+    - Finance
+    Banking/Securities
+    Credit
+    Leasing/Finance
+    Other Finance
+    Life/Non-Life Insurance
+    - Government/Public/Organizations
+    Public Corporations/Organizations
+    Government
     
     Format as JSON with this structure: 
     {
       "recommendations": [
         { 
+          "id": "unique-id-1",
           "name": "Company Name (English only)", 
-          "industry": "Industry (English only)", 
-          "matching_points": ["point1 (English only)", "point2 (English only)", ...] 
+          "industry": "Industry (English only)",
+          "company_values": "Values this company cares about (about 100 words)",
+          "value_match_ratings": {
+            "value1": 8,
+            "value2": 9
+            // Match ratings for each user value (1-10)
+          },
+          "strength_match_ratings": {
+            "strength1": 7,
+            "strength2": 9
+            // Match ratings for each user strength (1-10)
+          },
+          "value_matching_details": {
+            "value1": "Detailed matching points for this value",
+            "value2": "Detailed matching points for this value"
+            // Detailed explanation for each user value
+          },
+          "strength_matching_details": {
+            "strength1": "Detailed matching points for this strength",
+            "strength2": "Detailed matching points for this strength"
+            // Detailed explanation for each user strength
+          },
+          "matching_points": ["Overall matching point 1 (English only)", "Overall matching point 2 (English only)", ...] 
         },
         // more companies...
       ]
@@ -250,9 +377,14 @@ export async function generateRecommendations(
         const company = await getOrCreateCompany(rec.name, rec.industry, locale);
 
         return {
-          id: rec.id,
+          id: rec.id || uuid(),
           company,
           matching_points: rec.matching_points,
+          value_match_ratings: rec.value_match_ratings,
+          strength_match_ratings: rec.strength_match_ratings,
+          value_matching_details: rec.value_matching_details,
+          strength_matching_details: rec.strength_matching_details,
+          company_values: rec.company_values
         };
       })
     );
@@ -389,6 +521,7 @@ export async function fetchCompanyData(
     - name: 会社の正式名称（日本語で表記）
     - industry: 主要業界（日本語で表記）
     - description: 詳細な説明（100〜150語）。会社の歴史、主要製品/サービス、市場での位置づけを含めてください。すべて日本語で記述してください。
+    - company_values: この企業が大事にする価値観（100文字程度）を記述してください。
     - size: 会社の規模。従業員数に基づいて、以下の正確な形式のいずれかのみを使用してください：
       - 「スタートアップ（50人未満）」 - 小規模スタートアップ企業向け
       - 「小規模（50-200人）」 - 50人から200人程度の企業向け
@@ -430,6 +563,7 @@ export async function fetchCompanyData(
     - name: Full company name (in English)
     - industry: Primary industry (in English)
     - description: A detailed description (100-150 words) including company history, main products/services, and market position. All in English.
+    - company_values: Describe the values that this company cares about (about 100 words).
     - size: Company size. Use only one of the following exact formats based on employee count:
       - "Startup (less than 50 employees)" - For small startups
       - "Small (50-200 employees)" - For companies with around 50-200 employees
@@ -499,6 +633,7 @@ export async function fetchCompanyData(
       values: numericValues,
       logo_url: logoUrl, // Use the fetched logo URL instead of null
       site_url: companyData.site_url || null, // Include domain URL if available
+      company_values: companyData.company_values || undefined,
       data_source: "openai",
       last_updated: new Date().toISOString(),
     };
