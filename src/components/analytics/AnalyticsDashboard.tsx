@@ -1,8 +1,10 @@
 "use client";
 
-import {MetricCard, ConversionFunnel, SplitMetric} from "./DashboardCards";
+import {MetricCard, ConversionFunnel, SplitMetric, RefreshButton} from "./DashboardCards";
 import {useAnalytics, TimeRange} from "@/hooks/useAnalytics";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {Button} from "@/components/ui/button";
+import {RefreshCw} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -11,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {Skeleton} from "@/components/ui/skeleton";
+import {useState} from "react";
 
 const timeRangeLabels: Record<TimeRange, string> = {
   "24h": "Last 24 Hours",
@@ -20,7 +23,39 @@ const timeRangeLabels: Record<TimeRange, string> = {
 };
 
 export function AnalyticsDashboard() {
-  const {data, loading, error, timeRange, changeTimeRange} = useAnalytics();
+  const {data, loading, error, timeRange, changeTimeRange, refreshData} = useAnalytics();
+  const [refreshingStates, setRefreshingStates] = useState<Record<string, boolean>>({
+    visitors: false,
+    surveyStarted: false,
+    surveyCompleted: false,
+    signups: false,
+    surveyFunnel: false,
+    surveyTypes: false,
+    signupMethods: false,
+    recommendations: false,
+    all: false,
+  });
+
+  const refreshMetric = async (metricKey: string) => {
+    // Set the specific metric loading state
+    setRefreshingStates(prev => ({...prev, [metricKey]: true}));
+    
+    // Refresh all data
+    await refreshData();
+    
+    // Reset loading state after a short delay for visual feedback
+    setTimeout(() => {
+      setRefreshingStates(prev => ({...prev, [metricKey]: false}));
+    }, 500);
+  };
+
+  const refreshAllMetrics = async () => {
+    setRefreshingStates(prev => ({...prev, all: true}));
+    await refreshData();
+    setTimeout(() => {
+      setRefreshingStates(prev => ({...prev, all: false}));
+    }, 500);
+  };
 
   if (error) {
     return (
@@ -34,7 +69,7 @@ export function AnalyticsDashboard() {
           <p>{error.message}</p>
           <button
             className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md"
-            onClick={() => window.location.reload()}
+            onClick={() => refreshAllMetrics()}
           >
             Retry
           </button>
@@ -54,7 +89,18 @@ export function AnalyticsDashboard() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
 
-        <div className="flex">
+        <div className="flex gap-2 items-center">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={refreshAllMetrics}
+            disabled={refreshingStates.all}
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshingStates.all ? 'animate-spin' : ''}`} />
+            Refresh All
+          </Button>
+          
           <Tabs defaultValue="all">
             <TabsList>
               {(Object.keys(timeRangeLabels) as TimeRange[]).map((range) => (
@@ -77,20 +123,24 @@ export function AnalyticsDashboard() {
           title="Total Visitors"
           value={stats.surveyFunnel.visits.toLocaleString()}
           description="Users who visited home page"
+          onRefresh={() => refreshMetric('visitors')}
         />
         <MetricCard
           title="Survey Started"
           value={stats.surveyFunnel.started.toLocaleString()}
           description={`${stats.surveyFunnel.startRate} of visitors`}
+          onRefresh={() => refreshMetric('surveyStarted')}
         />
         <MetricCard
           title="Survey Completed"
           value={stats.surveyFunnel.completed.toLocaleString()}
           description={`${stats.surveyFunnel.completionRate} completion rate`}
+          onRefresh={() => refreshMetric('surveyCompleted')}
         />
         <MetricCard
           title="Total Signups"
           value={stats.signups.totalSignups.toLocaleString()}
+          onRefresh={() => refreshMetric('signups')}
         />
       </div>
 
@@ -110,14 +160,23 @@ export function AnalyticsDashboard() {
               value: stats.surveyFunnel.overallConversionRate,
             },
           ]}
+          onRefresh={() => refreshMetric('surveyFunnel')}
         />
 
         <Card>
           <CardHeader>
-            <CardTitle>Survey Types</CardTitle>
-            <CardDescription>
-              Distribution of survey types selected by users
-            </CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Survey Types</CardTitle>
+                <CardDescription>
+                  Distribution of survey types selected by users
+                </CardDescription>
+              </div>
+              <RefreshButton 
+                onClick={() => refreshMetric('surveyTypes')} 
+                size="md" 
+              />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-8">
@@ -195,6 +254,7 @@ export function AnalyticsDashboard() {
             },
           ]}
           total={stats.signups.totalSignups.toLocaleString()}
+          onRefresh={() => refreshMetric('signupMethods')}
         />
 
         <SplitMetric
@@ -219,6 +279,7 @@ export function AnalyticsDashboard() {
                 stats.recommendations.averageCompaniesPerUser.toLocaleString(),
             },
           ]}
+          onRefresh={() => refreshMetric('recommendations')}
         />
       </div>
     </div>

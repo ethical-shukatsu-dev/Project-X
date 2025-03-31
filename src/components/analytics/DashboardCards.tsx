@@ -1,4 +1,28 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+
+interface RefreshButtonProps {
+  onClick: () => void;
+  size?: 'sm' | 'md';
+  className?: string;
+}
+
+export function RefreshButton({ onClick, size = 'sm', className }: RefreshButtonProps) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={`p-0 h-auto w-auto hover:bg-transparent ${className}`}
+      onClick={onClick}
+      aria-label="Refresh data"
+    >
+      <RefreshCw 
+        className={`text-muted-foreground hover:text-primary transition-colors ${size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'}`} 
+      />
+    </Button>
+  );
+}
 
 interface MetricCardProps {
   title: string;
@@ -8,13 +32,17 @@ interface MetricCardProps {
     value: number;
     isPositive: boolean;
   };
+  onRefresh?: () => void;
 }
 
-export function MetricCard({ title, value, description, trend }: MetricCardProps) {
+export function MetricCard({ title, value, description, trend, onRefresh }: MetricCardProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+          {onRefresh && <RefreshButton onClick={onRefresh} />}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
@@ -43,14 +71,20 @@ interface ConversionFunnelProps {
     name: string;
     value: string;
   }[];
+  onRefresh?: () => void;
 }
 
-export function ConversionFunnel({ title, steps, rates }: ConversionFunnelProps) {
+export function ConversionFunnel({ title, steps, rates, onRefresh }: ConversionFunnelProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>Conversion funnel and rates</CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>Conversion funnel and rates</CardDescription>
+          </div>
+          {onRefresh && <RefreshButton onClick={onRefresh} size="md" />}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -99,13 +133,17 @@ interface SplitMetricProps {
     value: number | string;
   }[];
   total?: number | string;
+  onRefresh?: () => void;
 }
 
-export function SplitMetric({ title, metrics, total }: SplitMetricProps) {
+export function SplitMetric({ title, metrics, total, onRefresh }: SplitMetricProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+          {onRefresh && <RefreshButton onClick={onRefresh} />}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
