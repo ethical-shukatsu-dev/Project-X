@@ -29,6 +29,34 @@ export interface StepDropoffMetric {
   avgTimeSpentSeconds: number;
 }
 
+// Define anonymous user metrics type
+export interface AnonymousUserMetrics {
+  total: number;
+  percentage: string;
+  conversionRate: string;
+  completionRate: string;
+}
+
+// Define A/B test comparison metrics type
+export interface ABTestComparisonMetrics {
+  anonymous: {
+    total: number;
+    percentage: string;
+    completionRate: string;
+    conversionRate: string;
+  };
+  nonAnonymous: {
+    total: number;
+    percentage: string;
+    completionRate: string;
+    conversionRate: string;
+  };
+  difference: {
+    completionRate: string;
+    conversionRate: string;
+  };
+}
+
 // Type definitions for the analytics data
 export interface AnalyticsData {
   events: AnalyticsEvent[];
@@ -70,6 +98,8 @@ export interface AnalyticsData {
     };
     surveySteps: SurveyStepMetric[];
     dropoffAnalysis: StepDropoffMetric[];
+    anonymousUsers: AnonymousUserMetrics;
+    abTestComparison: ABTestComparisonMetrics;
   };
 }
 

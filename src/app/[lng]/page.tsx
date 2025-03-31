@@ -34,9 +34,6 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
     const heroProps = {
       title: t("homepage.title"),
       description: t("homepage.description"),
-      selectText: t("homepage.selectQuestionnaireType"),
-      textQuestionnaireText: t("homepage.textQuestionnaire"),
-      imageQuestionnaireText: t("homepage.imageQuestionnaire"),
       lng: lng,
     };
 
@@ -44,9 +41,6 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
       title: t("features.quick.title") || "Why Choose Us",
       features: features,
       showQuestionnaireOptions: true,
-      selectText: t("homepage.selectQuestionnaireType"),
-      textQuestionnaireText: t("homepage.textQuestionnaire"),
-      imageQuestionnaireText: t("homepage.imageQuestionnaire"),
       lng: lng,
     };
 

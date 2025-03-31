@@ -5,6 +5,7 @@ import {
   ConversionFunnel,
   SplitMetric,
   RefreshButton,
+  ABTestComparison,
 } from "./DashboardCards";
 import {SurveyStepsFunnel} from "./SurveyStepsFunnel";
 import {DropoffAnalysis} from "./DropoffAnalysis";
@@ -40,6 +41,8 @@ export function AnalyticsDashboard() {
     recommendations: false,
     surveySteps: false,
     dropoffAnalysis: false,
+    anonymousUsers: false,
+    abTestComparison: false,
     all: false,
   });
 
@@ -124,7 +127,31 @@ export function AnalyticsDashboard() {
       uniqueTotalSignups: 0
     },
     surveySteps: [],
-    dropoffAnalysis: []
+    dropoffAnalysis: [],
+    anonymousUsers: {
+      total: 0,
+      percentage: "0%",
+      conversionRate: "0%",
+      completionRate: "0%"
+    },
+    abTestComparison: {
+      anonymous: {
+        total: 0,
+        percentage: "0%",
+        completionRate: "0%",
+        conversionRate: "0%"
+      },
+      nonAnonymous: {
+        total: 0,
+        percentage: "0%",
+        completionRate: "0%",
+        conversionRate: "0%"
+      },
+      difference: {
+        completionRate: "0%",
+        conversionRate: "0%"
+      }
+    }
   };
 
   // Use the data if available, otherwise use default values
@@ -278,7 +305,92 @@ export function AnalyticsDashboard() {
             onRefresh={() => refreshMetric("surveyTypes")}
           />
         )}
+        
+        {/* Anonymous Users Card */}
+        {refreshingStates.anonymousUsers ? (
+          <MetricCardSkeleton />
+        ) : (
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-sm font-medium">
+                  Anonymous Users (A/B Test)
+                </CardTitle>
+                <RefreshButton onClick={() => refreshMetric("anonymousUsers")} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Total Users</span>
+                  <span className="font-medium">
+                    {stats.anonymousUsers.total}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Percentage</span>
+                  <span className="font-medium">
+                    {stats.anonymousUsers.percentage}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Completion Rate</span>
+                  <span className="font-medium">
+                    {stats.anonymousUsers.completionRate}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Conversion Rate</span>
+                  <span className="font-medium">
+                    {stats.anonymousUsers.conversionRate}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
+
+      {/* A/B Test Comparison */}
+      {refreshingStates.abTestComparison ? (
+        <Card className="col-span-1 md:col-span-3">
+          <CardHeader>
+            <Skeleton className="h-6 w-48 mb-2" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {Array(3).fill(0).map((_, i) => (
+                <Card key={i} className="bg-muted/50">
+                  <CardHeader>
+                    <Skeleton className="h-4 w-32 mb-1" />
+                    <Skeleton className="h-3 w-24" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {Array(2).fill(0).map((_, j) => (
+                        <div key={j}>
+                          <div className="flex justify-between mb-1">
+                            <Skeleton className="h-3 w-24" />
+                            <Skeleton className="h-3 w-12" />
+                          </div>
+                          <Skeleton className="h-2 w-full" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <ABTestComparison
+          title="A/B Test Results: Anonymous Mode"
+          description="Comparison of anonymous vs non-anonymous user behavior"
+          data={stats.abTestComparison}
+          onRefresh={() => refreshMetric("abTestComparison")}
+        />
+      )}
 
       {/* Unique Signup Metrics */}
       {refreshingStates.uniqueSignups ? (
@@ -560,8 +672,59 @@ function DashboardSkeleton() {
           ))}
       </div>
       
+      {/* A/B Test Comparison Skeleton */}
+      <Card className="col-span-1 md:col-span-3">
+        <CardHeader>
+          <Skeleton className="h-6 w-48 mb-2" />
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {Array(3).fill(0).map((_, i) => (
+              <Card key={i} className="bg-muted/50">
+                <CardHeader>
+                  <Skeleton className="h-4 w-32 mb-1" />
+                  <Skeleton className="h-3 w-24" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Array(2).fill(0).map((_, j) => (
+                      <div key={j}>
+                        <div className="flex justify-between mb-1">
+                          <Skeleton className="h-3 w-24" />
+                          <Skeleton className="h-3 w-12" />
+                        </div>
+                        <Skeleton className="h-2 w-full" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+      
       <SurveyStepsFunnelSkeleton />
       <DropoffAnalysisSkeleton />
+      
+      {/* Anonymous Users Card Skeleton */}
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48 mb-2" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {Array(4)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="flex justify-between items-center">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

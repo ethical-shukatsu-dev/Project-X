@@ -1,6 +1,7 @@
 /**
  * Analytics utility functions for tracking user actions
  */
+import { LOCALSTORAGE_KEYS } from '@/lib/constants/localStorage';
 
 type EventType = 
   // Existing events
@@ -44,6 +45,14 @@ const getSessionId = (): string => {
   return sessionId;
 };
 
+// Get the anonymous status from localStorage
+const getAnonymousStatus = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  const storedValue = localStorage.getItem(LOCALSTORAGE_KEYS.AB_TEST_ANONYMOUS);
+  return storedValue === 'true';
+};
+
 /**
  * Track an event to the analytics backend
  */
@@ -55,12 +64,18 @@ export const trackEvent = async (
     // Get session ID
     const sessionId = getSessionId();
     
+    // Get anonymous status
+    const isAnonymous = getAnonymousStatus();
+    
     // Create event payload
     const event: AnalyticsEvent = {
       event_type: eventType,
       timestamp: Date.now(),
       session_id: sessionId,
-      properties,
+      properties: {
+        ...properties,
+        isAnonymous
+      },
     };
     
     // For now, just log to console in development

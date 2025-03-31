@@ -58,6 +58,34 @@ interface SurveyStepDropoffMetrics {
   stepIndex: number;
 }
 
+// Define anonymous users metrics
+interface AnonymousUserMetrics {
+  total: number;
+  percentage: string;
+  conversionRate: string;
+  completionRate: string;
+}
+
+// Define comparison metrics interface for A/B test results
+interface ABTestComparisonMetrics {
+  anonymous: {
+    total: number;
+    percentage: string;
+    completionRate: string;
+    conversionRate: string;
+  };
+  nonAnonymous: {
+    total: number;
+    percentage: string;
+    completionRate: string;
+    conversionRate: string;
+  };
+  difference: {
+    completionRate: string;
+    conversionRate: string;
+  };
+}
+
 /**
  * GET handler for fetching analytics data
  */
@@ -360,6 +388,117 @@ export async function GET(request: NextRequest) {
       };
     }).sort((a, b) => a.stepIndex - b.stepIndex);
     
+    // Process anonymous user data
+    const anonymousEvents = data.filter(event => 
+      event.properties?.isAnonymous === true
+    );
+    
+    const nonAnonymousEvents = data.filter(event => 
+      event.properties?.isAnonymous === false
+    );
+    
+    const totalUniqueSessionsCount = new Set(
+      data.filter(event => event.session_id)
+        .map(event => event.session_id)
+    ).size;
+    
+    const anonymousUniqueSessionsCount = new Set(
+      anonymousEvents.filter(event => event.session_id)
+        .map(event => event.session_id)
+    ).size;
+    
+    const anonymousPercentage = totalUniqueSessionsCount > 0
+      ? Math.round((anonymousUniqueSessionsCount / totalUniqueSessionsCount) * 100)
+      : 0;
+    
+    // Anonymous users survey completion metrics
+    const anonymousSurveyCompletions = anonymousEvents.filter(
+      event => event.event_type === 'survey_completed'
+    ).length;
+    
+    const anonymousSurveyStarts = anonymousEvents.filter(
+      event => event.event_type === 'survey_start_click'
+    ).length;
+    
+    const anonymousCompletionRate = anonymousSurveyStarts > 0
+      ? Math.round((anonymousSurveyCompletions / anonymousSurveyStarts) * 100)
+      : 0;
+    
+    // Anonymous conversion rate (completed the survey out of all anonymous visitors)
+    const anonymousVisitors = new Set(
+      anonymousEvents.filter(event => event.session_id)
+        .map(event => event.session_id)
+    ).size;
+    
+    const anonymousConversionRate = anonymousVisitors > 0
+      ? Math.round((anonymousSurveyCompletions / anonymousVisitors) * 100)
+      : 0;
+    
+    // Compile anonymous metrics
+    const anonymousMetrics: AnonymousUserMetrics = {
+      total: anonymousUniqueSessionsCount,
+      percentage: `${anonymousPercentage}%`,
+      completionRate: `${anonymousCompletionRate}%`,
+      conversionRate: `${anonymousConversionRate}%`
+    };
+    
+    // Non-anonymous users metrics
+    const nonAnonymousUniqueSessionsCount = new Set(
+      nonAnonymousEvents.filter(event => event.session_id)
+        .map(event => event.session_id)
+    ).size;
+    
+    const nonAnonymousPercentage = totalUniqueSessionsCount > 0
+      ? Math.round((nonAnonymousUniqueSessionsCount / totalUniqueSessionsCount) * 100)
+      : 0;
+    
+    // Non-anonymous users survey completion metrics
+    const nonAnonymousSurveyCompletions = nonAnonymousEvents.filter(
+      event => event.event_type === 'survey_completed'
+    ).length;
+    
+    const nonAnonymousSurveyStarts = nonAnonymousEvents.filter(
+      event => event.event_type === 'survey_start_click'
+    ).length;
+    
+    const nonAnonymousCompletionRate = nonAnonymousSurveyStarts > 0
+      ? Math.round((nonAnonymousSurveyCompletions / nonAnonymousSurveyStarts) * 100)
+      : 0;
+    
+    // Non-anonymous conversion rate (completed the survey out of all non-anonymous visitors)
+    const nonAnonymousVisitors = new Set(
+      nonAnonymousEvents.filter(event => event.session_id)
+        .map(event => event.session_id)
+    ).size;
+    
+    const nonAnonymousConversionRate = nonAnonymousVisitors > 0
+      ? Math.round((nonAnonymousSurveyCompletions / nonAnonymousVisitors) * 100)
+      : 0;
+    
+    // Calculate differences for comparison
+    const completionRateDifference = anonymousCompletionRate - nonAnonymousCompletionRate;
+    const conversionRateDifference = anonymousConversionRate - nonAnonymousConversionRate;
+    
+    // Compile A/B test comparison metrics
+    const abTestComparison: ABTestComparisonMetrics = {
+      anonymous: {
+        total: anonymousUniqueSessionsCount,
+        percentage: `${anonymousPercentage}%`,
+        completionRate: `${anonymousCompletionRate}%`,
+        conversionRate: `${anonymousConversionRate}%`,
+      },
+      nonAnonymous: {
+        total: nonAnonymousUniqueSessionsCount,
+        percentage: `${nonAnonymousPercentage}%`,
+        completionRate: `${nonAnonymousCompletionRate}%`,
+        conversionRate: `${nonAnonymousConversionRate}%`,
+      },
+      difference: {
+        completionRate: `${completionRateDifference > 0 ? '+' : ''}${completionRateDifference}%`,
+        conversionRate: `${conversionRateDifference > 0 ? '+' : ''}${conversionRateDifference}%`,
+      }
+    };
+    
     return NextResponse.json({
       events: data,
       eventCounts: typedEventCounts,
@@ -382,6 +521,10 @@ export async function GET(request: NextRequest) {
         surveySteps: surveyStepMetrics,
         // Dropoff analytics
         dropoffAnalysis: dropoffMetrics,
+        // Anonymous users metrics
+        anonymousUsers: anonymousMetrics,
+        // A/B test comparison
+        abTestComparison,
         // Diagnostic data
         diagnostics: {
           surveyStartClicks,

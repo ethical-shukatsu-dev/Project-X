@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useTranslation } from "@/i18n-client";
-import useAnonymousMode from "@/hooks/useAnonymousMode";
+import useABTesting from "@/hooks/useABTesting";
 import { Info } from "lucide-react";
 import {
   Tooltip,
@@ -20,7 +20,7 @@ interface AnonymousModeToggleProps {
 
 export default function AnonymousModeToggle({ lng }: AnonymousModeToggleProps) {
   const { t, loaded: translationsLoaded } = useTranslation(lng, "common");
-  const { isAnonymous, toggleAnonymousMode, isLoaded } = useAnonymousMode();
+  const { isAnonymous, isLoaded } = useABTesting();
   const [isMounted, setIsMounted] = useState(false);
   
   // Prevent hydration mismatch
@@ -39,7 +39,7 @@ export default function AnonymousModeToggle({ lng }: AnonymousModeToggleProps) {
           <Switch
             id="anonymous-mode"
             checked={isAnonymous}
-            onCheckedChange={toggleAnonymousMode}
+            disabled={true} // Disable manual toggling since it's controlled by A/B testing
           />
           <Label htmlFor="anonymous-mode" className="text-sm cursor-pointer sm:text-base">
             {t("homepage.anonymousMode")}
