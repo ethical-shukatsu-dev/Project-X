@@ -688,7 +688,8 @@ function useStepTracking(totalSteps: number) {
       hasAnswerSelectedRef.current = false;
     }
 
-    // Update current step refs
+    // Update current step refs - IMPORTANT: Update these AFTER tracking completion
+    // to ensure we're recording the correct step completion
     currentStepRef.current = newStepIndex;
     currentStepIdRef.current = stepId;
   };
@@ -698,59 +699,93 @@ function useStepTracking(totalSteps: number) {
     hasAnswerSelectedRef.current = selected;
   };
 
+  // Initialize the first step without tracking completion
+  const initializeFirstStep = (stepId: string) => {
+    console.log(`Initializing first step: ${stepId}`);
+    currentStepRef.current = 0;
+    currentStepIdRef.current = stepId;
+    startTimeRef.current = Date.now();
+    hasAnswerSelectedRef.current = false;
+  };
+
   // Track step abandonment
   useEffect(() => {
+    let isFirstRender = true;
+    
+    // After first render, set isFirstRender to false
+    setTimeout(() => {
+      isFirstRender = false;
+    }, 500);
+
     // Define the beforeunload handler
     const handleBeforeUnload = () => {
-      if (currentStepIdRef.current) {
+      if (currentStepIdRef.current && !isFirstRender) {
         const timeSpent = Math.round(
           (Date.now() - startTimeRef.current) / 1000
         );
 
-        // If the user hasn't selected an answer, count as abandoned
-        // This is the key change - we're explicitly checking if an answer was selected
-        if (!hasAnswerSelectedRef.current) {
-          // Use a synchronous approach for beforeunload
-          localStorage.setItem(
-            "survey_abandoned_step",
-            JSON.stringify({
-              stepIndex: currentStepRef.current,
-              stepId: currentStepIdRef.current,
-              totalSteps,
-              timeSpentSeconds: timeSpent,
-              reason: "no_answer_selected"
-            })
+        // Track abandonment regardless of answer status
+        console.log(`Abandoning step: ${currentStepIdRef.current} (index: ${currentStepRef.current})`);
+        
+        // Use navigator.sendBeacon for reliable event sending during page unload
+        if (navigator.sendBeacon) {
+          const blob = new Blob(
+            [
+              JSON.stringify({
+                event_type: "survey_step_abandoned",
+                properties: {
+                  stepIndex: currentStepRef.current,
+                  stepId: currentStepIdRef.current,
+                  totalSteps,
+                  timeSpentSeconds: timeSpent,
+                  reason: "page_exit"
+                },
+                timestamp: Date.now(),
+              }),
+            ],
+            {type: "application/json"}
+          );
+
+          navigator.sendBeacon("/api/analytics/track", blob);
+        } else {
+          // Fallback to traditional tracking for older browsers
+          trackSurveyStepAbandoned(
+            currentStepRef.current,
+            currentStepIdRef.current, 
+            totalSteps,
+            timeSpent,
+            "page_exit"
+          ).catch(err => 
+            console.error("Error tracking step abandonment during unload:", err)
           );
         }
       }
     };
-
-    // Add beforeunload listener
-    window.addEventListener("beforeunload", handleBeforeUnload);
 
     // Set up visibility change listener (for mobile)
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden" && currentStepIdRef.current) {
+      if (document.visibilityState === "hidden" && currentStepIdRef.current && !isFirstRender) {
         const timeSpent = Math.round(
           (Date.now() - startTimeRef.current) / 1000
         );
 
-        // Store abandonment data only if no answer was selected
-        if (!hasAnswerSelectedRef.current) {
-          localStorage.setItem(
-            "survey_abandoned_step",
-            JSON.stringify({
-              stepIndex: currentStepRef.current,
-              stepId: currentStepIdRef.current,
-              totalSteps,
-              timeSpentSeconds: timeSpent,
-              reason: "no_answer_selected"
-            })
-          );
-        }
+        // Track abandonment regardless of answer status
+        console.log(`Abandoning step (visibility): ${currentStepIdRef.current} (index: ${currentStepRef.current})`);
+        
+        // For visibility change, we can use the regular tracking method
+        trackSurveyStepAbandoned(
+          currentStepRef.current,
+          currentStepIdRef.current,
+          totalSteps,
+          timeSpent,
+          "visibility_change"
+        ).catch(err =>
+          console.error("Error tracking step abandonment on visibility change:", err)
+        );
       }
     };
 
+    window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // Clean up function
@@ -758,49 +793,34 @@ function useStepTracking(totalSteps: number) {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
 
-      // Check if there's abandonment data to send
-      const abandonedData = localStorage.getItem("survey_abandoned_step");
-      if (abandonedData) {
-        try {
-          const data = JSON.parse(abandonedData);
-
-          // Use navigator.sendBeacon for reliable event sending during page unload
-          if (navigator.sendBeacon) {
-            const blob = new Blob(
-              [
-                JSON.stringify({
-                  event_type: "survey_step_abandoned",
-                  properties: data,
-                  timestamp: Date.now(),
-                }),
-              ],
-              {type: "application/json"}
-            );
-
-            navigator.sendBeacon("/api/analytics/track", blob);
-          } else {
-            // Fallback to traditional tracking for older browsers
-            trackSurveyStepAbandoned(
-              data.stepIndex,
-              data.stepId,
-              data.totalSteps,
-              data.timeSpentSeconds,
-              data.reason || "page_unload"
-            ).catch((err) =>
-              console.error("Error tracking step abandonment:", err)
-            );
-          }
-
-          // Clear the stored data
-          localStorage.removeItem("survey_abandoned_step");
-        } catch (e) {
-          console.error("Error processing abandoned step data:", e);
-        }
+      // Track abandonment on component unmount regardless of answer status
+      // But don't track if it's the first render and we're on first step
+      if (currentStepIdRef.current && !isFirstRender) {
+        const timeSpent = Math.round(
+          (Date.now() - startTimeRef.current) / 1000
+        );
+        
+        console.log(`Abandoning step (unmount): ${currentStepIdRef.current} (index: ${currentStepRef.current})`);
+        
+        // Component unmounting, track abandonment
+        trackSurveyStepAbandoned(
+          currentStepRef.current,
+          currentStepIdRef.current,
+          totalSteps,
+          timeSpent,
+          "component_unmounted"
+        ).catch(err =>
+          console.error("Error tracking step abandonment on unmount:", err)
+        );
       }
     };
   }, [totalSteps]);
 
-  return { trackStepChange, setAnswerSelected };
+  return { 
+    trackStepChange, 
+    setAnswerSelected,
+    initializeFirstStep
+  };
 }
 
 export default function ValuesQuestionnaire({
@@ -832,8 +852,8 @@ export default function ValuesQuestionnaire({
   // Determine if we should use only image questions based on the prop
   const useOnlyImageQuestions = questionnaireType === "image";
 
-  // Use step tracking hook
-  const { trackStepChange, setAnswerSelected } = useStepTracking(QUESTIONS.length);
+  // Use step tracking hook - define it before the effects so we can use it in them
+  const { trackStepChange, setAnswerSelected, initializeFirstStep } = useStepTracking(QUESTIONS.length);
 
   useEffect(() => {
     // Scroll to top of page
@@ -842,13 +862,10 @@ export default function ValuesQuestionnaire({
     // Set survey start time
     setSurveyStartTime(Date.now());
 
-    // Randomly select 5 questions from the 10 available
-    // const shuffledQuestions = shuffleArray([...QUESTIONS]);
-    // const selectedQuestions = shuffledQuestions.slice(0, NUM_RANDOM_QUESTIONS);
+    // Set up the questions
     setRandomQuestions(QUESTIONS);
 
-    // Randomly select 5 image questions from the 10 available
-    // We need to make sure the selected image questions correspond to the same categories as the text questions
+    // Set up the image questions
     const selectedCategories = QUESTIONS.map((q) => q.id);
     const selectedImageQuestions = ALL_IMAGE_QUESTIONS.filter((q) =>
       selectedCategories.includes(q.category)
@@ -861,12 +878,14 @@ export default function ValuesQuestionnaire({
         useOnlyImageQuestions && ALL_IMAGE_QUESTIONS.length > 0
           ? ALL_IMAGE_QUESTIONS[0].id
           : QUESTIONS[0].id;
-      trackStepChange(0, firstQuestionId);
+      
+      // Initialize the first step without tracking completion
+      initializeFirstStep(firstQuestionId);
       firstStepTrackedRef.current = true;
     }
 
     setIsInitialized(true);
-  }, [useOnlyImageQuestions]); // Remove trackStepChange from dependencies
+  }, [useOnlyImageQuestions]);
 
   // Calculate total questions based on questionnaire type
   const totalTextQuestions = randomQuestions.length;
@@ -899,65 +918,48 @@ export default function ValuesQuestionnaire({
   };
 
   const handleNext = async () => {
-    // Track the current step completion
-    const currentQuestionData = useOnlyImageQuestions
-      ? randomImageQuestions[currentQuestion]
-      : randomQuestions[currentQuestion];
+    // Get the next step data that we'll navigate to
+    const nextQuestion = currentQuestion + 1;
+    const nextQuestionData = nextQuestion < totalQuestions
+      ? (useOnlyImageQuestions
+          ? randomImageQuestions[nextQuestion]
+          : randomQuestions[nextQuestion])
+      : null;
 
-    // Track step change
-    trackStepChange(currentQuestion + 1, currentQuestionData.id);
-
-    try {
-      await trackSurveyStepCompleted(
-        currentQuestion + 1,
-        currentQuestionData.id,
-        totalQuestions
-      );
-    } catch (error) {
-      console.error("Error tracking survey step:", error);
-    }
-
-    // If we're at the last question, submit automatically instead of showing interests
     if (currentQuestion === totalQuestions - 1) {
+      // If this is the last question, submit the form
       handleSubmit();
     } else if (currentQuestion < totalQuestions) {
-      setCurrentQuestion((prev) => prev + 1);
+      // First update the UI to show the next question
+      setCurrentQuestion(nextQuestion);
+      
+      // Then track step change with the ID of the next question
+      // This ensures completion of current step is tracked correctly
+      if (nextQuestionData) {
+        trackStepChange(nextQuestion, nextQuestionData.id);
+      }
     }
   };
 
   const handlePrevious = () => {
     if (currentQuestion > 0) {
-      // Track step change for previous step
+      // Get the previous question data before changing state
+      const prevQuestion = currentQuestion - 1;
       const previousQuestionData = useOnlyImageQuestions
-        ? randomImageQuestions[currentQuestion - 1]
-        : randomQuestions[currentQuestion - 1];
-      trackStepChange(currentQuestion - 1, previousQuestionData.id);
-
-      setCurrentQuestion((prev) => prev - 1);
+        ? randomImageQuestions[prevQuestion]
+        : randomQuestions[prevQuestion];
+      
+      // First update the UI to show the previous question
+      setCurrentQuestion(prevQuestion);
+      
+      // Then track step change for the previous step
+      trackStepChange(prevQuestion, previousQuestionData.id);
     }
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // First, track the final step completion explicitly
-      const finalQuestionData = useOnlyImageQuestions
-        ? randomImageQuestions[currentQuestion]
-        : randomQuestions[currentQuestion];
-
-      if (finalQuestionData) {
-        // Track the final step completion
-        try {
-          await trackSurveyStepCompleted(
-            currentQuestion + 1, // Step index (1-based)
-            finalQuestionData.id, // Step ID
-            totalQuestions
-          );
-        } catch (error) {
-          console.error("Error tracking final survey step:", error);
-        }
-      }
-
       // Track survey completion
       const surveyDurationSeconds = Math.floor(
         (Date.now() - surveyStartTime) / 1000

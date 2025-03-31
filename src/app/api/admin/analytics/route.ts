@@ -264,13 +264,35 @@ export async function GET(request: NextRequest) {
     
     // Process drop-off analysis data
     const surveyStepAbandonedEvents = data.filter(event => event.event_type === 'survey_step_abandoned');
-    console.log('DIAGNOSTICS - Total abandoned events:', surveyStepAbandonedEvents.length);
-    console.log('DIAGNOSTICS - Abandoned event details:', JSON.stringify(surveyStepAbandonedEvents.map(e => ({
-      stepId: e.properties?.stepId,
-      session_id: e.session_id,
-      timestamp: e.timestamp,
-      reason: e.properties?.reason
-    }))));
+    console.log('DIAGNOSTICS - Total abandoned events from tracked data:', surveyStepAbandonedEvents.length);
+    console.log('DIAGNOSTICS - Abandoned event sample:', 
+                surveyStepAbandonedEvents.length > 0 
+                  ? JSON.stringify(surveyStepAbandonedEvents[0]) 
+                  : 'No abandoned events found');
+    
+    // For debugging session-specific events
+    if (surveyStepAbandonedEvents.length > 0) {
+      const abandonmentSessionIds = [...new Set(surveyStepAbandonedEvents
+        .filter(event => event.session_id)
+        .map(event => event.session_id))];
+      
+      console.log('DIAGNOSTICS - Session IDs with abandonments:', abandonmentSessionIds);
+      
+      // Also log start events for these sessions for comparison
+      const relatedStartEvents = data.filter(
+        event => event.event_type === 'survey_start_click' && 
+                 event.session_id && 
+                 abandonmentSessionIds.includes(event.session_id)
+      );
+      
+      console.log('DIAGNOSTICS - Related survey start events:', 
+                  relatedStartEvents.length > 0 
+                    ? JSON.stringify(relatedStartEvents.map(e => ({ 
+                        session_id: e.session_id, 
+                        timestamp: e.timestamp 
+                      }))) 
+                    : 'No related start events found');
+    }
     
     // Get all unique step IDs - include both completed and abandoned steps
     const stepIds = [...new Set([
@@ -340,24 +362,24 @@ export async function GET(request: NextRequest) {
         event => event.properties?.stepId === stepId
       ).length;
       
-      // Count actual abandonment events for this step
+      // Count actual abandonment events for this step from tracked events
       const actualAbandonments = surveyStepAbandonedEvents.filter(
         event => event.properties?.stepId === stepId
       ).length;
 
       console.log(`DIAGNOSTICS - Step ${stepId}: completed=${completed}, actualAbandonments=${actualAbandonments}`);
       
-      // For our new definition, we use actual tracked abandonments, not inferred ones
+      // For our calculated values, use the actual tracked abandonment events
+      // In a production environment, you would query the database directly here
+      // instead of relying solely on filtered events
       const abandoned = actualAbandonments;
 
-      // For the first step, total is the sum of completions and actual abandonments
-      // This ensures the total properly represents everyone who started the step
+      // For the first step, total is the survey starts
+      // For subsequent steps, total is the completions from the previous step
       let total = 0;
       if (index === 0) {
-        // For first step, total is the number of survey starts
         total = surveyStartClicks;
       } else {
-        // For subsequent steps, total is the number of completions from previous step
         const previousStepCompleted = surveyStepEvents.filter(
           event => event.properties?.stepId === stepIds[index - 1]
         ).length;
@@ -367,7 +389,6 @@ export async function GET(request: NextRequest) {
       console.log(`DIAGNOSTICS - Step ${stepId}: total=${total}`);
 
       // Ensure totals make sense mathematically
-      // The sum of completed and abandoned should never be greater than the total
       if (completed + abandoned > total) {
         total = completed + abandoned;
         console.log(`DIAGNOSTICS - Step ${stepId}: Adjusted total=${total}`);
@@ -376,9 +397,7 @@ export async function GET(request: NextRequest) {
       // Ensure abandoned is never negative
       const finalAbandoned = Math.max(0, abandoned);
       
-      // Calculate completion and abandonment rates using total viewing the step as denominator
-      // For first step, the total is people who started the survey
-      // For subsequent steps, it's people who completed the previous step
+      // Calculate rates using total as denominator
       const completionRate = total > 0 
         ? `${Math.round((completed / total) * 100)}%` 
         : '0%';
@@ -568,8 +587,21 @@ export async function GET(request: NextRequest) {
             stepId,
             abandonments: surveyStepAbandonedEvents.filter(
               event => event.properties?.stepId === stepId
-            ).length
-          }))
+            ).length,
+            reasons: [...new Set(surveyStepAbandonedEvents
+              .filter(event => event.properties?.stepId === stepId && event.properties?.reason)
+              .map(event => event.properties?.reason as string)
+            )],
+            sessionsWithCompletions: [...new Set(surveyStepEvents
+              .filter(event => event.properties?.stepId === stepId && event.session_id)
+              .map(event => event.session_id)
+            )].length,
+            sessionsWithAbandonments: [...new Set(surveyStepAbandonedEvents
+              .filter(event => event.properties?.stepId === stepId && event.session_id)
+              .map(event => event.session_id)
+            )].length
+          })),
+          timeRange: timeRange
         }
       }
     });

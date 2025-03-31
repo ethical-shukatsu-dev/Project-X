@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     // Parse event data from the request
     const eventData = await request.json();
+    console.log('DIAGNOSTICS - Received event:', eventData);
     
     if (!eventData || !eventData.event_type) {
       return NextResponse.json(
