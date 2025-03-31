@@ -1,22 +1,22 @@
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import AnonymousModeToggle from "@/components/AnonymousModeToggle";
+// import AnonymousModeToggle from "@/components/AnonymousModeToggle";
 import QuestionnaireOptions from "@/components/ui/QuestionnaireOptions/QuestionnaireOptions";
 
 interface HeroSectionProps {
   title: string;
   description: string;
-  selectText: string;
-  textQuestionnaireText: string;
-  imageQuestionnaireText: string;
+  // selectText: string;
+  // textQuestionnaireText: string;
+  // imageQuestionnaireText: string;
   lng: string;
 }
 
 export default function HeroSection({
   title,
   description,
-  selectText,
-  textQuestionnaireText,
-  imageQuestionnaireText,
+  // selectText,
+  // textQuestionnaireText,
+  // imageQuestionnaireText,
   lng,
 }: HeroSectionProps) {
   return (
@@ -36,19 +36,16 @@ export default function HeroSection({
           </AnimatedContent>
 
           <QuestionnaireOptions
-            selectText={selectText}
-            textQuestionnaireText={textQuestionnaireText}
-            imageQuestionnaireText={imageQuestionnaireText}
             lng={lng}
             showAnimation={true}
             animationDelay={900}
           />
 
-          <AnimatedContent direction="vertical" distance={20} delay={1200}>
-            <div className="flex justify-center hidden pt-3 mt-6">
+          {/* <AnimatedContent direction="vertical" distance={20} delay={1200}>
+            <div className="flex justify-center pt-3 mt-6">
               <AnonymousModeToggle lng={lng} />
             </div>
-          </AnimatedContent>
+          </AnimatedContent> */}
         </div>
       </div>
     </section>

@@ -24,6 +24,22 @@ function getLocale(request: NextRequest): string {
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
+  // Check if the request is for the admin/analytics page
+  if (pathname.includes('/admin/analytics')) {
+    // Check if the admin is authenticated via cookie
+    const adminSession = request.cookies.get('admin_session');
+    
+    // If not authenticated, redirect to the login page
+    if (!adminSession || adminSession.value !== 'authenticated') {
+      const url = new URL(`/${getLocale(request)}/admin/login`, request.url);
+      url.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(url);
+    }
+    
+    // If authenticated, continue to the admin page
+    return NextResponse.next();
+  }
+  
   // Skip if the request is for a static file, API, or already has a locale
   if (
     pathname.startsWith('/_next') || 

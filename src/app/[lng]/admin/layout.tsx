@@ -1,15 +1,16 @@
 import React from "react";
 import Link from "next/link";
+import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 
 export default async function AdminLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ lng: string }>;
+  params: Promise<{lng: string}>;
 }) {
-  const { lng } = await params;
-  
+  const {lng} = await params;
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Admin Header */}
@@ -17,7 +18,7 @@ export default async function AdminLayout({
         <div className="container flex items-center justify-between mx-auto">
           <div className="flex items-center gap-6">
             <h1 className="text-xl font-bold">Project X Admin</h1>
-            <nav className="hidden gap-4 md:flex">
+            <nav className="gap-4 flex">
               <Link
                 href={`/${lng}/admin`}
                 className="transition-colors hover:text-blue-400"
@@ -30,7 +31,7 @@ export default async function AdminLayout({
               >
                 Analytics
               </Link>
-              <Link
+              {/* <Link
                 href={`/${lng}/admin/users`}
                 className="transition-colors hover:text-blue-400"
               >
@@ -41,10 +42,11 @@ export default async function AdminLayout({
                 className="transition-colors hover:text-blue-400"
               >
                 Companies
-              </Link>
+              </Link> */}
             </nav>
           </div>
-          <div>
+          <div className="flex items-center gap-4">
+            <AdminLogoutButton lng={lng} />
             <Link
               href={`/${lng}`}
               className="text-sm transition-colors hover:text-blue-400"

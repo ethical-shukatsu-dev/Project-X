@@ -1,8 +1,29 @@
 /**
  * Analytics utility functions for tracking user actions
  */
+import { LOCALSTORAGE_KEYS } from '@/lib/constants/localStorage';
 
-type EventType = 'signup_click' | 'dialog_close' | 'feedback' | 'page_view';
+type EventType = 
+  // Existing events
+  'signup_click' | 
+  'dialog_close' | 
+  'feedback' | 
+  'page_view' |
+  // Home page events
+  'home_page_visit' |
+  'survey_start_click' |
+  // Survey type events
+  'survey_type_selected' |
+  // Survey progress events
+  'survey_step_completed' |
+  'survey_step_abandoned' |  // New event type for abandonment
+  'survey_completed' |
+  // Recommendations events
+  'recommendations_page_visit' |
+  'company_interested_click' |
+  // Signup events
+  'email_signup_click' |
+  'google_signup_click';
 
 interface AnalyticsEvent {
   event_type: EventType;
@@ -24,6 +45,14 @@ const getSessionId = (): string => {
   return sessionId;
 };
 
+// Get the anonymous status from localStorage
+const getAnonymousStatus = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  const storedValue = localStorage.getItem(LOCALSTORAGE_KEYS.AB_TEST_ANONYMOUS);
+  return storedValue === 'true';
+};
+
 /**
  * Track an event to the analytics backend
  */
@@ -35,12 +64,18 @@ export const trackEvent = async (
     // Get session ID
     const sessionId = getSessionId();
     
+    // Get anonymous status
+    const isAnonymous = getAnonymousStatus();
+    
     // Create event payload
     const event: AnalyticsEvent = {
       event_type: eventType,
       timestamp: Date.now(),
       session_id: sessionId,
-      properties,
+      properties: {
+        ...properties,
+        isAnonymous
+      },
     };
     
     // For now, just log to console in development
@@ -68,4 +103,112 @@ export const trackSignupClick = async (source: string, properties?: Record<strin
     source,
     ...properties,
   });
+};
+
+/**
+ * Track home page visit
+ */
+export const trackHomePageVisit = async (): Promise<void> => {
+  await trackEvent('home_page_visit');
+};
+
+/**
+ * Track survey start click
+ */
+export const trackSurveyStartClick = async (): Promise<void> => {
+  await trackEvent('survey_start_click');
+};
+
+/**
+ * Track survey type selection
+ */
+export const trackSurveyTypeSelection = async (surveyType: 'text' | 'image'): Promise<void> => {
+  await trackEvent('survey_type_selected', { surveyType });
+};
+
+/**
+ * Track survey step completion
+ */
+export const trackSurveyStepCompleted = async (
+  stepIndex: number, 
+  stepId: string,
+  totalSteps: number
+): Promise<void> => {
+  await trackEvent('survey_step_completed', { 
+    stepIndex,
+    stepId, 
+    totalSteps,
+    progress: Math.round((stepIndex / totalSteps) * 100),
+    completedAt: new Date().toISOString()
+  });
+};
+
+/**
+ * Track when a user abandons a survey step
+ */
+export const trackSurveyStepAbandoned = async (
+  stepIndex: number,
+  stepId: string,
+  totalSteps: number,
+  timeSpentSeconds: number,
+  reason?: string
+): Promise<void> => {
+  await trackEvent('survey_step_abandoned', { 
+    stepIndex,
+    stepId, 
+    totalSteps,
+    timeSpentSeconds,
+    abandonedAt: new Date().toISOString(),
+    reason: reason || 'unknown'
+  });
+};
+
+/**
+ * Track survey completion
+ */
+export const trackSurveyCompleted = async (
+  surveyType: 'text' | 'image',
+  totalSteps: number,
+  timeSpentSeconds: number
+): Promise<void> => {
+  await trackEvent('survey_completed', { 
+    surveyType,
+    totalSteps,
+    timeSpentSeconds,
+    completedAt: new Date().toISOString()
+  });
+};
+
+/**
+ * Track recommendations page visit
+ */
+export const trackRecommendationsPageVisit = async (): Promise<void> => {
+  await trackEvent('recommendations_page_visit');
+};
+
+/**
+ * Track company interested click
+ */
+export const trackCompanyInterestedClick = async (
+  companyId: string,
+  companyName: string
+): Promise<void> => {
+  await trackEvent('company_interested_click', { 
+    companyId,
+    companyName 
+  });
+};
+
+/**
+ * Track email signup click
+ */
+export const trackEmailSignupClick = async (): Promise<void> => {
+  await trackEvent('email_signup_click');
+};
+
+/**
+ * Track Google signup click
+ */
+export const trackGoogleSignupClick = async (): Promise<void> => {
+  await trackEvent('google_signup_click');
 }; 

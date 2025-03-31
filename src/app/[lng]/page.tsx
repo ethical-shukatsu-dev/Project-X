@@ -4,6 +4,7 @@ import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDec
 import HeroSection from "@/components/sections/HeroSection/HeroSection";
 import FeaturesSection from "@/components/sections/FeaturesSection/FeaturesSection";
 import Footer from "@/components/ui/Footer/Footer";
+import HomePageTracker from "@/components/analytics/HomePageTracker";
 
 export default function Home({params}: {params: Promise<{lng: string}>}) {
   // Use an async IIFE to handle the Promise
@@ -33,9 +34,6 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
     const heroProps = {
       title: t("homepage.title"),
       description: t("homepage.description"),
-      selectText: t("homepage.selectQuestionnaireType"),
-      textQuestionnaireText: t("homepage.textQuestionnaire"),
-      imageQuestionnaireText: t("homepage.imageQuestionnaire"),
       lng: lng,
     };
 
@@ -43,9 +41,6 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
       title: t("features.quick.title") || "Why Choose Us",
       features: features,
       showQuestionnaireOptions: true,
-      selectText: t("homepage.selectQuestionnaireType"),
-      textQuestionnaireText: t("homepage.textQuestionnaire"),
-      imageQuestionnaireText: t("homepage.imageQuestionnaire"),
       lng: lng,
     };
 
@@ -53,6 +48,8 @@ export default function Home({params}: {params: Promise<{lng: string}>}) {
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
         <BackgroundEffects />
         <FloatingDecorations />
+
+        <HomePageTracker />
 
         <main className="relative z-20 flex-1">
           <HeroSection {...heroProps} />

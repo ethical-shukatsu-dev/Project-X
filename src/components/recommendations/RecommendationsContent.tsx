@@ -13,11 +13,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {RecommendationResult} from "@/lib/openai/client";
+import {Company} from "@/lib/supabase/client";
 import {useTranslation} from "@/i18n-client";
 import SignupDialog from "@/components/recommendations/SignupDialog";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 import RecommendationTabs from "@/components/recommendations/RecommendationTabs";
 import {useIsMobile} from "@/hooks/useIsMobile";
+import {
+  trackRecommendationsPageVisit,
+  trackCompanyInterestedClick,
+} from "@/lib/analytics";
+
 interface RecommendationsContentProps {
   lng: string;
 }
@@ -48,6 +54,11 @@ export default function RecommendationsContent({
   useEffect(() => {
     // Scroll to top of page
     window.scrollTo({top: 0, behavior: "smooth"});
+
+    // Track recommendations page visit
+    trackRecommendationsPageVisit().catch((error) => {
+      console.error("Error tracking recommendations page visit:", error);
+    });
 
     const fetchRecommendations = async (refresh = false) => {
       if (!userId) {
@@ -116,9 +127,15 @@ export default function RecommendationsContent({
 
   const handleFeedback = async (
     recommendationId: string,
-    feedback: "interested" | "not_interested"
+    feedback: "interested" | "not_interested",
+    company: Company
   ) => {
     try {
+      // Only track interested clicks
+      if (feedback === "interested") {
+        await trackCompanyInterestedClick(company.id, company.name);
+      }
+
       const response = await fetch("/api/recommendations/feedback", {
         method: "POST",
         headers: {
@@ -240,8 +257,15 @@ export default function RecommendationsContent({
             {t("recommendations.loading.description")}
           </p>
           <div className="max-w-4xl mx-auto">
-            <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
-            <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <AnimatedContent direction="vertical" distance={20} delay={300}>
+              <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            </AnimatedContent>
+            <AnimatedContent direction="vertical" distance={20} delay={600}>
+              <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            </AnimatedContent>
+            <AnimatedContent direction="vertical" distance={20} delay={900}>
+              <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+            </AnimatedContent>
             <Skeleton className="h-[200px] w-full bg-white/10 border border-white/10 backdrop-blur-sm" />
           </div>
         </div>
@@ -308,16 +332,22 @@ export default function RecommendationsContent({
                 key={recommendation.id || recommendation.company.id}
                 direction="vertical"
                 distance={20}
-                delay={isMobile ? (index === 0 ? 900 : 100) : index === 0 ? 900 : 400}
+                delay={
+                  isMobile ? (index === 0 ? 900 : 100) : index === 0 ? 900 : 400
+                }
               >
                 <CompanyCard
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
                   matchingPoints={recommendation.matching_points}
                   feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
+                  onFeedback={(feedbackType) =>
                     recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
+                    handleFeedback(
+                      recommendation.id,
+                      feedbackType,
+                      recommendation.company
+                    )
                   }
                   lng={lng}
                 />
@@ -391,7 +421,7 @@ export default function RecommendationsContent({
           lng={lng}
           recommendations={recommendations}
         />
-        
+
         {/* Show SignupDialog as in-page component after user has closed the modal */}
         {hasClosedDialog && (
           <SignupDialog
@@ -407,4 +437,3 @@ export default function RecommendationsContent({
     </div>
   );
 }
-

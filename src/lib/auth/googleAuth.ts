@@ -3,7 +3,7 @@
  */
 
 import {trackEvent} from "../analytics";
-import { BASE_URL } from "../constants/domain";
+import { BASE_URL, DOMAIN } from "../constants/domain";
 import { GoogleUser } from "../../types/google-auth";
 
 interface BaseMeUserData {
@@ -235,7 +235,7 @@ const setCookie = (name: string, value: string, days: number): void => {
   
   const d = new Date();
   d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-  document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;domain=.staging.baseme.app`;
+  document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;domain=.${DOMAIN}`;
 };
 
 // Helper function to remove localStorage parameters
@@ -293,5 +293,5 @@ const redirectAfterLogin = (userData: BaseMeUserData): void => {
 
 // Helper function to delete a cookie
 const deleteCookie = (name: string): void => {
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.staging.baseme.app`;
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${DOMAIN}`;
 }; 

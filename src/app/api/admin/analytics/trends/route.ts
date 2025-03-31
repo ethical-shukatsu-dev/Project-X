@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin-client';
 
+// Define the daily event count type
 interface DailyEventCount {
   event_date: string;
   event_type: string;
   count: number;
-}
-
-// Define a type for the transformed data
-interface DailyEventData {
-  date: string;
-  [key: string]: string | number;
 }
 
 /**
@@ -21,58 +16,113 @@ export async function GET(request: NextRequest) {
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
     const days = parseInt(searchParams.get('days') || '30', 10);
+    const eventType = searchParams.get('eventType') || undefined;
     
     // Get daily event counts
-    const { data, error } = await supabaseAdmin
-      .rpc('get_daily_event_counts', { days });
+    const { data: dailyCounts, error: countError } = await supabaseAdmin
+      .rpc('get_daily_event_counts', { 
+        days
+      });
     
-    if (error) {
-      console.error('Error fetching daily event counts:', error);
+    if (countError) {
+      console.error('Error fetching daily event counts:', countError);
       return NextResponse.json(
-        { error: 'Failed to fetch analytics trends' },
+        { error: 'Failed to fetch analytics trend data' },
         { status: 500 }
       );
     }
     
     // Cast the data to the proper type
-    const dailyCounts = (data || []) as DailyEventCount[];
+    const typedDailyCounts = (dailyCounts || []) as DailyEventCount[];
     
-    // Transform data for frontend charting
-    // Process into a format: { date: '2023-01-01', signup_click: 5, dialog_close: 3, ... }
-    const eventTypes = [...new Set(dailyCounts.map(item => item.event_type))];
+    // Filter by event type if specified
+    const filteredCounts = eventType 
+      ? typedDailyCounts.filter(item => item.event_type === eventType)
+      : typedDailyCounts;
     
-    const transformedData = dailyCounts.reduce((acc, { event_date, event_type, count }) => {
-      // Check if we already have an entry for this date
-      const existingEntry = acc.find(item => item.date === event_date);
+    // Format the data for time-series charts
+    // Group by date first to get all dates in the range
+    const dateMap = new Map<string, Record<string, number>>();
+    
+    // Get unique event types
+    const eventTypes = new Set<string>();
+    
+    // Process the data
+    filteredCounts.forEach(item => {
+      const { event_date, event_type, count } = item;
       
-      if (existingEntry) {
-        // Add the count to the existing entry
-        existingEntry[event_type] = count;
-      } else {
-        // Create a new entry
-        const newEntry: DailyEventData = { date: event_date };
-        newEntry[event_type] = count;
-        acc.push(newEntry);
+      if (!dateMap.has(event_date)) {
+        dateMap.set(event_date, {});
       }
       
-      return acc;
-    }, [] as DailyEventData[]);
-    
-    // Ensure all event types have a value (0 if no data)
-    transformedData.forEach(entry => {
-      eventTypes.forEach(type => {
-        if (entry[type] === undefined) {
-          entry[type] = 0;
-        }
-      });
+      const dateData = dateMap.get(event_date)!;
+      dateData[event_type] = count;
+      
+      eventTypes.add(event_type);
     });
     
-    // Sort by date
-    transformedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Sort dates
+    const sortedDates = Array.from(dateMap.keys()).sort();
+    
+    // Create the series data
+    const seriesData = Array.from(eventTypes).map(type => {
+      return {
+        name: type,
+        data: sortedDates.map(date => {
+          const dateData = dateMap.get(date) || {};
+          return dateData[type] || 0;
+        })
+      };
+    });
+    
+    // Calculate conversion trends
+    // Get home page visits by date
+    const homePageVisitsByDate = new Map<string, number>();
+    filteredCounts
+      .filter(item => item.event_type === 'home_page_visit')
+      .forEach(item => {
+        homePageVisitsByDate.set(item.event_date, item.count);
+      });
+    
+    // Get survey start clicks by date
+    const surveyStartsByDate = new Map<string, number>();
+    filteredCounts
+      .filter(item => item.event_type === 'survey_start_click')
+      .forEach(item => {
+        surveyStartsByDate.set(item.event_date, item.count);
+      });
+    
+    // Get survey completions by date
+    const surveyCompletionsByDate = new Map<string, number>();
+    filteredCounts
+      .filter(item => item.event_type === 'survey_completed')
+      .forEach(item => {
+        surveyCompletionsByDate.set(item.event_date, item.count);
+      });
+    
+    // Calculate conversion rates by date
+    const conversionTrends = sortedDates.map(date => {
+      const visits = homePageVisitsByDate.get(date) || 0;
+      const starts = surveyStartsByDate.get(date) || 0;
+      const completions = surveyCompletionsByDate.get(date) || 0;
+      
+      const startRate = visits > 0 ? Math.round((starts / visits) * 100) : 0;
+      const completionRate = starts > 0 ? Math.round((completions / starts) * 100) : 0;
+      const overallRate = visits > 0 ? Math.round((completions / visits) * 100) : 0;
+      
+      return {
+        date,
+        startRate,
+        completionRate,
+        overallRate
+      };
+    });
     
     return NextResponse.json({
-      trends: transformedData,
-      eventTypes
+      dates: sortedDates,
+      seriesData,
+      conversionTrends,
+      rawData: filteredCounts
     });
   } catch (error) {
     console.error('Error in analytics trends API:', error);

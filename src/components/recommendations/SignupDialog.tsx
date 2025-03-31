@@ -12,7 +12,7 @@ import BounceCards from "@/components/ui/Components/BounceCards/BounceCards";
 import CompanyCard from "@/components/ui/Components/BounceCards/CompanyCard";
 import {RecommendationResult} from "@/lib/openai/client";
 import {Button} from "../ui/button";
-import {trackSignupClick, trackEvent} from "@/lib/analytics";
+import {trackSignupClick, trackEvent, trackEmailSignupClick, trackGoogleSignupClick} from "@/lib/analytics";
 import {useIsMobile} from "../../hooks/useIsMobile";
 import GoogleSignUpButton from "../ui/GoogleSignUpButton";
 import {useRouter} from "next/navigation";
@@ -63,16 +63,21 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
     .reverse();
 
   // Handle sign up button click with tracking
-  const handleSignupClick = () => {
-    // Track the signup click event
-    trackSignupClick("signup_dialog", {
-      dialog_type: showInPage ? "in_page" : "modal",
-      revealed_companies: filteredRecommendations.filter((rec) => rec.feedback)
-        .length,
-      total_companies: recommendations.length,
-    }).catch((error) => {
+  const handleSignupClick = async () => {
+    try {
+      // Track email signup click
+      await trackEmailSignupClick();
+      
+      // Also track the legacy signup click event
+      await trackSignupClick("signup_dialog", {
+        dialog_type: showInPage ? "in_page" : "modal",
+        revealed_companies: filteredRecommendations.filter((rec) => rec.feedback)
+          .length,
+        total_companies: recommendations.length,
+      });
+    } catch (error) {
       console.error("Error tracking signup click:", error);
-    });
+    }
 
     // Get current URL search params
     const currentUrl = new URL(window.location.href);
@@ -88,6 +93,15 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
 
     // Navigate to signup page with preserved query params
     router.push(`${BASE_URL}/auth/students/signup${queryPrefix}${queryString}`);
+  };
+
+  // Handle Google signup click
+  const handleGoogleSignupClick = async () => {
+    try {
+      await trackGoogleSignupClick();
+    } catch (error) {
+      console.error("Error tracking Google signup click:", error);
+    }
   };
 
   // Handle dialog close with tracking
@@ -170,7 +184,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
           {t("cta.primaryButton") || "Sign up with Email"}
         </Button>
 
-        <GoogleSignUpButton t={t} />
+        <GoogleSignUpButton t={t} onClick={handleGoogleSignupClick} />
       </div>
 
       {/* Disclaimer */}
