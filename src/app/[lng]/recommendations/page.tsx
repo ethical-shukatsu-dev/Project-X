@@ -19,8 +19,15 @@ async function RecommendationsLoading({lng}: {lng: string}) {
         {t("recommendations.loading.description")}
       </p>
       <div className="max-w-4xl mx-auto">
-        <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
-        <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+        <AnimatedContent direction="vertical" distance={20} delay={300}>
+          <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+        </AnimatedContent>
+        <AnimatedContent direction="vertical" distance={20} delay={1000}>
+          <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+        </AnimatedContent>
+        <AnimatedContent direction="vertical" distance={20} delay={1500}>
+          <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
+        </AnimatedContent>
         <Skeleton className="h-[200px] w-full bg-white/10 border border-white/10 backdrop-blur-sm" />
       </div>
     </div>
