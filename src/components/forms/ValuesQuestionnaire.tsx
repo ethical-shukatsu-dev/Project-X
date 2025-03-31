@@ -665,6 +665,8 @@ function useStepTracking(totalSteps: number) {
   const startTimeRef = useRef<number>(Date.now());
   const currentStepRef = useRef<number>(0);
   const currentStepIdRef = useRef<string>("");
+  // Add a ref to track if the current step has an answer selected
+  const hasAnswerSelectedRef = useRef<boolean>(false);
 
   // Track when the step changes
   const trackStepChange = (newStepIndex: number, stepId: string) => {
@@ -682,11 +684,18 @@ function useStepTracking(totalSteps: number) {
 
       // Reset start time for the new step
       startTimeRef.current = Date.now();
+      // Reset answer selected state for the new step
+      hasAnswerSelectedRef.current = false;
     }
 
     // Update current step refs
     currentStepRef.current = newStepIndex;
     currentStepIdRef.current = stepId;
+  };
+
+  // Set answer selected state
+  const setAnswerSelected = (selected: boolean) => {
+    hasAnswerSelectedRef.current = selected;
   };
 
   // Track step abandonment
@@ -698,18 +707,21 @@ function useStepTracking(totalSteps: number) {
           (Date.now() - startTimeRef.current) / 1000
         );
 
-        // Use a synchronous approach for beforeunload
-        // This won't actually send the event due to browser restrictions,
-        // but we'll handle it with navigator.sendBeacon in the cleanup function
-        localStorage.setItem(
-          "survey_abandoned_step",
-          JSON.stringify({
-            stepIndex: currentStepRef.current,
-            stepId: currentStepIdRef.current,
-            totalSteps,
-            timeSpentSeconds: timeSpent,
-          })
-        );
+        // If the user hasn't selected an answer, count as abandoned
+        // This is the key change - we're explicitly checking if an answer was selected
+        if (!hasAnswerSelectedRef.current) {
+          // Use a synchronous approach for beforeunload
+          localStorage.setItem(
+            "survey_abandoned_step",
+            JSON.stringify({
+              stepIndex: currentStepRef.current,
+              stepId: currentStepIdRef.current,
+              totalSteps,
+              timeSpentSeconds: timeSpent,
+              reason: "no_answer_selected"
+            })
+          );
+        }
       }
     };
 
@@ -723,16 +735,19 @@ function useStepTracking(totalSteps: number) {
           (Date.now() - startTimeRef.current) / 1000
         );
 
-        // Store abandonment data
-        localStorage.setItem(
-          "survey_abandoned_step",
-          JSON.stringify({
-            stepIndex: currentStepRef.current,
-            stepId: currentStepIdRef.current,
-            totalSteps,
-            timeSpentSeconds: timeSpent,
-          })
-        );
+        // Store abandonment data only if no answer was selected
+        if (!hasAnswerSelectedRef.current) {
+          localStorage.setItem(
+            "survey_abandoned_step",
+            JSON.stringify({
+              stepIndex: currentStepRef.current,
+              stepId: currentStepIdRef.current,
+              totalSteps,
+              timeSpentSeconds: timeSpent,
+              reason: "no_answer_selected"
+            })
+          );
+        }
       }
     };
 
@@ -770,7 +785,7 @@ function useStepTracking(totalSteps: number) {
               data.stepId,
               data.totalSteps,
               data.timeSpentSeconds,
-              "page_unload"
+              data.reason || "page_unload"
             ).catch((err) =>
               console.error("Error tracking step abandonment:", err)
             );
@@ -785,7 +800,7 @@ function useStepTracking(totalSteps: number) {
     };
   }, [totalSteps]);
 
-  return trackStepChange;
+  return { trackStepChange, setAnswerSelected };
 }
 
 export default function ValuesQuestionnaire({
@@ -818,7 +833,7 @@ export default function ValuesQuestionnaire({
   const useOnlyImageQuestions = questionnaireType === "image";
 
   // Use step tracking hook
-  const trackStepChange = useStepTracking(QUESTIONS.length);
+  const { trackStepChange, setAnswerSelected } = useStepTracking(QUESTIONS.length);
 
   useEffect(() => {
     // Scroll to top of page
@@ -879,6 +894,8 @@ export default function ValuesQuestionnaire({
 
   const handleImageValueChange = (questionId: string, imageId: string) => {
     setSelectedImageValues((prev) => ({...prev, [questionId]: imageId}));
+    // Mark that an answer has been selected
+    setAnswerSelected(true);
   };
 
   const handleNext = async () => {
@@ -1039,6 +1056,8 @@ export default function ValuesQuestionnaire({
 
   const handleValueChange = (questionId: string, value: string) => {
     setValues((prev) => ({...prev, [questionId]: value}));
+    // Mark that an answer has been selected
+    setAnswerSelected(true);
   };
 
   // If translations are not loaded yet, show a loading state

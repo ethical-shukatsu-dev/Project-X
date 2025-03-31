@@ -262,10 +262,23 @@ export async function GET(request: NextRequest) {
     // Process survey step completion data
     const surveyStepEvents = data.filter(event => event.event_type === 'survey_step_completed');
     
-    // Get all unique step IDs
-    const stepIds = [...new Set(
-      surveyStepEvents.map(event => event.properties?.stepId as string)
-    )].filter(Boolean);
+    // Process drop-off analysis data
+    const surveyStepAbandonedEvents = data.filter(event => event.event_type === 'survey_step_abandoned');
+    console.log('DIAGNOSTICS - Total abandoned events:', surveyStepAbandonedEvents.length);
+    console.log('DIAGNOSTICS - Abandoned event details:', JSON.stringify(surveyStepAbandonedEvents.map(e => ({
+      stepId: e.properties?.stepId,
+      session_id: e.session_id,
+      timestamp: e.timestamp,
+      reason: e.properties?.reason
+    }))));
+    
+    // Get all unique step IDs - include both completed and abandoned steps
+    const stepIds = [...new Set([
+      ...surveyStepEvents.map(event => event.properties?.stepId as string),
+      ...surveyStepAbandonedEvents.map(event => event.properties?.stepId as string)
+    ])].filter(Boolean);
+    
+    console.log('DIAGNOSTICS - Combined step IDs from completed and abandoned events:', JSON.stringify(stepIds));
     
     // Count completions for each step
     const surveyStepMetrics: SurveyStepMetrics[] = stepIds.map(stepId => {
@@ -279,7 +292,15 @@ export async function GET(request: NextRequest) {
       
       // Get the step index from any matching event
       const stepEvent = surveyStepEvents.find(event => event.properties?.stepId === stepId);
-      const stepIndex = stepEvent?.properties?.stepIndex || 0;
+      // Also look in abandoned events if no completed event is found
+      const abandonedStepEvent = !stepEvent ? surveyStepAbandonedEvents.find(
+        event => event.properties?.stepId === stepId
+      ) : null;
+      
+      // Use the first available step index
+      const stepIndex = stepEvent?.properties?.stepIndex || 
+                        abandonedStepEvent?.properties?.stepIndex || 
+                        0;
       
       return {
         id: stepId,
@@ -288,9 +309,6 @@ export async function GET(request: NextRequest) {
         stepIndex
       };
     }).sort((a, b) => a.stepIndex - b.stepIndex);
-    
-    // Process drop-off analysis data
-    const surveyStepAbandonedEvents = data.filter(event => event.event_type === 'survey_step_abandoned');
     
     // Format step labels
     const formatStepLabel = (stepId: string): string => {
@@ -311,6 +329,10 @@ export async function GET(request: NextRequest) {
       return stepId.charAt(0).toUpperCase() + stepId.slice(1);
     };
     
+    // Log diagnostic information for step IDs
+    console.log('DIAGNOSTICS - Step IDs from completed events:', JSON.stringify(stepIds));
+    console.log('DIAGNOSTICS - Total survey starts:', surveyStartClicks);
+    
     // Prepare dropoff metrics
     const dropoffMetrics: SurveyStepDropoffMetrics[] = stepIds.map((stepId, index) => {
       // Count completions for this step
@@ -322,45 +344,50 @@ export async function GET(request: NextRequest) {
       const actualAbandonments = surveyStepAbandonedEvents.filter(
         event => event.properties?.stepId === stepId
       ).length;
+
+      console.log(`DIAGNOSTICS - Step ${stepId}: completed=${completed}, actualAbandonments=${actualAbandonments}`);
       
-      // Calculate abandonment based on drop-off from previous step
-      let abandoned = 0;
+      // For our new definition, we use actual tracked abandonments, not inferred ones
+      const abandoned = actualAbandonments;
+
+      // For the first step, total is the sum of completions and actual abandonments
+      // This ensures the total properly represents everyone who started the step
       let total = 0;
-      
       if (index === 0) {
         // For first step, total is the number of survey starts
         total = surveyStartClicks;
-        // Use actual abandonment events for the first step if available
-        abandoned = actualAbandonments > 0 ? actualAbandonments : (total - completed);
       } else {
         // For subsequent steps, total is the number of completions from previous step
         const previousStepCompleted = surveyStepEvents.filter(
           event => event.properties?.stepId === stepIds[index - 1]
         ).length;
         total = previousStepCompleted;
-        // Prefer actual abandonment events if available, otherwise infer from completion difference
-        abandoned = actualAbandonments > 0 ? actualAbandonments : Math.max(0, total - completed);
       }
+
+      console.log(`DIAGNOSTICS - Step ${stepId}: total=${total}`);
 
       // Ensure totals make sense mathematically
       // The sum of completed and abandoned should never be greater than the total
       if (completed + abandoned > total) {
         total = completed + abandoned;
+        console.log(`DIAGNOSTICS - Step ${stepId}: Adjusted total=${total}`);
       }
       
       // Ensure abandoned is never negative
-      abandoned = Math.max(0, abandoned);
+      const finalAbandoned = Math.max(0, abandoned);
       
-      // Calculate completion and abandonment rates using the sum of completed and abandoned as denominator
-      // This ensures they always add up to 100%
-      const actualTotal = completed + abandoned;
-      const completionRate = actualTotal > 0 
-        ? `${Math.round((completed / actualTotal) * 100)}%` 
+      // Calculate completion and abandonment rates using total viewing the step as denominator
+      // For first step, the total is people who started the survey
+      // For subsequent steps, it's people who completed the previous step
+      const completionRate = total > 0 
+        ? `${Math.round((completed / total) * 100)}%` 
         : '0%';
       
-      const abandonmentRate = actualTotal > 0
-        ? `${Math.round((abandoned / actualTotal) * 100)}%`
+      const abandonmentRate = total > 0
+        ? `${Math.round((finalAbandoned / total) * 100)}%`
         : '0%';
+      
+      console.log(`DIAGNOSTICS - Step ${stepId}: completionRate=${completionRate}, abandonmentRate=${abandonmentRate}`);
       
       // Calculate average time spent on this step
       const timeSpentValues = surveyStepAbandonedEvents
@@ -374,13 +401,21 @@ export async function GET(request: NextRequest) {
       
       // Get the step index from any matching event
       const stepEvent = surveyStepEvents.find(event => event.properties?.stepId === stepId);
-      const stepIndex = stepEvent?.properties?.stepIndex || 0;
+      // Also look in abandoned events if no completed event is found
+      const abandonedStepEvent = !stepEvent ? surveyStepAbandonedEvents.find(
+        event => event.properties?.stepId === stepId
+      ) : null;
+      
+      // Use the first available step index
+      const stepIndex = stepEvent?.properties?.stepIndex || 
+                        abandonedStepEvent?.properties?.stepIndex || 
+                        0;
       
       return {
         id: stepId,
         label: formatStepLabel(stepId),
         completed,
-        abandoned: Math.max(0, abandoned), // Ensure no negative abandonments
+        abandoned: finalAbandoned,
         completionRate,
         abandonmentRate,
         avgTimeSpentSeconds,
