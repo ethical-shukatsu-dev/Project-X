@@ -20,7 +20,7 @@
     "no_images": "No images available for this question. Please continue to the next question.",
     "image_questions": {
       "work_values": {
-        "question": "What are the work values that are most important to you?"
+        "question": "What work values are most important to you?"
       },
       "corporate_culture": {
         "question": "What type of corporate culture are you looking for?"
@@ -32,7 +32,7 @@
         "question": "What kind of workplace environment do you seek?"
       },
       "humanity": {
-        "question": "Which aspect of humanity do you strongly embody?"
+        "question": "What kind of human relationships do you value?"
       },
       "interpersonal_skills": {
         "question": "What interpersonal skill is your strongest?"
@@ -66,93 +66,93 @@
     },
     "questions": {
       "work_values": {
-        "question": "What are the work values that are most important to you?",
+        "question": "What work values are most important to you?",
         "options": {
-          "growth": "Growth",
-          "contribution": "Contribution",
-          "challenge": "Challenge",
-          "result_oriented": "Result-oriented"
+          "growth": "Being able to develop your skills and abilities",
+          "contribution": "Having a positive impact on society and those around you",
+          "challenge": "Taking on new and unknown territories",
+          "result_oriented": "Having your efforts and results fairly evaluated"
         }
       },
       "corporate_culture": {
         "question": "What type of corporate culture are you looking for?",
         "options": {
-          "innovation": "Innovation",
-          "collaboration": "Collaboration",
-          "diversity": "Diversity",
-          "customer_orientation": "Customer Orientation"
+          "innovation": "A culture that welcomes new ideas and changes",
+          "collaboration": "A culture that emphasizes teamwork and cooperation",
+          "diversity": "A culture that respects different backgrounds and values",
+          "customer_orientation": "A culture that prioritizes customer satisfaction"
         }
       },
       "leadership": {
         "question": "What type of leadership do you aspire to?",
         "options": {
-          "vision": "Vision",
-          "influence": "Influence",
-          "inclusive": "Inclusive",
-          "decision_making": "Decision-Making"
+          "vision": "Provides clear goals and direction",
+          "influence": "Brings out team members' abilities and motivation",
+          "inclusive": "Accepts diverse opinions and values team unity",
+          "decision_making": "Makes quick decisions and takes responsibility"
         }
       },
       "workplace_environment": {
         "question": "What kind of workplace environment do you seek?",
         "options": {
-          "workability": "Workability",
-          "growth_opportunities": "Growth Opportunities",
-          "sense_of_security": "Sense of Security",
-          "mutual_support": "Mutual Support"
+          "workability": "Flexible work arrangements and efficient work environment",
+          "growth_opportunities": "Abundant training and opportunities for challenges",
+          "sense_of_security": "Stable employment and fair evaluation systems",
+          "mutual_support": "Relationships where people help each other when needed"
         }
       },
       "humanity": {
-        "question": "Which aspect of humanity do you strongly embody?",
+        "question": "What kind of human relationships do you value?",
         "options": {
-          "integrity": "Integrity",
-          "responsibility": "Responsibility",
-          "ethics": "Ethics",
-          "fairness": "Fairness"
+          "integrity": "Building honest and trusting relationships",
+          "responsibility": "Everyone takes responsibility for their work",
+          "ethics": "Acting fairly with high ethical standards",
+          "fairness": "An environment where everyone is treated impartially"
         }
       },
       "interpersonal_skills": {
         "question": "What interpersonal skill is your strongest?",
         "options": {
-          "cooperation": "Cooperation",
-          "empathy": "Empathy",
-          "teamwork": "Teamwork",
-          "communication": "Communication"
+          "cooperation": "Ability to value team harmony and build good relationships",
+          "empathy": "Ability to understand others' feelings and perspectives",
+          "teamwork": "Ability to understand your role and cooperate to achieve results",
+          "communication": "Ability to clearly express your ideas and draw out others' opinions"
         }
       },
       "cognitive_abilities": {
         "question": "What cognitive strength do you possess?",
         "options": {
-          "logical_thinking": "Logical Thinking",
-          "problem_solving": "Problem-Solving",
-          "insight": "Insight",
-          "critical_thinking": "Critical Thinking"
+          "logical_thinking": "Ability to think methodically and reach rational conclusions",
+          "problem_solving": "Ability to identify issues and find effective solutions",
+          "insight": "Ability to see beyond the surface and anticipate what's ahead",
+          "critical_thinking": "Ability to analyze information objectively from multiple angles"
         }
       },
       "self_growth": {
         "question": "Which aspect of self-growth are you most strong in?",
         "options": {
-          "change_orientation": "Change Orientation",
-          "willingness_to_learn": "Willingness to Learn",
-          "curiosity": "Curiosity",
-          "adaptability": "Adaptability"
+          "change_orientation": "Ability to pursue better methods without settling for the status quo",
+          "willingness_to_learn": "Ability to actively absorb new knowledge and skills",
+          "curiosity": "Ability to think deeply with intellectual curiosity",
+          "adaptability": "Ability to flexibly adapt to changes in environment and situations"
         }
       },
       "job_performance": {
         "question": "What is your greatest strength in job performance?",
         "options": {
-          "persistence": "Persistence",
-          "time_management": "Time Management",
-          "efficiency": "Efficiency",
-          "planning": "Planning"
+          "persistence": "Ability to keep working through difficulties",
+          "time_management": "Ability to meet deadlines and prioritize actions",
+          "efficiency": "Ability to achieve maximum results with minimal effort",
+          "planning": "Ability to create effective paths toward goal achievement"
         }
       },
       "mental_strength": {
         "question": "What is your strongest mental strength?",
         "options": {
-          "resilience": "Resilience",
-          "open_mindedness": "Open-Mindedness",
-          "stress_tolerance": "Stress Tolerance",
-          "flexibility": "Flexibility"
+          "resilience": "Ability to recover from failures and setbacks with a positive attitude",
+          "open_mindedness": "Ability to accept new ideas and different opinions",
+          "stress_tolerance": "Ability to stay calm under pressure",
+          "flexibility": "Ability to adapt to unexpected events and modify approaches"
         }
       },
       "company_size": {

@@ -20,7 +20,7 @@
     "no_images": "この質問に利用可能な画像がありません。次の質問に進んでください。",
     "image_questions": {
       "work_values": {
-        "question": "あなたが最も大事にしたい仕事の価値観は何ですか？"
+        "question": "あなたが最も大切にしたい仕事の価値観は何ですか？"
       },
       "corporate_culture": {
         "question": "あなたが求める企業文化はどれですか？"
@@ -32,7 +32,7 @@
         "question": "あなたが求める職場環境はどれですか？"
       },
       "humanity": {
-        "question": "あなたに強く備わっている人間性はどれですか？"
+        "question": "あなたが重視する人間関係はどれですか？"
       },
       "interpersonal_skills": {
         "question": "あなたの強みの対人能力はどれですか？"
@@ -66,93 +66,93 @@
     },
     "questions": {
       "work_values": {
-        "question": "あなたが最も大事にしたい仕事の価値観は何ですか？",
+        "question": "あなたが最も大切にしたい仕事の価値観は何ですか？",
         "options": {
-          "growth": "成長",
-          "contribution": "貢献",
-          "challenge": "挑戦",
-          "result_oriented": "成果主義"
+          "growth": "自分自身のスキルや能力を伸ばしていけること",
+          "contribution": "社会や周囲の人々に良い影響を与えられること",
+          "challenge": "未知の領域に挑み、新しいことに取り組めること",
+          "result_oriented": "努力と結果が正当に評価されること"
         }
       },
       "corporate_culture": {
         "question": "あなたが求める企業文化はどれですか？",
         "options": {
-          "innovation": "イノベーション",
-          "collaboration": "コラボレーション",
-          "diversity": "多様性（ダイバーシティ）",
-          "customer_orientation": "顧客志向"
+          "innovation": "新しいアイデアや変化を歓迎する文化",
+          "collaboration": "チームワークを重視し、協力し合う文化",
+          "diversity": "様々な背景や価値観を尊重する文化",
+          "customer_orientation": "お客様の満足を最優先に考える文化"
         }
       },
       "leadership": {
         "question": "あなたが理想とするリーダーシップはどれですか？",
         "options": {
-          "vision": "ビジョン",
-          "influence": "影響力",
-          "inclusive": "包容力",
-          "decision_making": "決断力"
+          "vision": "明確な目標を示し、方向性を導いてくれる",
+          "influence": "メンバーの能力を引き出し、モチベーションを高めてくれる",
+          "inclusive": "多様な意見を受け入れ、チームの一体感を大切にしてくれる",
+          "decision_making": "迅速に判断し、責任を持って行動してくれる"
         }
       },
       "workplace_environment": {
         "question": "あなたが求める職場環境はどれですか？",
         "options": {
-          "workability": "働きやすさ",
-          "growth_opportunities": "成長機会",
-          "sense_of_security": "安心感",
-          "mutual_support": "支え合い"
+          "workability": "柔軟な勤務形態や効率的な業務環境が整っている",
+          "growth_opportunities": "研修や挑戦の機会が豊富に用意されている",
+          "sense_of_security": "安定した雇用と公平な評価制度がある",
+          "mutual_support": "困ったときに助け合える関係性がある"
         }
       },
       "humanity": {
-        "question": "あなたに強く備わっている人間性はどれですか？",
+        "question": "あなたが重視する人間関係はどれですか？",
         "options": {
-          "integrity": "誠実さ",
-          "responsibility": "責任感",
-          "ethics": "倫理観",
-          "fairness": "公正さ"
+          "integrity": "正直で信頼関係を築ける",
+          "responsibility": "各自が責任を持って仕事に取り組む",
+          "ethics": "高い倫理観を持って公正に行動する",
+          "fairness": "偏りなく公平に扱われる環境がある"
         }
       },
       "interpersonal_skills": {
         "question": "あなたの強みの対人能力はどれですか？",
         "options": {
-          "cooperation": "協調性",
-          "empathy": "共感力",
-          "teamwork": "チームワーク",
-          "communication": "コミュニケーション能力"
+          "cooperation": "チームの調和を大切にし、周囲と良好な関係を築ける",
+          "empathy": "相手の気持ちや立場を理解し、寄り添える",
+          "teamwork": "集団の中で自分の役割を理解し、協力して成果を出せる",
+          "communication": "自分の考えを明確に伝え、相手の意見も引き出せる"
         }
       },
       "cognitive_abilities": {
         "question": "あなたの強みの思考力はどれですか？",
         "options": {
-          "logical_thinking": "論理的思考",
-          "problem_solving": "問題解決力",
-          "insight": "洞察力",
-          "critical_thinking": "クリティカルシンキング"
+          "logical_thinking": "筋道を立てて物事を考え、合理的な結論を導き出せる",
+          "problem_solving": "課題を特定し、効果的な解決策を見つけ出せる",
+          "insight": "表面的ではなく本質を見抜き、先を読める",
+          "critical_thinking": "情報を客観的に分析し、多角的に検討できる"
         }
       },
       "self_growth": {
         "question": "あなたに最も強く備わっている自己成長力はどれですか？",
         "options": {
-          "change_orientation": "変革志向",
-          "willingness_to_learn": "学習意欲",
-          "curiosity": "探求心",
-          "adaptability": "適応力"
+          "change_orientation": "現状に満足せず、より良い方法や仕組みを追求できる",
+          "willingness_to_learn": "新しい知識やスキルを積極的に吸収しようとする",
+          "curiosity": "知的好奇心を持ち、深く掘り下げて考えられる",
+          "adaptability": "環境や状況の変化に柔軟に対応できる"
         }
       },
       "job_performance": {
         "question": "あなたの強みの業務遂行力はどれですか？",
         "options": {
-          "persistence": "継続力",
-          "time_management": "時間管理能力",
-          "efficiency": "効率性",
-          "planning": "計画力"
+          "persistence": "困難があっても粘り強く取り組み続けられる",
+          "time_management": "締め切りを守り、優先順位をつけて行動できる",
+          "efficiency": "最小限の労力で最大の成果を出せるよう工夫できる",
+          "planning": "目標達成に向けて効果的な道筋を描ける"
         }
       },
       "mental_strength": {
         "question": "あなたの強みの精神力はどれですか？",
         "options": {
-          "resilience": "回復力",
-          "open_mindedness": "オープンマインド",
-          "stress_tolerance": "ストレス耐性",
-          "flexibility": "柔軟性"
+          "resilience": "失敗や挫折から立ち直り、前向きになれる",
+          "open_mindedness": "新しい考え方や異なる意見を受け入れられる",
+          "stress_tolerance": "プレッシャーがかかる状況でも冷静に対応できる",
+          "flexibility": "予定外の出来事にも対応し、方針を修正できる"
         }
       },
       "company_size": {
