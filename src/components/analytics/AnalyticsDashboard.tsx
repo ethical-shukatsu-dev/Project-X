@@ -36,6 +36,7 @@ export function AnalyticsDashboard() {
     surveyFunnel: false,
     surveyTypes: false,
     signupMethods: false,
+    uniqueSignups: false,
     recommendations: false,
     surveySteps: false,
     dropoffAnalysis: false,
@@ -118,6 +119,9 @@ export function AnalyticsDashboard() {
       emailSignups: 0,
       googleSignups: 0,
       totalSignups: 0,
+      uniqueEmailSignups: 0,
+      uniqueGoogleSignups: 0,
+      uniqueTotalSignups: 0
     },
     surveySteps: [],
     dropoffAnalysis: []
@@ -274,22 +278,58 @@ export function AnalyticsDashboard() {
             onRefresh={() => refreshMetric("surveyTypes")}
           />
         )}
-
-        {/* Signup Methods */}
-        {refreshingStates.signupMethods ? (
-          <MetricCardSkeleton />
-        ) : (
-          <SplitMetric
-            title="Signup Methods"
-            metrics={[
-              {name: "Email Signups", value: stats.signups.emailSignups},
-              {name: "Google Signups", value: stats.signups.googleSignups},
-            ]}
-            total={stats.signups.totalSignups}
-            onRefresh={() => refreshMetric("signupMethods")}
-          />
-        )}
       </div>
+
+      {/* Unique Signup Metrics */}
+      {refreshingStates.uniqueSignups ? (
+        <MetricCardSkeleton />
+      ) : (
+        <Card className="mt-4">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-sm font-medium">Unique Signup Clicks</CardTitle>
+              <RefreshButton onClick={() => refreshMetric("uniqueSignups")} />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Email Signups</h3>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Total</span>
+                  <span className="font-medium">{stats.signups.emailSignups}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Unique</span>
+                  <span className="font-medium">{stats.signups.uniqueEmailSignups}</span>
+                </div>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Google Signups</h3>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Total</span>
+                  <span className="font-medium">{stats.signups.googleSignups}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Unique</span>
+                  <span className="font-medium">{stats.signups.uniqueGoogleSignups}</span>
+                </div>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Total Signups</h3>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Total</span>
+                  <span className="font-medium">{stats.signups.totalSignups}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Unique</span>
+                  <span className="font-medium">{stats.signups.uniqueTotalSignups}</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Survey Steps Funnel */}
       {refreshingStates.surveySteps ? (

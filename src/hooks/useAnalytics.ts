@@ -64,6 +64,9 @@ export interface AnalyticsData {
       emailSignups: number;
       googleSignups: number;
       totalSignups: number;
+      uniqueEmailSignups: number;
+      uniqueGoogleSignups: number;
+      uniqueTotalSignups: number;
     };
     surveySteps: SurveyStepMetric[];
     dropoffAnalysis: StepDropoffMetric[];

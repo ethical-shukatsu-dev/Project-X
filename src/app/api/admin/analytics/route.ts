@@ -25,6 +25,9 @@ interface SignupMetrics {
   emailSignups: number;
   googleSignups: number;
   totalSignups: number;
+  uniqueEmailSignups: number;
+  uniqueGoogleSignups: number;
+  uniqueTotalSignups: number;
 }
 
 // Define recommendations metrics
@@ -193,10 +196,31 @@ export async function GET(request: NextRequest) {
     const googleSignups = findEventCount('google_signup_click');
     const totalSignups = emailSignups + googleSignups;
     
+    // Calculate unique sessions for signups
+    const uniqueEmailSignupSessions = new Set(
+      data.filter(event => event.event_type === 'email_signup_click' && event.session_id)
+        .map(event => event.session_id)
+    ).size;
+    
+    const uniqueGoogleSignupSessions = new Set(
+      data.filter(event => event.event_type === 'google_signup_click' && event.session_id)
+        .map(event => event.session_id)
+    ).size;
+    
+    const uniqueTotalSignupSessions = new Set([
+      ...data.filter(event => event.event_type === 'email_signup_click' && event.session_id)
+        .map(event => event.session_id),
+      ...data.filter(event => event.event_type === 'google_signup_click' && event.session_id)
+        .map(event => event.session_id)
+    ]).size;
+    
     const signupMetrics: SignupMetrics = {
       emailSignups,
       googleSignups,
-      totalSignups
+      totalSignups,
+      uniqueEmailSignups: uniqueEmailSignupSessions,
+      uniqueGoogleSignups: uniqueGoogleSignupSessions,
+      uniqueTotalSignups: uniqueTotalSignupSessions
     };
     
     // Legacy metrics for backward compatibility
