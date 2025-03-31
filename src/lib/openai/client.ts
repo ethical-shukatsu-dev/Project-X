@@ -69,7 +69,8 @@ const loadAiTranslations = (locale: string) => {
  */
 export async function generateRecommendations(
   userData: UserValues,
-  locale: string = 'en'
+  locale: string = 'en',
+  previouslyRecommendedCompanies: string[] = []
 ): Promise<RecommendationResult[]> {
   // Load translations for the specified locale
   const translations = loadAiTranslations(locale) || loadAiTranslations('en');
@@ -83,11 +84,18 @@ export async function generateRecommendations(
     ? `\n\nあなたは画像ベースの価値観評価の専門家でもあります。ユーザーが選択した画像から価値観を抽出し、それを企業の推薦に活用できます。\n\nまた、企業データの分析の専門家でもあります。企業の公式情報（ミッション、ビジョン、価値観）だけでなく、社員レビューや実際の職場環境も考慮して、ユーザーの価値観と企業の価値観の間の真の適合性を評価してください。表面的なマッチングではなく、企業文化と実際の職場環境に基づいた深い分析を提供してください。\n\n特に重要なのは、ユーザーの価値観と企業の価値観の間の具体的な一致点を明確に示すことです。この企業はあなたと同じように...という形式で、具体的な例や証拠を含めた詳細な説明を提供してください。\n\n重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。`
     : `\n\nYou are also an expert in image-based value assessment. You can extract values from images selected by users and incorporate them into company recommendations.\n\nYou are also an expert in company data analysis. Consider not just official company information (mission, vision, values) but also employee reviews and actual workplace environment to evaluate the true fit between user values and company values. Provide deep analysis based on company culture and actual workplace environment, not just surface-level matching.\n\nIt is especially important to clearly show the specific connections between the user's values and the company's values. Use a "This company, like you, values..." format and provide detailed explanations with specific examples or evidence.\n\nImportant: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.`);
 
+  // Add previously recommended companies to the prompt
+  const previousCompaniesText = previouslyRecommendedCompanies.length > 0
+    ? locale === 'ja'
+      ? `\n\n以前に推薦された企業（これらの企業のうち最大${RECOMMENDATION_COUNT - 2}社までを再度推薦できますが、少なくとも1-2社は以前に推薦されていない新しい企業を含めてください）:\n${previouslyRecommendedCompanies.join(', ')}\n\n`
+      : `\n\nPreviously recommended companies (you can recommend up to ${RECOMMENDATION_COUNT - 2} of these again, but please include at least 1-2 new companies that haven't been recommended before):\n${previouslyRecommendedCompanies.join(', ')}\n\n`
+    : '';
+
   const promptTemplate = locale === 'ja' 
     ? `
-    ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。過去に提示した企業の重複は避けてください。
+    ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。過去に提示した企業の重複は避けてください。${previouslyRecommendedCompanies.length > 0 ? '下記のリストに示す以前に推薦された企業のうち最大で' + (RECOMMENDATION_COUNT - 2) + '社は再推薦可能ですが、残りは以前に推薦されていない新しい企業である必要があります。' : ''}
 
-    重要: すべての回答は必ず日本語のみで提供。企業名や業界名も含め、英語の単語や文を混在させないでください。
+    重要: すべての回答は必ず日本語のみで提供。企業名や業界名も含め、英語の単語や文を混在させないでください。${previousCompaniesText}
     
     ユーザーの価値観:
     ${JSON.stringify(userData.values)}
@@ -194,22 +202,26 @@ export async function generateRecommendations(
           "company_values": "この企業が大事にする価値観（100文字程度）",
           "value_match_ratings": {
             "価値観1": 8,
-            "価値観2": 9
+            "価値観2": 9,
+            ...
             // ユーザーの各価値観に対するマッチ度（1-10）
           },
           "strength_match_ratings": {
             "強み1": 7,
-            "強み2": 9
+            "強み2": 9,
+            ...
             // ユーザーの各強みに対するマッチ度（1-10）
           },
           "value_matching_details": {
             "価値観1": "この価値観に対する詳細なマッチングポイント",
-            "価値観2": "この価値観に対する詳細なマッチングポイント"
+            "価値観2": "この価値観に対する詳細なマッチングポイント",
+            ...
             // ユーザーの各価値観に対する詳細な説明
           },
           "strength_matching_details": {
             "強み1": "この強みに対する詳細なマッチングポイント",
-            "強み2": "この強みに対する詳細なマッチングポイント"
+            "強み2": "この強みに対する詳細なマッチングポイント",
+            ...
             // ユーザーの各強みに対する詳細な説明
           },
           "matching_points": ["総合的なマッチングポイント1（日本語のみ）", "総合的なマッチングポイント2（日本語のみ）", ...] 
@@ -222,9 +234,9 @@ export async function generateRecommendations(
     `
     : `
     Based on the user's values and strengths, recommend ${RECOMMENDATION_COUNT} real companies in Japan 
-    that would be good matches for a university student seeking employment. Include both well-known and lesser-known companies, and avoid duplicating companies that have been suggested previously.
+    that would be good matches for a university student seeking employment. Include both well-known and lesser-known companies.${previouslyRecommendedCompanies.length > 0 ? ' You can recommend up to ' + (RECOMMENDATION_COUNT - 2) + ' companies from the previously recommended list below, but at least 1-2 must be new companies that haven\'t been recommended before.' : ''}
 
-    Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
+    Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.${previousCompaniesText}
     
     User values:
     ${JSON.stringify(userData.values)}
@@ -332,22 +344,26 @@ export async function generateRecommendations(
           "company_values": "Values this company cares about (about 100 words)",
           "value_match_ratings": {
             "value1": 8,
-            "value2": 9
+            "value2": 9,
+            ...
             // Match ratings for each user value (1-10)
           },
           "strength_match_ratings": {
             "strength1": 7,
-            "strength2": 9
+            "strength2": 9,
+            ...
             // Match ratings for each user strength (1-10)
           },
           "value_matching_details": {
             "value1": "Detailed matching points for this value",
-            "value2": "Detailed matching points for this value"
+            "value2": "Detailed matching points for this value",
+            ...
             // Detailed explanation for each user value
           },
           "strength_matching_details": {
             "strength1": "Detailed matching points for this strength",
-            "strength2": "Detailed matching points for this strength"
+            "strength2": "Detailed matching points for this strength",
+            ...
             // Detailed explanation for each user strength
           },
           "matching_points": ["Overall matching point 1 (English only)", "Overall matching point 2 (English only)", ...] 
