@@ -30,7 +30,7 @@ export default async function AdminLayout({
               >
                 Analytics
               </Link>
-              <Link
+              {/* <Link
                 href={`/${lng}/admin/users`}
                 className="transition-colors hover:text-blue-400"
               >
@@ -41,7 +41,7 @@ export default async function AdminLayout({
                 className="transition-colors hover:text-blue-400"
               >
                 Companies
-              </Link>
+              </Link> */}
             </nav>
           </div>
           <div>
