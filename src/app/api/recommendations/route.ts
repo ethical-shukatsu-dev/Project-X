@@ -59,10 +59,31 @@ export async function GET(request: Request) {
       }
     }
 
-    // Generate new recommendations with real company data, passing the locale
+    // Fetch previously recommended company names to avoid repetition and promote diversity
+    const {data: previouslyRecommendedCompanies, error: prevRecsError} = await supabase
+      .from("recommendations")
+      .select("company_id");
+
+    if (prevRecsError) {
+      console.error("Error fetching previously recommended companies:", prevRecsError);
+      // Continue with the process, we'll just have less information about previous recommendations
+    }
+
+    // Get the actual company names from the IDs
+    const previousCompanyIds = previouslyRecommendedCompanies?.map(rec => rec.company_id) || [];
+    const {data: previousCompanies} = await supabase
+      .from("companies")
+      .select("name")
+      .in("id", previousCompanyIds.length > 0 ? previousCompanyIds : ['no-companies']);
+    
+    // Extract just the company names
+    const previousCompanyNames = previousCompanies?.map(company => company.name) || [];
+
+    // Generate new recommendations with real company data, passing the locale and previously recommended companies
     const recommendations = await generateRecommendations(
       userData,
-      locale as "en" | "ja"
+      locale as "en" | "ja",
+      previousCompanyNames
     );
 
     // Save recommendations to Supabase
@@ -70,6 +91,10 @@ export async function GET(request: Request) {
       user_id: userId,
       company_id: rec.company.id,
       matching_points: rec.matching_points,
+      value_match_ratings: rec.value_match_ratings || null,
+      strength_match_ratings: rec.strength_match_ratings || null,
+      value_matching_details: rec.value_matching_details || null,
+      strength_matching_details: rec.strength_matching_details || null,
     }));
 
     const {data: insertedRecommendations, error: insertError} = await supabase

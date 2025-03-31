@@ -23,9 +23,11 @@ const DEFAULT_QUESTIONNAIRE_TYPE = "text"; // "text" or "image"
 
 // Define the questions for the questionnaire
 const QUESTIONS = [
+  // Values Questions (1-5)
   {
     id: "work_values",
     questionKey: "questionnaire.questions.work_values.question",
+    type: "value",
     options: [
       {
         value: "growth",
@@ -48,6 +50,7 @@ const QUESTIONS = [
   {
     id: "corporate_culture",
     questionKey: "questionnaire.questions.corporate_culture.question",
+    type: "value",
     options: [
       {
         value: "innovation",
@@ -70,6 +73,7 @@ const QUESTIONS = [
   {
     id: "leadership",
     questionKey: "questionnaire.questions.leadership.question",
+    type: "value",
     options: [
       {
         value: "vision",
@@ -92,6 +96,7 @@ const QUESTIONS = [
   {
     id: "workplace_environment",
     questionKey: "questionnaire.questions.workplace_environment.question",
+    type: "value",
     options: [
       {
         value: "workability",
@@ -114,6 +119,7 @@ const QUESTIONS = [
   {
     id: "humanity",
     questionKey: "questionnaire.questions.humanity.question",
+    type: "value",
     options: [
       {
         value: "integrity",
@@ -133,9 +139,12 @@ const QUESTIONS = [
       },
     ],
   },
+  
+  // Strengths Questions (6-10)
   {
     id: "interpersonal_skills",
     questionKey: "questionnaire.questions.interpersonal_skills.question",
+    type: "strength",
     options: [
       {
         value: "cooperation",
@@ -158,6 +167,7 @@ const QUESTIONS = [
   {
     id: "cognitive_abilities",
     questionKey: "questionnaire.questions.cognitive_abilities.question",
+    type: "strength",
     options: [
       {
         value: "logical_thinking",
@@ -180,6 +190,7 @@ const QUESTIONS = [
   {
     id: "self_growth",
     questionKey: "questionnaire.questions.self_growth.question",
+    type: "strength",
     options: [
       {
         value: "change_orientation",
@@ -202,6 +213,7 @@ const QUESTIONS = [
   {
     id: "job_performance",
     questionKey: "questionnaire.questions.job_performance.question",
+    type: "strength",
     options: [
       {
         value: "persistence",
@@ -224,6 +236,7 @@ const QUESTIONS = [
   {
     id: "mental_strength",
     questionKey: "questionnaire.questions.mental_strength.question",
+    type: "strength",
     options: [
       {
         value: "resilience",
@@ -566,19 +579,6 @@ const HARD_CODED_IMAGE_DATA: HardCodedImageData = {
   ]
 };
 
-// Set number of random questions to select from the 10 available ones
-const NUM_RANDOM_QUESTIONS = 5;
-
-// Helper function to shuffle an array (Fisher-Yates algorithm)
-function shuffleArray<T>(array: T[]): T[] {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-}
-
 interface ValuesQuestionnaireProps {
   lng: string;
   questionnaireType?: string; // New prop to control which type of questionnaire to show
@@ -618,13 +618,13 @@ export default function ValuesQuestionnaire({
     setSurveyStartTime(Date.now());
     
     // Randomly select 5 questions from the 10 available
-    const shuffledQuestions = shuffleArray([...QUESTIONS]);
-    const selectedQuestions = shuffledQuestions.slice(0, NUM_RANDOM_QUESTIONS);
-    setRandomQuestions(selectedQuestions);
+    // const shuffledQuestions = shuffleArray([...QUESTIONS]);
+    // const selectedQuestions = shuffledQuestions.slice(0, NUM_RANDOM_QUESTIONS);
+    setRandomQuestions(QUESTIONS);
     
     // Randomly select 5 image questions from the 10 available
     // We need to make sure the selected image questions correspond to the same categories as the text questions
-    const selectedCategories = selectedQuestions.map(q => q.id);
+    const selectedCategories = QUESTIONS.map(q => q.id);
     const selectedImageQuestions = ALL_IMAGE_QUESTIONS.filter(q => 
       selectedCategories.includes(q.category)
     );
@@ -704,12 +704,25 @@ export default function ValuesQuestionnaire({
       
       // Convert values to numeric format for better AI processing
       const numericValues: Record<string, number> = {};
+      const numericStrengths: Record<string, number> = {};
 
       // Only process text-based values if we're in text-only mode
       if (!useOnlyImageQuestions) {
-        Object.entries(values).forEach(([, value]) => {
-          // Assign a value of 5 (on a scale of 1-5) to indicate strong preference
-          numericValues[value] = 5;
+        Object.entries(values).forEach(([questionId, value]) => {
+          // Find the question to determine if it's a value or strength
+          const question = QUESTIONS.find(q => q.id === questionId);
+          
+          if (question) {
+            // Assign a value of 5 (on a scale of 1-5) to indicate strong preference
+            if (question.type === 'strength') {
+              numericStrengths[value] = 5;
+            } else {
+              numericValues[value] = 5;
+            }
+          } else {
+            // Default to values if type not found
+            numericValues[value] = 5;
+          }
         });
       }
 
@@ -746,7 +759,8 @@ export default function ValuesQuestionnaire({
       const userValues: Partial<UserValues> = {
         values: numericValues,
         selected_image_values: selectedImages,
-        questionnaire_type: questionnaireType, // Add the questionnaire type to the user values
+        questionnaire_type: questionnaireType,
+        strengths: numericStrengths,
       };
 
       // Submit to API
@@ -825,8 +839,8 @@ export default function ValuesQuestionnaire({
                     className="flex items-center space-x-2"
                   >
                     <RadioGroupItem
-                      value={option.value}
                       id={option.value}
+                      value={t(option.labelKey)}
                       className="border-white/50 text-white data-[state=checked]:bg-white data-[state=checked]:border-white"
                     />
                     <Label

@@ -70,10 +70,19 @@ export async function getOrCreateCompany(companyName: string, industry?: string,
     // If company doesn't exist, fetch from OpenAI
     const companyData = await fetchCompanyData(companyName, industry, locale);
     
+    // Extract the company_values field if present
+    const { company_values, ...standardCompanyData } = companyData;
+    
+    // Prepare the company data for insertion
+    const companyToInsert = {
+      ...standardCompanyData,
+      company_values: company_values || null,
+    };
+    
     // Insert into database
     const { data: newCompany, error: insertError } = await supabase
       .from('companies')
-      .insert([companyData])
+      .insert([companyToInsert])
       .select()
       .single();
 
