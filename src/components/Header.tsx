@@ -3,9 +3,10 @@
 import { useScrollDirection } from "@/hooks";
 import Link from "next/link";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import Image from "next/image";
 
 export default function Header() {
-  const { scrollDirection } = useScrollDirection(5);
+  const { scrollDirection } = useScrollDirection(3);
   
   return (
     <header 
@@ -19,7 +20,13 @@ export default function Header() {
             href="/" 
             className="text-xl font-bold transition-colors duration-200 hover:text-primary"
           >
-            Project X
+            <Image 
+              src="/images/logos/base_me.svg" 
+              alt="Project X Logo" 
+              width={120} 
+              height={30} 
+              priority
+            />
           </Link>
           <LanguageSwitcher />
         </div>
