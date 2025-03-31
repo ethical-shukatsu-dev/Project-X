@@ -260,25 +260,54 @@ export async function GET(request: NextRequest) {
     };
     
     // Prepare dropoff metrics
-    const dropoffMetrics: SurveyStepDropoffMetrics[] = stepIds.map(stepId => {
+    const dropoffMetrics: SurveyStepDropoffMetrics[] = stepIds.map((stepId, index) => {
       // Count completions for this step
       const completed = surveyStepEvents.filter(
         event => event.properties?.stepId === stepId
       ).length;
       
-      // Count abandonments for this step
-      const abandoned = surveyStepAbandonedEvents.filter(
+      // Count actual abandonment events for this step
+      const actualAbandonments = surveyStepAbandonedEvents.filter(
         event => event.properties?.stepId === stepId
       ).length;
       
-      // Calculate completion and abandonment rates
-      const total = completed + abandoned;
-      const completionRate = total > 0 
-        ? `${Math.round((completed / total) * 100)}%` 
+      // Calculate abandonment based on drop-off from previous step
+      let abandoned = 0;
+      let total = 0;
+      
+      if (index === 0) {
+        // For first step, total is the number of survey starts
+        total = surveyStartClicks;
+        // Use actual abandonment events for the first step if available
+        abandoned = actualAbandonments > 0 ? actualAbandonments : (total - completed);
+      } else {
+        // For subsequent steps, total is the number of completions from previous step
+        const previousStepCompleted = surveyStepEvents.filter(
+          event => event.properties?.stepId === stepIds[index - 1]
+        ).length;
+        total = previousStepCompleted;
+        // Prefer actual abandonment events if available, otherwise infer from completion difference
+        abandoned = actualAbandonments > 0 ? actualAbandonments : Math.max(0, total - completed);
+      }
+
+      // Ensure totals make sense mathematically
+      // The sum of completed and abandoned should never be greater than the total
+      if (completed + abandoned > total) {
+        total = completed + abandoned;
+      }
+      
+      // Ensure abandoned is never negative
+      abandoned = Math.max(0, abandoned);
+      
+      // Calculate completion and abandonment rates using the sum of completed and abandoned as denominator
+      // This ensures they always add up to 100%
+      const actualTotal = completed + abandoned;
+      const completionRate = actualTotal > 0 
+        ? `${Math.round((completed / actualTotal) * 100)}%` 
         : '0%';
       
-      const abandonmentRate = total > 0
-        ? `${Math.round((abandoned / total) * 100)}%`
+      const abandonmentRate = actualTotal > 0
+        ? `${Math.round((abandoned / actualTotal) * 100)}%`
         : '0%';
       
       // Calculate average time spent on this step
@@ -299,7 +328,7 @@ export async function GET(request: NextRequest) {
         id: stepId,
         label: formatStepLabel(stepId),
         completed,
-        abandoned,
+        abandoned: Math.max(0, abandoned), // Ensure no negative abandonments
         completionRate,
         abandonmentRate,
         avgTimeSpentSeconds,
@@ -328,7 +357,18 @@ export async function GET(request: NextRequest) {
         // Survey step metrics
         surveySteps: surveyStepMetrics,
         // Dropoff analytics
-        dropoffAnalysis: dropoffMetrics
+        dropoffAnalysis: dropoffMetrics,
+        // Diagnostic data
+        diagnostics: {
+          surveyStartClicks,
+          totalAbandonments: surveyStepAbandonedEvents.length,
+          abandonmentsByStep: stepIds.map(stepId => ({
+            stepId,
+            abandonments: surveyStepAbandonedEvents.filter(
+              event => event.properties?.stepId === stepId
+            ).length
+          }))
+        }
       }
     });
   } catch (error) {

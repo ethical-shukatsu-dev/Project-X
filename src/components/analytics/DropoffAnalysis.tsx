@@ -79,12 +79,12 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
           </TabsList>
 
           <TabsContent value="completion" className="space-y-4">
-            <div className="h-[300px]">
+            <div className="h-[600px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={completionChart} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
-                  <YAxis dataKey="step" type="category" />
+                  <YAxis dataKey="step" type="category" className="text-xs w-fit"/>
                   <Tooltip 
                     formatter={(value: number, name: string) => [`${value} users`, name]}
                     labelFormatter={(value: string) => `Step: ${value}`}

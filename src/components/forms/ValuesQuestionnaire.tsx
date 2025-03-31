@@ -713,6 +713,7 @@ export default function ValuesQuestionnaire({
   const [isLoadingImages, setIsLoadingImages] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const [surveyStartTime, setSurveyStartTime] = useState<number>(Date.now());
+  const firstStepTrackedRef = useRef(false);
 
   // Store selected random questions
   const [randomQuestions, setRandomQuestions] = useState<typeof QUESTIONS>([]);
@@ -744,8 +745,17 @@ export default function ValuesQuestionnaire({
     );
     setRandomImageQuestions(selectedImageQuestions);
     
+    // Track the first question on component mount, but only once
+    if (QUESTIONS.length > 0 && !firstStepTrackedRef.current) {
+      const firstQuestionId = useOnlyImageQuestions && ALL_IMAGE_QUESTIONS.length > 0
+        ? ALL_IMAGE_QUESTIONS[0].id
+        : QUESTIONS[0].id;
+      trackStepChange(0, firstQuestionId);
+      firstStepTrackedRef.current = true;
+    }
+    
     setIsInitialized(true);
-  }, []);
+  }, [useOnlyImageQuestions]); // Remove trackStepChange from dependencies
 
   // Calculate total questions based on questionnaire type
   const totalTextQuestions = randomQuestions.length;
@@ -817,6 +827,24 @@ export default function ValuesQuestionnaire({
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
+      // First, track the final step completion explicitly
+      const finalQuestionData = useOnlyImageQuestions 
+        ? randomImageQuestions[currentQuestion] 
+        : randomQuestions[currentQuestion];
+      
+      if (finalQuestionData) {
+        // Track the final step completion
+        try {
+          await trackSurveyStepCompleted(
+            currentQuestion + 1, // Step index (1-based)
+            finalQuestionData.id, // Step ID
+            totalQuestions
+          );
+        } catch (error) {
+          console.error('Error tracking final survey step:', error);
+        }
+      }
+      
       // Track survey completion
       const surveyDurationSeconds = Math.floor((Date.now() - surveyStartTime) / 1000);
       await trackSurveyCompleted(
