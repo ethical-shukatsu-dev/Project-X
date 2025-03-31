@@ -11,6 +11,13 @@ export interface AnalyticsEvent {
   created_at: string;
 }
 
+// Survey step interface
+export interface SurveyStepMetric {
+  id: string;
+  count: number;
+  percentage: string;
+}
+
 // Type definitions for the analytics data
 export interface AnalyticsData {
   events: AnalyticsEvent[];
@@ -47,6 +54,7 @@ export interface AnalyticsData {
       googleSignups: number;
       totalSignups: number;
     };
+    surveySteps: SurveyStepMetric[];
   };
 }
 

@@ -35,6 +35,13 @@ interface RecommendationsMetrics {
   averageCompaniesPerUser: number;
 }
 
+// Define survey step completion metrics
+interface SurveyStepMetrics {
+  id: string;
+  count: number;
+  percentage: string;
+}
+
 /**
  * GET handler for fetching analytics data
  */
@@ -187,6 +194,42 @@ export async function GET(request: NextRequest) {
       ? Math.round((signupClicks / (signupClicks + dialogCloses)) * 100) 
       : 0;
     
+    // Process survey step completion data
+    const surveyStepEvents = data.filter(event => event.event_type === 'survey_step_completed');
+    
+    // Get all unique step IDs
+    const stepIds = [...new Set(
+      surveyStepEvents.map(event => event.properties?.stepId as string)
+    )].filter(Boolean);
+    
+    // Count completions for each step
+    const surveyStepMetrics: SurveyStepMetrics[] = stepIds.map(stepId => {
+      const count = surveyStepEvents.filter(
+        event => event.properties?.stepId === stepId
+      ).length;
+      
+      const percentage = surveyStartClicks > 0 
+        ? `${Math.round((count / surveyStartClicks) * 100)}%` 
+        : '0%';
+      
+      return {
+        id: stepId,
+        count,
+        percentage
+      };
+    }).sort((a, b) => {
+      // Try to sort by step index if available in the step ID format like "step_1", "step_2"
+      const indexA = parseInt(a.id.split('_').pop() || '0');
+      const indexB = parseInt(b.id.split('_').pop() || '0');
+      
+      if (!isNaN(indexA) && !isNaN(indexB)) {
+        return indexA - indexB;
+      }
+      
+      // Fall back to alphabetical sorting
+      return a.id.localeCompare(b.id);
+    });
+    
     return NextResponse.json({
       events: data,
       eventCounts: typedEventCounts,
@@ -204,7 +247,9 @@ export async function GET(request: NextRequest) {
           total: textSurveys + imageSurveys
         },
         recommendations: recommendationsMetrics,
-        signups: signupMetrics
+        signups: signupMetrics,
+        // Survey step metrics
+        surveySteps: surveyStepMetrics
       }
     });
   } catch (error) {
