@@ -7,6 +7,7 @@ import {
   RefreshButton,
 } from "./DashboardCards";
 import {SurveyStepsFunnel} from "./SurveyStepsFunnel";
+import {DropoffAnalysis} from "./DropoffAnalysis";
 import {useAnalytics, TimeRange} from "@/hooks/useAnalytics";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Button} from "@/components/ui/button";
@@ -37,6 +38,7 @@ export function AnalyticsDashboard() {
     signupMethods: false,
     recommendations: false,
     surveySteps: false,
+    dropoffAnalysis: false,
     all: false,
   });
 
@@ -117,7 +119,8 @@ export function AnalyticsDashboard() {
       googleSignups: 0,
       totalSignups: 0,
     },
-    surveySteps: []
+    surveySteps: [],
+    dropoffAnalysis: []
   };
 
   // Use the data if available, otherwise use default values
@@ -137,6 +140,9 @@ export function AnalyticsDashboard() {
       label: stepName
     };
   });
+
+  // Get dropoff analysis data
+  const dropoffData = stats.dropoffAnalysis || [];
 
   // Render individual metric cards with conditionally showing skeletons when refreshing
   return (
@@ -297,6 +303,18 @@ export function AnalyticsDashboard() {
         />
       )}
 
+      {/* Dropoff Analysis */}
+      {refreshingStates.dropoffAnalysis ? (
+        <DropoffAnalysisSkeleton />
+      ) : (
+        <DropoffAnalysis
+          title="Drop-off Analysis"
+          description="Detailed analysis of where users abandon the survey"
+          data={dropoffData}
+          onRefresh={() => refreshMetric("dropoffAnalysis")}
+        />
+      )}
+
       {/* Recommendations Metrics */}
       {refreshingStates.recommendations ? (
         <MetricCardSkeleton />
@@ -424,6 +442,51 @@ function SurveyStepsFunnelSkeleton() {
   );
 }
 
+function DropoffAnalysisSkeleton() {
+  return (
+    <Card className="col-span-3">
+      <CardHeader>
+        <div>
+          <Skeleton className="h-6 w-48 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-96 mb-4" />
+        <Skeleton className="h-[300px] w-full mb-6" />
+        
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {Array(3)
+            .fill(0)
+            .map((_, i) => (
+              <Card key={i} className="bg-muted/50">
+                <CardHeader className="p-3 pb-0">
+                  <Skeleton className="h-5 w-24" />
+                </CardHeader>
+                <CardContent className="p-3 pt-0">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    <div className="flex justify-between">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    <div className="flex justify-between">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
@@ -458,6 +521,7 @@ function DashboardSkeleton() {
       </div>
       
       <SurveyStepsFunnelSkeleton />
+      <DropoffAnalysisSkeleton />
     </div>
   );
 }

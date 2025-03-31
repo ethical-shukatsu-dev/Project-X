@@ -18,6 +18,17 @@ export interface SurveyStepMetric {
   percentage: string;
 }
 
+// Survey step drop-off interface
+export interface StepDropoffMetric {
+  id: string;
+  label: string;
+  completed: number;
+  abandoned: number;
+  completionRate: string;
+  abandonmentRate: string;
+  avgTimeSpentSeconds: number;
+}
+
 // Type definitions for the analytics data
 export interface AnalyticsData {
   events: AnalyticsEvent[];
@@ -55,6 +66,7 @@ export interface AnalyticsData {
       totalSignups: number;
     };
     surveySteps: SurveyStepMetric[];
+    dropoffAnalysis: StepDropoffMetric[];
   };
 }
 

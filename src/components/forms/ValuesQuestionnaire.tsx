@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
 import {
@@ -16,7 +16,7 @@ import {Label} from "@/components/ui/label";
 import {UserValues, ValueImage} from "@/lib/supabase/client";
 import {useTranslation} from "@/i18n-client";
 import {ImageQuestionGrid} from "./ImageValueSelector";
-import { trackSurveyStepCompleted, trackSurveyCompleted } from "@/lib/analytics";
+import { trackSurveyStepCompleted, trackSurveyCompleted, trackSurveyStepAbandoned } from "@/lib/analytics";
 
 // A/B Testing Toggle - This will be overridden by the questionnaireType prop if provided
 const DEFAULT_QUESTIONNAIRE_TYPE = "text"; // "text" or "image"
@@ -584,6 +584,119 @@ interface ValuesQuestionnaireProps {
   questionnaireType?: string; // New prop to control which type of questionnaire to show
 }
 
+// The hook to track step timing and abandonment
+function useStepTracking(totalSteps: number) {
+  const startTimeRef = useRef<number>(Date.now());
+  const currentStepRef = useRef<number>(0);
+  const currentStepIdRef = useRef<string>('');
+  
+  // Track when the step changes
+  const trackStepChange = (newStepIndex: number, stepId: string) => {
+    const previousStepIndex = currentStepRef.current;
+    const previousStepId = currentStepIdRef.current;
+    
+    // If moving to a new step, record the previous step as completed
+    if (previousStepId && previousStepIndex !== newStepIndex) {
+      const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
+      
+      // Track the step completion async (fire and forget)
+      trackSurveyStepCompleted(
+        previousStepIndex,
+        previousStepId,
+        totalSteps
+      ).catch(err => console.error('Error tracking step completion:', err));
+      
+      // Reset start time for the new step
+      startTimeRef.current = Date.now();
+    }
+    
+    // Update current step refs
+    currentStepRef.current = newStepIndex;
+    currentStepIdRef.current = stepId;
+  };
+  
+  // Track step abandonment
+  useEffect(() => {
+    // Define the beforeunload handler
+    const handleBeforeUnload = () => {
+      if (currentStepIdRef.current) {
+        const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
+        
+        // Use a synchronous approach for beforeunload
+        // This won't actually send the event due to browser restrictions,
+        // but we'll handle it with navigator.sendBeacon in the cleanup function
+        localStorage.setItem('survey_abandoned_step', JSON.stringify({
+          stepIndex: currentStepRef.current,
+          stepId: currentStepIdRef.current,
+          totalSteps,
+          timeSpentSeconds: timeSpent
+        }));
+      }
+    };
+    
+    // Add beforeunload listener
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Set up visibility change listener (for mobile)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && currentStepIdRef.current) {
+        const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
+        
+        // Store abandonment data
+        localStorage.setItem('survey_abandoned_step', JSON.stringify({
+          stepIndex: currentStepRef.current,
+          stepId: currentStepIdRef.current,
+          totalSteps,
+          timeSpentSeconds: timeSpent
+        }));
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Clean up function
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      
+      // Check if there's abandonment data to send
+      const abandonedData = localStorage.getItem('survey_abandoned_step');
+      if (abandonedData) {
+        try {
+          const data = JSON.parse(abandonedData);
+          
+          // Use navigator.sendBeacon for reliable event sending during page unload
+          if (navigator.sendBeacon) {
+            const blob = new Blob([JSON.stringify({
+              event_type: 'survey_step_abandoned',
+              properties: data,
+              timestamp: Date.now()
+            })], { type: 'application/json' });
+            
+            navigator.sendBeacon('/api/analytics/track', blob);
+          } else {
+            // Fallback to traditional tracking for older browsers
+            trackSurveyStepAbandoned(
+              data.stepIndex,
+              data.stepId,
+              data.totalSteps,
+              data.timeSpentSeconds,
+              'page_unload'
+            ).catch(err => console.error('Error tracking step abandonment:', err));
+          }
+          
+          // Clear the stored data
+          localStorage.removeItem('survey_abandoned_step');
+        } catch (e) {
+          console.error('Error processing abandoned step data:', e);
+        }
+      }
+    };
+  }, [totalSteps]);
+  
+  return trackStepChange;
+}
+
 export default function ValuesQuestionnaire({
   lng,
   questionnaireType = DEFAULT_QUESTIONNAIRE_TYPE,
@@ -609,6 +722,9 @@ export default function ValuesQuestionnaire({
 
   // Determine if we should use only image questions based on the prop
   const useOnlyImageQuestions = questionnaireType === "image";
+
+  // Use step tracking hook
+  const trackStepChange = useStepTracking(QUESTIONS.length);
 
   useEffect(() => {
     // Scroll to top of page

@@ -15,6 +15,7 @@ type EventType =
   'survey_type_selected' |
   // Survey progress events
   'survey_step_completed' |
+  'survey_step_abandoned' |  // New event type for abandonment
   'survey_completed' |
   // Recommendations events
   'recommendations_page_visit' |
@@ -122,7 +123,28 @@ export const trackSurveyStepCompleted = async (
     stepIndex,
     stepId, 
     totalSteps,
-    progress: Math.round((stepIndex / totalSteps) * 100)
+    progress: Math.round((stepIndex / totalSteps) * 100),
+    completedAt: new Date().toISOString()
+  });
+};
+
+/**
+ * Track when a user abandons a survey step
+ */
+export const trackSurveyStepAbandoned = async (
+  stepIndex: number,
+  stepId: string,
+  totalSteps: number,
+  timeSpentSeconds: number,
+  reason?: string
+): Promise<void> => {
+  await trackEvent('survey_step_abandoned', { 
+    stepIndex,
+    stepId, 
+    totalSteps,
+    timeSpentSeconds,
+    abandonedAt: new Date().toISOString(),
+    reason: reason || 'unknown'
   });
 };
 
@@ -137,7 +159,8 @@ export const trackSurveyCompleted = async (
   await trackEvent('survey_completed', { 
     surveyType,
     totalSteps,
-    timeSpentSeconds
+    timeSpentSeconds,
+    completedAt: new Date().toISOString()
   });
 };
 

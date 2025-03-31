@@ -40,6 +40,19 @@ interface SurveyStepMetrics {
   id: string;
   count: number;
   percentage: string;
+  stepIndex: number;
+}
+
+// Define survey step dropoff metrics
+interface SurveyStepDropoffMetrics {
+  id: string;
+  label: string;
+  completed: number;
+  abandoned: number;
+  completionRate: string;
+  abandonmentRate: string;
+  avgTimeSpentSeconds: number;
+  stepIndex: number;
 }
 
 /**
@@ -212,23 +225,87 @@ export async function GET(request: NextRequest) {
         ? `${Math.round((count / surveyStartClicks) * 100)}%` 
         : '0%';
       
+      // Get the step index from any matching event
+      const stepEvent = surveyStepEvents.find(event => event.properties?.stepId === stepId);
+      const stepIndex = stepEvent?.properties?.stepIndex || 0;
+      
       return {
         id: stepId,
         count,
-        percentage
+        percentage,
+        stepIndex
       };
-    }).sort((a, b) => {
-      // Try to sort by step index if available in the step ID format like "step_1", "step_2"
-      const indexA = parseInt(a.id.split('_').pop() || '0');
-      const indexB = parseInt(b.id.split('_').pop() || '0');
-      
-      if (!isNaN(indexA) && !isNaN(indexB)) {
-        return indexA - indexB;
+    }).sort((a, b) => a.stepIndex - b.stepIndex);
+    
+    // Process drop-off analysis data
+    const surveyStepAbandonedEvents = data.filter(event => event.event_type === 'survey_step_abandoned');
+    
+    // Format step labels
+    const formatStepLabel = (stepId: string): string => {
+      // Check if step ID contains underscores (e.g., "work_values")
+      if (stepId.includes('_')) {
+        return stepId.split('_')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
       }
       
-      // Fall back to alphabetical sorting
-      return a.id.localeCompare(b.id);
-    });
+      // For numeric steps like "step_1", extract the number
+      const stepMatch = stepId.match(/step[_-]?(\d+)/i);
+      if (stepMatch && stepMatch[1]) {
+        return `Step ${stepMatch[1]}`;
+      }
+      
+      // Default formatting for other formats
+      return stepId.charAt(0).toUpperCase() + stepId.slice(1);
+    };
+    
+    // Prepare dropoff metrics
+    const dropoffMetrics: SurveyStepDropoffMetrics[] = stepIds.map(stepId => {
+      // Count completions for this step
+      const completed = surveyStepEvents.filter(
+        event => event.properties?.stepId === stepId
+      ).length;
+      
+      // Count abandonments for this step
+      const abandoned = surveyStepAbandonedEvents.filter(
+        event => event.properties?.stepId === stepId
+      ).length;
+      
+      // Calculate completion and abandonment rates
+      const total = completed + abandoned;
+      const completionRate = total > 0 
+        ? `${Math.round((completed / total) * 100)}%` 
+        : '0%';
+      
+      const abandonmentRate = total > 0
+        ? `${Math.round((abandoned / total) * 100)}%`
+        : '0%';
+      
+      // Calculate average time spent on this step
+      const timeSpentValues = surveyStepAbandonedEvents
+        .filter(event => event.properties?.stepId === stepId && 
+                typeof event.properties?.timeSpentSeconds === 'number')
+        .map(event => event.properties?.timeSpentSeconds as number);
+      
+      const avgTimeSpentSeconds = timeSpentValues.length > 0
+        ? timeSpentValues.reduce((sum, time) => sum + time, 0) / timeSpentValues.length
+        : 0;
+      
+      // Get the step index from any matching event
+      const stepEvent = surveyStepEvents.find(event => event.properties?.stepId === stepId);
+      const stepIndex = stepEvent?.properties?.stepIndex || 0;
+      
+      return {
+        id: stepId,
+        label: formatStepLabel(stepId),
+        completed,
+        abandoned,
+        completionRate,
+        abandonmentRate,
+        avgTimeSpentSeconds,
+        stepIndex
+      };
+    }).sort((a, b) => a.stepIndex - b.stepIndex);
     
     return NextResponse.json({
       events: data,
@@ -249,7 +326,9 @@ export async function GET(request: NextRequest) {
         recommendations: recommendationsMetrics,
         signups: signupMetrics,
         // Survey step metrics
-        surveySteps: surveyStepMetrics
+        surveySteps: surveyStepMetrics,
+        // Dropoff analytics
+        dropoffAnalysis: dropoffMetrics
       }
     });
   } catch (error) {
