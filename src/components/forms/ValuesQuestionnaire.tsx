@@ -16,6 +16,7 @@ import {Label} from "@/components/ui/label";
 import {UserValues, ValueImage} from "@/lib/supabase/client";
 import {useTranslation} from "@/i18n-client";
 import {ImageQuestionGrid} from "./ImageValueSelector";
+import { trackSurveyStepCompleted, trackSurveyCompleted } from "@/lib/analytics";
 
 // A/B Testing Toggle - This will be overridden by the questionnaireType prop if provided
 const DEFAULT_QUESTIONNAIRE_TYPE = "text"; // "text" or "image"
@@ -600,6 +601,7 @@ export default function ValuesQuestionnaire({
   >({});
   const [isLoadingImages, setIsLoadingImages] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [surveyStartTime, setSurveyStartTime] = useState<number>(Date.now());
 
   // Store selected random questions
   const [randomQuestions, setRandomQuestions] = useState<typeof QUESTIONS>([]);
@@ -611,6 +613,9 @@ export default function ValuesQuestionnaire({
   useEffect(() => {
     // Scroll to top of page
     window.scrollTo({top: 0, behavior: "smooth"});
+    
+    // Set survey start time
+    setSurveyStartTime(Date.now());
     
     // Randomly select 5 questions from the 10 available
     const shuffledQuestions = shuffleArray([...QUESTIONS]);
@@ -656,7 +661,22 @@ export default function ValuesQuestionnaire({
     setSelectedImageValues((prev) => ({...prev, [questionId]: imageId}));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Track the current step completion
+    const currentQuestionData = useOnlyImageQuestions 
+      ? randomImageQuestions[currentQuestion] 
+      : randomQuestions[currentQuestion];
+    
+    try {
+      await trackSurveyStepCompleted(
+        currentQuestion + 1,
+        currentQuestionData.id,
+        totalQuestions
+      );
+    } catch (error) {
+      console.error('Error tracking survey step:', error);
+    }
+    
     // If we're at the last question, submit automatically instead of showing interests
     if (currentQuestion === totalQuestions - 1) {
       handleSubmit();
@@ -674,6 +694,14 @@ export default function ValuesQuestionnaire({
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
+      // Track survey completion
+      const surveyDurationSeconds = Math.floor((Date.now() - surveyStartTime) / 1000);
+      await trackSurveyCompleted(
+        useOnlyImageQuestions ? 'image' : 'text',
+        totalQuestions,
+        surveyDurationSeconds
+      );
+      
       // Convert values to numeric format for better AI processing
       const numericValues: Record<string, number> = {};
 

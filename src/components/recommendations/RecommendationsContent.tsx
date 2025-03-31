@@ -13,11 +13,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {RecommendationResult} from "@/lib/openai/client";
+import {Company} from "@/lib/supabase/client";
 import {useTranslation} from "@/i18n-client";
 import SignupDialog from "@/components/recommendations/SignupDialog";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 import RecommendationTabs from "@/components/recommendations/RecommendationTabs";
 import {useIsMobile} from "@/hooks/useIsMobile";
+import { trackRecommendationsPageVisit, trackCompanyInterestedClick } from "@/lib/analytics";
+
 interface RecommendationsContentProps {
   lng: string;
 }
@@ -48,6 +51,11 @@ export default function RecommendationsContent({
   useEffect(() => {
     // Scroll to top of page
     window.scrollTo({top: 0, behavior: "smooth"});
+    
+    // Track recommendations page visit
+    trackRecommendationsPageVisit().catch(error => {
+      console.error('Error tracking recommendations page visit:', error);
+    });
 
     const fetchRecommendations = async (refresh = false) => {
       if (!userId) {
@@ -116,9 +124,15 @@ export default function RecommendationsContent({
 
   const handleFeedback = async (
     recommendationId: string,
-    feedback: "interested" | "not_interested"
+    feedback: "interested" | "not_interested",
+    company: Company
   ) => {
     try {
+      // Only track interested clicks
+      if (feedback === "interested") {
+        await trackCompanyInterestedClick(company.id, company.name);
+      }
+      
       const response = await fetch("/api/recommendations/feedback", {
         method: "POST",
         headers: {
@@ -315,9 +329,9 @@ export default function RecommendationsContent({
                   company={recommendation.company}
                   matchingPoints={recommendation.matching_points}
                   feedback={recommendation.feedback}
-                  onFeedback={(feedback) =>
+                  onFeedback={(feedbackType) =>
                     recommendation.id &&
-                    handleFeedback(recommendation.id, feedback)
+                    handleFeedback(recommendation.id, feedbackType, recommendation.company)
                   }
                   lng={lng}
                 />

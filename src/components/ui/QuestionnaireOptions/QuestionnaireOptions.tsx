@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 import StarBorder from "@/components/ui/Animations/StarBorder/StarBorder";
+import { trackSurveyStartClick, trackSurveyTypeSelection } from "@/lib/analytics";
 
 interface QuestionnaireOptionsProps {
   selectText: string;
@@ -21,6 +24,16 @@ export default function QuestionnaireOptions({
   animationDelay = 900,
   className = "",
 }: QuestionnaireOptionsProps) {
+  // Handler for tracking survey start click and type selection
+  const handleSurveyStart = async (type: 'text' | 'image') => {
+    try {
+      await trackSurveyStartClick();
+      await trackSurveyTypeSelection(type);
+    } catch (error) {
+      console.error('Error tracking survey selection:', error);
+    }
+  };
+
   const content = (
     <div className={`px-4 mt-4 space-y-4 sm:space-y-6 sm:mt-6 md:mt-10 ${className}`}>
       <p className="text-base font-medium text-gray-200 sm:text-lg">
@@ -28,7 +41,10 @@ export default function QuestionnaireOptions({
       </p>
 
       <div className="flex flex-col justify-center w-full gap-4 sm:flex-row sm:gap-5 sm:w-auto">
-        <Link href={`/${lng}/questionnaire?type=text`}>
+        <Link 
+          href={`/${lng}/questionnaire?type=text`}
+          onClick={() => handleSurveyStart('text')}
+        >
           <StarBorder
             as="div"
             color="#3B82F6"
@@ -57,6 +73,7 @@ export default function QuestionnaireOptions({
         <Link
           href={`/${lng}/questionnaire?type=image`}
           className="block"
+          onClick={() => handleSurveyStart('image')}
         >
           <StarBorder
             as="div"
