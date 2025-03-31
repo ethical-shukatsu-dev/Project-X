@@ -17,9 +17,10 @@ export type UserValues = {
   id: string;
   created_at: string;
   values: Record<string, number>; // Store values as key-value pairs
-  interests: string[]; // Array of interest keywords
+  interests?: string[]; // Array of interest keywords
   selected_image_values?: Record<string, string[]>; // Store selected image IDs by category
   questionnaire_type?: string; // Type of questionnaire used (text or image)
+  strengths?: Record<string, number>; // Store strengths as key-value pairs
 };
 
 export type Company = {

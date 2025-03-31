@@ -25,6 +25,7 @@ export async function POST(request: Request) {
         values: body.values,
         interests: body.interests || [], // Use empty array if interests not provided
         selected_image_values: body.selected_image_values || null,
+        strengths: body.strengths || null, // Add strengths field
       });
 
     if (error) {

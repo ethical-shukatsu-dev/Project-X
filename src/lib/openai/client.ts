@@ -4,6 +4,7 @@ import {v4 as uuid} from "uuid";
 import {getOrCreateCompany} from "../companies/client";
 import fs from 'fs';
 import path from 'path';
+import { RECOMMENDATION_COUNT } from "../constants/recommendations";
 
 // Initialize the OpenAI client
 const openaiClient = new OpenAI({
@@ -84,28 +85,33 @@ export async function generateRecommendations(
 
   const promptTemplate = locale === 'ja' 
     ? `
-    ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業10社を推薦してください。誰もが知っている企業だけでなく、あまり知られていない企業も含んでください。なお、過去に提示した企業の重複は避けてください。
+    ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。過去に提示した企業の重複は避けてください。
 
-    重要: すべての回答は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。
+    重要: すべての回答は必ず日本語のみで提供。企業名や業界名も含め、英語の単語や文を混在させないでください。
     
     ユーザーの価値観:
     ${JSON.stringify(userData.values)}
+
     ${userData.selected_image_values ? `
-    
     ユーザーが選択した画像ベースの価値観:
     ${JSON.stringify(userData.selected_image_values)}
     
     これらの画像ベースの価値観は、ユーザーが視覚的に選択した価値観を表しています。テキストベースの価値観と同様に重要視してください。
     ` : ''}
-    ${userData.interests ? `
-    
+
+    ${userData.strengths ? `
     ユーザーの強み:
+    ${JSON.stringify(userData.strengths)}
+    ` : ''}
+    
+    ${userData.interests ? `
+    ユーザーの興味のある業種・業界:
     ${JSON.stringify(userData.interests)}
     ` : ''}
     
     各企業について、以下の情報を提供してください:
     - 企業名: 日本語で表記してください。英語名の場合は日本語での一般的な呼び方を使用してください。
-    - 業界: 日本語で表記してください。指定された業界カテゴリとサブカテゴリから選んでください。
+    - 業界: 日本語で表記してください。
     - 大事にする価値観：この企業が大事にする価値観を100文字程度で記述してください。
     - 各価値観や強みとのマッチ度：ユーザーの各価値観や強みとのマッチ度を1-10で示してください。
     - 各価値観とのマッチングポイント: この企業がユーザーの各価値観に合う理由をすべて日本語で記述してください。プロダクトやサービスに触れるなどして具体的にマッチしている点を明確に示してください。
@@ -121,7 +127,7 @@ export async function generateRecommendations(
     - 「良い職場環境を提供しています」（具体性に欠ける）
     - 「ユーザーの価値観に合っています」（具体的な一致点が示されていない）
     
-    必ず以下の企業規模をすべて含めた多様な企業を推薦してください：
+    必ず以下の企業規模をすべて1社を含めた多様な企業を推薦してください：
     - 「スタートアップ（50人未満）」: 少なくとも1社
     - 「小規模（50-200人）」: 少なくとも1社 
     - 「中規模（1000-5000人）」: 少なくとも1社
@@ -216,7 +222,7 @@ export async function generateRecommendations(
     再度強調しますが、すべての出力は日本語のみで提供してください。英語の単語や文を混在させないでください。
     `
     : `
-    Based on the user's values and strengths, recommend 10 real companies in Japan 
+    Based on the user's values and strengths, recommend ${RECOMMENDATION_COUNT} real companies in Japan 
     that would be good matches for a university student seeking employment. Include both well-known and lesser-known companies, and avoid duplicating companies that have been suggested previously.
 
     Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
@@ -230,9 +236,14 @@ export async function generateRecommendations(
     
     These image-based values represent the values that the user selected visually. Please consider them as important as the text-based values.
     ` : ''}
-    ${userData.interests ? `
     
+    ${userData.strengths ? `
     User's strengths:
+    ${JSON.stringify(userData.strengths)}
+    ` : ''}
+
+    ${userData.interests ? `
+    User's interests:
     ${JSON.stringify(userData.interests)}
     ` : ''}
     
@@ -349,51 +360,51 @@ export async function generateRecommendations(
     
     To emphasize again, all output must be in English only. Do not mix Japanese words or sentences.
     `;
+    
+    try {
+      const response = await openaiClient.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: enhancedSystemPrompt,
+          },
+          {role: "user", content: promptTemplate},
+        ],
+        response_format: {type: "json_object"},
+      });
 
-  try {
-    const response = await openaiClient.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: enhancedSystemPrompt,
-        },
-        {role: "user", content: promptTemplate},
-      ],
-      response_format: {type: "json_object"},
-    });
+      const content = response.choices[0].message.content;
+      if (!content) {
+        throw new Error("Empty response from OpenAI");
+      }
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error("Empty response from OpenAI");
+      const parsedResponse = JSON.parse(content) as OpenAIRecommendationResponse;
+      const recommendations = parsedResponse.recommendations;
+
+      // Fetch or create company data for each recommendation
+      const enhancedRecommendations = await Promise.all(
+        recommendations.map(async (rec) => {
+          const company = await getOrCreateCompany(rec.name, rec.industry, locale);
+
+          return {
+            id: rec.id || uuid(),
+            company,
+            matching_points: rec.matching_points,
+            value_match_ratings: rec.value_match_ratings,
+            strength_match_ratings: rec.strength_match_ratings,
+            value_matching_details: rec.value_matching_details,
+            strength_matching_details: rec.strength_matching_details,
+            company_values: rec.company_values
+          };
+        })
+      );
+
+      return enhancedRecommendations;
+    } catch (error) {
+      console.error("Error processing recommendations:", error);
+      throw new Error("Failed to generate recommendations");
     }
-
-    const parsedResponse = JSON.parse(content) as OpenAIRecommendationResponse;
-    const recommendations = parsedResponse.recommendations;
-
-    // Fetch or create company data for each recommendation
-    const enhancedRecommendations = await Promise.all(
-      recommendations.map(async (rec) => {
-        const company = await getOrCreateCompany(rec.name, rec.industry, locale);
-
-        return {
-          id: rec.id || uuid(),
-          company,
-          matching_points: rec.matching_points,
-          value_match_ratings: rec.value_match_ratings,
-          strength_match_ratings: rec.strength_match_ratings,
-          value_matching_details: rec.value_matching_details,
-          strength_matching_details: rec.strength_matching_details,
-          company_values: rec.company_values
-        };
-      })
-    );
-
-    return enhancedRecommendations;
-  } catch (error) {
-    console.error("Error processing recommendations:", error);
-    throw new Error("Failed to generate recommendations");
-  }
 }
 
 /**
