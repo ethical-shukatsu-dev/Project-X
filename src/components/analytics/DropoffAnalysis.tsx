@@ -67,7 +67,7 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
             <CardTitle className="text-lg font-medium">{title}</CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
           </div>
-          {onRefresh && <RefreshButton onClick={onRefresh} size="md" />}
+          {onRefresh && <RefreshButton onClick={onRefresh} />}
         </div>
       </CardHeader>
       <CardContent>
