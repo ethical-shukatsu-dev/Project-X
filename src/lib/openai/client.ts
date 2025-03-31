@@ -189,7 +189,6 @@ export async function generateRecommendations(
     {
       "recommendations": [
         { 
-          "id": "unique-id-1",
           "name": "企業名（日本語のみ）", 
           "industry": "業界（日本語のみ）",
           "company_values": "この企業が大事にする価値観（100文字程度）",
@@ -328,7 +327,6 @@ export async function generateRecommendations(
     {
       "recommendations": [
         { 
-          "id": "unique-id-1",
           "name": "Company Name (English only)", 
           "industry": "Industry (English only)",
           "company_values": "Values this company cares about (about 100 words)",
