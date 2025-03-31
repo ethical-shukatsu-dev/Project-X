@@ -6,10 +6,10 @@ export default async function AdminLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ lng: string }>;
+  params: Promise<{lng: string}>;
 }) {
-  const { lng } = await params;
-  
+  const {lng} = await params;
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Admin Header */}
@@ -17,7 +17,7 @@ export default async function AdminLayout({
         <div className="container flex items-center justify-between mx-auto">
           <div className="flex items-center gap-6">
             <h1 className="text-xl font-bold">Project X Admin</h1>
-            <nav className="hidden gap-4 md:flex">
+            <nav className="gap-4 flex">
               <Link
                 href={`/${lng}/admin`}
                 className="transition-colors hover:text-blue-400"
