@@ -75,7 +75,13 @@ export default function CompanyCard({
 
   // Get company initials for avatar fallback
   const getInitials = (name: string) => {
-    return name
+    // Remove Japanese corporation designator "株式会社" before getting initials
+    const cleanName = name.replace(/株式会社/g, "").trim();
+    
+    // If the name is empty after removing "株式会社", use the original name
+    const nameToUse = cleanName || name;
+    
+    return nameToUse
       .split(" ")
       .map((n) => n[0])
       .join("")
