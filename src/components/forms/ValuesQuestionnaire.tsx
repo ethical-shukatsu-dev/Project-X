@@ -597,8 +597,6 @@ function useStepTracking(totalSteps: number) {
     
     // If moving to a new step, record the previous step as completed
     if (previousStepId && previousStepIndex !== newStepIndex) {
-      const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
-      
       // Track the step completion async (fire and forget)
       trackSurveyStepCompleted(
         previousStepIndex,
@@ -783,6 +781,9 @@ export default function ValuesQuestionnaire({
       ? randomImageQuestions[currentQuestion] 
       : randomQuestions[currentQuestion];
     
+    // Track step change
+    trackStepChange(currentQuestion + 1, currentQuestionData.id);
+    
     try {
       await trackSurveyStepCompleted(
         currentQuestion + 1,
@@ -803,6 +804,12 @@ export default function ValuesQuestionnaire({
 
   const handlePrevious = () => {
     if (currentQuestion > 0) {
+      // Track step change for previous step
+      const previousQuestionData = useOnlyImageQuestions 
+        ? randomImageQuestions[currentQuestion - 1] 
+        : randomQuestions[currentQuestion - 1];
+      trackStepChange(currentQuestion - 1, previousQuestionData.id);
+      
       setCurrentQuestion((prev) => prev - 1);
     }
   };
