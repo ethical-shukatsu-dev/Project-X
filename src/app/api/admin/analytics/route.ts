@@ -10,6 +10,31 @@ interface EventCount {
   count: number;
 }
 
+// Define survey funnel metrics
+interface SurveyFunnelMetrics {
+  visits: number;
+  started: number;
+  completed: number;
+  startRate: string;
+  completionRate: string;
+  overallConversionRate: string;
+}
+
+// Define signup metrics
+interface SignupMetrics {
+  emailSignups: number;
+  googleSignups: number;
+  totalSignups: number;
+}
+
+// Define recommendations metrics
+interface RecommendationsMetrics {
+  pageVisits: number;
+  companyInterestClicks: number;
+  companyInterestRate: string;
+  averageCompaniesPerUser: number;
+}
+
 /**
  * GET handler for fetching analytics data
  */
@@ -70,11 +95,95 @@ export async function GET(request: NextRequest) {
     // Cast the event counts to the proper type
     const typedEventCounts = (eventCounts || []) as EventCount[];
     
-    // Get signup conversion rate (signup clicks vs. dialog closes)
-    const signupClicks = typedEventCounts.find(item => item.event_type === 'signup_click')?.count || 0;
-    const dialogCloses = typedEventCounts.find(item => item.event_type === 'dialog_close')?.count || 0;
+    // Calculate metrics based on event counts
+    const findEventCount = (eventType: string): number => {
+      return typedEventCounts.find(item => item.event_type === eventType)?.count || 0;
+    };
     
-    const conversionRate = dialogCloses > 0 
+    // Home page and survey funnel metrics
+    const homePageVisits = findEventCount('home_page_visit');
+    const surveyStartClicks = findEventCount('survey_start_click');
+    const surveyCompletions = findEventCount('survey_completed');
+    
+    const surveyStartRate = homePageVisits > 0 
+      ? Math.round((surveyStartClicks / homePageVisits) * 100) 
+      : 0;
+      
+    const surveyCompletionRate = surveyStartClicks > 0 
+      ? Math.round((surveyCompletions / surveyStartClicks) * 100) 
+      : 0;
+      
+    const overallConversionRate = homePageVisits > 0 
+      ? Math.round((surveyCompletions / homePageVisits) * 100) 
+      : 0;
+    
+    const surveyFunnel: SurveyFunnelMetrics = {
+      visits: homePageVisits,
+      started: surveyStartClicks,
+      completed: surveyCompletions,
+      startRate: `${surveyStartRate}%`,
+      completionRate: `${surveyCompletionRate}%`,
+      overallConversionRate: `${overallConversionRate}%`
+    };
+    
+    // Survey type metrics
+    const textSurveys = data.filter(event => 
+      event.event_type === 'survey_type_selected' && 
+      event.properties?.surveyType === 'text'
+    ).length;
+    
+    const imageSurveys = data.filter(event => 
+      event.event_type === 'survey_type_selected' && 
+      event.properties?.surveyType === 'image'
+    ).length;
+    
+    // Recommendations metrics
+    const recommendationsVisits = findEventCount('recommendations_page_visit');
+    const companyInterestClicks = findEventCount('company_interested_click');
+    
+    // Calculate unique sessions that viewed recommendations page
+    const uniqueRecommendationSessions = new Set(
+      data.filter(event => event.event_type === 'recommendations_page_visit' && event.session_id)
+        .map(event => event.session_id)
+    ).size;
+    
+    // Calculate unique sessions that clicked company interest
+    const uniqueCompanyInterestSessions = new Set(
+      data.filter(event => event.event_type === 'company_interested_click' && event.session_id)
+        .map(event => event.session_id)
+    ).size;
+    
+    const companyInterestRate = uniqueRecommendationSessions > 0
+      ? Math.round((uniqueCompanyInterestSessions / uniqueRecommendationSessions) * 100)
+      : 0;
+      
+    const avgCompaniesPerUser = uniqueCompanyInterestSessions > 0
+      ? Math.round((companyInterestClicks / uniqueCompanyInterestSessions) * 10) / 10
+      : 0;
+    
+    const recommendationsMetrics: RecommendationsMetrics = {
+      pageVisits: recommendationsVisits,
+      companyInterestClicks,
+      companyInterestRate: `${companyInterestRate}%`,
+      averageCompaniesPerUser: avgCompaniesPerUser
+    };
+    
+    // Signup metrics
+    const emailSignups = findEventCount('email_signup_click');
+    const googleSignups = findEventCount('google_signup_click');
+    const totalSignups = emailSignups + googleSignups;
+    
+    const signupMetrics: SignupMetrics = {
+      emailSignups,
+      googleSignups,
+      totalSignups
+    };
+    
+    // Legacy metrics for backward compatibility
+    const signupClicks = findEventCount('signup_click');
+    const dialogCloses = findEventCount('dialog_close');
+    
+    const legacyConversionRate = dialogCloses > 0 
       ? Math.round((signupClicks / (signupClicks + dialogCloses)) * 100) 
       : 0;
     
@@ -83,9 +192,19 @@ export async function GET(request: NextRequest) {
       eventCounts: typedEventCounts,
       stats: {
         totalEvents: data.length,
+        // Legacy stats
         signupClicks,
         dialogCloses,
-        conversionRate: `${conversionRate}%`,
+        conversionRate: `${legacyConversionRate}%`,
+        // New stats
+        surveyFunnel,
+        surveyTypes: {
+          text: textSurveys,
+          image: imageSurveys,
+          total: textSurveys + imageSurveys
+        },
+        recommendations: recommendationsMetrics,
+        signups: signupMetrics
       }
     });
   } catch (error) {

@@ -2,7 +2,26 @@
  * Analytics utility functions for tracking user actions
  */
 
-type EventType = 'signup_click' | 'dialog_close' | 'feedback' | 'page_view';
+type EventType = 
+  // Existing events
+  'signup_click' | 
+  'dialog_close' | 
+  'feedback' | 
+  'page_view' |
+  // Home page events
+  'home_page_visit' |
+  'survey_start_click' |
+  // Survey type events
+  'survey_type_selected' |
+  // Survey progress events
+  'survey_step_completed' |
+  'survey_completed' |
+  // Recommendations events
+  'recommendations_page_visit' |
+  'company_interested_click' |
+  // Signup events
+  'email_signup_click' |
+  'google_signup_click';
 
 interface AnalyticsEvent {
   event_type: EventType;
@@ -68,4 +87,90 @@ export const trackSignupClick = async (source: string, properties?: Record<strin
     source,
     ...properties,
   });
+};
+
+/**
+ * Track home page visit
+ */
+export const trackHomePageVisit = async (): Promise<void> => {
+  await trackEvent('home_page_visit');
+};
+
+/**
+ * Track survey start click
+ */
+export const trackSurveyStartClick = async (): Promise<void> => {
+  await trackEvent('survey_start_click');
+};
+
+/**
+ * Track survey type selection
+ */
+export const trackSurveyTypeSelection = async (surveyType: 'text' | 'image'): Promise<void> => {
+  await trackEvent('survey_type_selected', { surveyType });
+};
+
+/**
+ * Track survey step completion
+ */
+export const trackSurveyStepCompleted = async (
+  stepIndex: number, 
+  stepId: string,
+  totalSteps: number
+): Promise<void> => {
+  await trackEvent('survey_step_completed', { 
+    stepIndex,
+    stepId, 
+    totalSteps,
+    progress: Math.round((stepIndex / totalSteps) * 100)
+  });
+};
+
+/**
+ * Track survey completion
+ */
+export const trackSurveyCompleted = async (
+  surveyType: 'text' | 'image',
+  totalSteps: number,
+  timeSpentSeconds: number
+): Promise<void> => {
+  await trackEvent('survey_completed', { 
+    surveyType,
+    totalSteps,
+    timeSpentSeconds
+  });
+};
+
+/**
+ * Track recommendations page visit
+ */
+export const trackRecommendationsPageVisit = async (): Promise<void> => {
+  await trackEvent('recommendations_page_visit');
+};
+
+/**
+ * Track company interested click
+ */
+export const trackCompanyInterestedClick = async (
+  companyId: string,
+  companyName: string
+): Promise<void> => {
+  await trackEvent('company_interested_click', { 
+    companyId,
+    companyName 
+  });
+};
+
+/**
+ * Track email signup click
+ */
+export const trackEmailSignupClick = async (): Promise<void> => {
+  await trackEvent('email_signup_click');
+};
+
+/**
+ * Track Google signup click
+ */
+export const trackGoogleSignupClick = async (): Promise<void> => {
+  await trackEvent('google_signup_click');
 }; 
