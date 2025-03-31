@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 
 export default async function AdminLayout({
   children,
@@ -44,7 +45,8 @@ export default async function AdminLayout({
               </Link> */}
             </nav>
           </div>
-          <div>
+          <div className="flex items-center gap-4">
+            <AdminLogoutButton lng={lng} />
             <Link
               href={`/${lng}`}
               className="text-sm transition-colors hover:text-blue-400"
