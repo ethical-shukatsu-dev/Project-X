@@ -23,26 +23,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  // Fetch previously recommended company names to avoid repetition
-  const { data: previouslyRecommendedCompanies, error: prevRecsError } = await supabase
-    .from("recommendations")
-    .select("company_id");
-
-  if (prevRecsError) {
-    console.error("Error fetching previously recommended companies:", prevRecsError);
-    // Continue with the process, we'll just have less information about previous recommendations
-  }
-
-  // Get the actual company names from the IDs
-  const previousCompanyIds = previouslyRecommendedCompanies?.map(rec => rec.company_id) || [];
-  const { data: previousCompanies } = await supabase
-    .from("companies")
-    .select("name")
-    .in("id", previousCompanyIds.length > 0 ? previousCompanyIds : ['no-companies']);
-  
-  // Extract just the company names
-  const previousCompanyNames = previousCompanies?.map(company => company.name) || [];
-
   // Create a new ReadableStream to stream the recommendations
   const stream = new ReadableStream({
     async start(controller) {
@@ -50,7 +30,6 @@ export async function GET(request: Request) {
         await streamRecommendations(
           userData,
           locale as "en" | "ja",
-          previousCompanyNames,
           async (recommendation) => {
             // Log the recommendation being streamed
             console.log("Streaming recommendation:", recommendation.company.name);

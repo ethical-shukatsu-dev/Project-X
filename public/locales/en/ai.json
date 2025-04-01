@@ -4,10 +4,6 @@
     "submit": "Send"
   },
   "response": {
-    "title": "Finding Your Matches...",
-    "description": "We're analyzing your values and preferences to find the best company matches for you.",
-    "streaming": "Finding company matches for you...",
-    "more_coming": "Finding more companies that match your values...",
     "error": "An error occurred"
   },
   "questionnaire": {

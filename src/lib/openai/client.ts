@@ -70,7 +70,6 @@ const loadAiTranslations = (locale: string) => {
 export async function streamRecommendations(
   userData: UserValues,
   locale: string = 'en',
-  previouslyRecommendedCompanies: string[] = [],
   onRecommendation: (recommendation: RecommendationResult) => Promise<void>
 ): Promise<void> {
   // Load translations for the specified locale
@@ -89,13 +88,6 @@ export async function streamRecommendations(
 英語の単語や文を混在 させないでください。`
      : `\n\nYou are also an expert in image-based value assessment. You can extract values from images selected by users and incorporate them into company recommendations.\n\nYou are also an expert in company data analysis. Consider not just official company information (mission, vision, values) but also employee reviews and actual workplace environment to evaluate the true fit between user values and company values. Provide deep analysis based on company culture and actual workplace environment, not just surface-level matching.\n\nIt is especially important to clearly show the specific connections between the user's values and the company's values. Use a "This company, like you, values..." format and provide detailed explanations with specific examples or evidence.\n\nImportant: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.`);
 
-  // Add previously recommended companies to the prompt
-  const previousCompaniesText = previouslyRecommendedCompanies.length > 0
-    ? locale === 'ja'
-      ? `\n\n以前に推薦された企業（これらの企業のうち最大${RECOMMENDATION_COUNT - 2}社までを再度推薦できますが、少なくとも1-2社は以前に推薦されていない新しい企業を含めてください）:\n${previouslyRecommendedCompanies.join(', ')}\n\n`
-                                                                           : `\n\nPreviously recommended companies (you can recommend up to ${RECOMMENDATION_COUNT - 2} of these again, but please include at least 1-2 new companies that haven't been recommended before):\n${previouslyRecommendedCompanies.join(', ')}\n\n`
-    : '';
-
   // For streaming, we'll modify the prompt to instruct the model to provide recommendations one by one
   const streamingInstructions = locale === 'ja'
     ? "\n\n重要: 企業の推薦を1つずつ提供してください。各企業の完全な情報を提供した後、必ず 「NEXT_RECOMMENDATION」 というテキストマーカーを含めてください。これにより、スムーズなストリーミング体験が確保されます。最後の企業の後には 「END_OF_RECOMMENDATIONS」 というテキストマーカーを含めてください。各企業のJSONはマークダウンなどのフォーマットを使わずに、純粋なJSONのみを提供してください。"
@@ -104,11 +96,10 @@ export async function streamRecommendations(
   const promptTemplate = locale === 'ja' 
     ? `
     ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を
-推薦してください。過去に提示した企業の重複は避けてください。${previouslyRecommendedCompanies.length > 0 ? '下記のリストに示す以前に推薦された企業のうち最大で' +
- (RECOMMENDATION_COUNT - 2) + '社は再推薦可能です が、残りは以前に推薦されていない新しい企業である必要があります。' : ''}
+推薦してください。
          
     重要: すべての回答は必ず日本語のみで提供。企業名や業界名も含め、英語の単語や文を混在させないでくださ
-い。${previousCompaniesText}
+い。
   
     ユーザーの価値観:
     ${JSON.stringify(userData.values)}
@@ -234,17 +225,16 @@ export async function streamRecommendations(
         ...
         // ユーザーの各強みに対する詳細な説明
       },
-      "matching_points": ["総合的なマッチングポイント1（日本語のみ）", "総合的なマッチングポイント2（
-日本語のみ）", ...]
+      "matching_points": ["総合的なマッチングポイント1（日本語のみ）", "総合的なマッチングポイント2（日本語のみ）", ...]
     }
     NEXT_RECOMMENDATION
     
     再度強調しますが、すべての出力は日本語のみで提供してください。JSONの形式は純粋なJSONのみを使用し、バッククォート(\`)や\`\`\`のようなコードブロック記法は使用しないでください。英語の単語や文を混在させないでください。最後の企業の後には "END_OF_RECOMMENDATIONS" を含めてください。
    `
     : `
-    Based on the user's values and strengths, recommend ${RECOMMENDATION_COUNT} real companies in Japan that would be good matches for a university student seeking employment. Include both well-known and lesser-known companies.${previouslyRecommendedCompanies.length > 0 ? ' You can recommend up to ' + (RECOMMENDATION_COUNT - 2) + ' companies from the previously recommended list below, but at least 1-2 must be new companies that haven\'t been recommended before.' : ''}
+    Based on the user's values and strengths, recommend ${RECOMMENDATION_COUNT} real companies in Japan that would be good matches for a university student seeking employment. Include both well-known and lesser-known companies.
 
-    Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.${previousCompaniesText}
+    Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
     
     User values:
     ${JSON.stringify(userData.values)}
@@ -544,8 +534,7 @@ export async function streamRecommendations(
  */
 export async function generateRecommendations(
   userData: UserValues,
-  locale: string = 'en',
-  previouslyRecommendedCompanies: string[] = []
+  locale: string = 'en'
 ): Promise<RecommendationResult[]> {
   // Load translations for the specified locale
   const translations = loadAiTranslations(locale) || loadAiTranslations('en');
@@ -559,18 +548,11 @@ export async function generateRecommendations(
     ? `\n\nあなたは画像ベースの価値観評価の専門家でもあります。ユーザーが選択した画像から価値観を抽出し、それを企業の推薦に活用できます。\n\nまた、企業データの分析の専門家でもあります。企業の公式情報（ミッション、ビジョン、価値観）だけでなく、社員レビューや実際の職場環境も考慮して、ユーザーの価値観と企業の価値観の間の真の適合性を評価してください。表面的なマッチングではなく、企業文化と実際の職場環境に基づいた深い分析を提供してください。\n\n特に重要なのは、ユーザーの価値観と企業の価値観の間の具体的な一致点を明確に示すことです。この企業はあなたと同じように...という形式で、具体的な例や証拠を含めた詳細な説明を提供してください。\n\n重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。`
     : `\n\nYou are also an expert in image-based value assessment. You can extract values from images selected by users and incorporate them into company recommendations.\n\nYou are also an expert in company data analysis. Consider not just official company information (mission, vision, values) but also employee reviews and actual workplace environment to evaluate the true fit between user values and company values. Provide deep analysis based on company culture and actual workplace environment, not just surface-level matching.\n\nIt is especially important to clearly show the specific connections between the user's values and the company's values. Use a "This company, like you, values..." format and provide detailed explanations with specific examples or evidence.\n\nImportant: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.`);
 
-  // Add previously recommended companies to the prompt
-  const previousCompaniesText = previouslyRecommendedCompanies.length > 0
-    ? locale === 'ja'
-      ? `\n\n以前に推薦された企業（これらの企業のうち最大${RECOMMENDATION_COUNT - 2}社までを再度推薦できますが、少なくとも1-2社は以前に推薦されていない新しい企業を含めてください）:\n${previouslyRecommendedCompanies.join(', ')}\n\n`
-      : `\n\nPreviously recommended companies (you can recommend up to ${RECOMMENDATION_COUNT - 2} of these again, but please include at least 1-2 new companies that haven't been recommended before):\n${previouslyRecommendedCompanies.join(', ')}\n\n`
-    : '';
-
   const promptTemplate = locale === 'ja' 
     ? `
-    ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。過去に提示した企業の重複は避けてください。${previouslyRecommendedCompanies.length > 0 ? '下記のリストに示す以前に推薦された企業のうち最大で' + (RECOMMENDATION_COUNT - 2) + '社は再推薦可能ですが、残りは以前に推薦されていない新しい企業である必要があります。' : ''}
+    ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。
 
-    重要: すべての回答は必ず日本語のみで提供。企業名や業界名も含め、英語の単語や文を混在させないでください。${previousCompaniesText}
+    重要: すべての回答は必ず日本語のみで提供。企業名や業界名も含め、英語の単語や文を混在させないでください。
     
     ユーザーの価値観:
     ${JSON.stringify(userData.values)}
@@ -579,7 +561,8 @@ export async function generateRecommendations(
     ユーザーが選択した画像ベースの価値観:
     ${JSON.stringify(userData.selected_image_values)}
     
-    これらの画像ベースの価値観は、ユーザーが視覚的に選択した価値観を表しています。テキストベースの価値観と同様に重要視してください。
+    これらの画像ベースの価値観は、ユーザーが視覚的に選択した価値観を表しています。テキストベースの価値観
+と同様に重要視してください。
     ` : ''}
 
     ${userData.strengths ? `
@@ -709,7 +692,7 @@ export async function generateRecommendations(
     `
     : `
     Based on the user's values and strengths, recommend ${RECOMMENDATION_COUNT} real companies in Japan 
-    that would be good matches for a university student seeking employment. Include both well-known and lesser-known companies.${previouslyRecommendedCompanies.length > 0 ? ' You can recommend up to ' + (RECOMMENDATION_COUNT - 2) + ' companies from the previously recommended list below, but at least 1-2 must be new companies that haven\'t been recommended before.' : ''}
+    that would be good matches for a university student seeking employment. Include both well-known and lesser-known companies.
 
     Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
     
@@ -849,51 +832,51 @@ export async function generateRecommendations(
     
     To emphasize again, all output must be in English only. Do not mix Japanese words or sentences.
     `;
-    
-    try {
-      const response = await openaiClient.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: enhancedSystemPrompt,
-          },
-          {role: "user", content: promptTemplate},
-        ],
-        response_format: {type: "json_object"},
-      });
 
-      const content = response.choices[0].message.content;
-      if (!content) {
-        throw new Error("Empty response from OpenAI");
-      }
+  try {
+    const response = await openaiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: enhancedSystemPrompt,
+        },
+        {role: "user", content: promptTemplate},
+      ],
+      response_format: {type: "json_object"},
+    });
 
-      const parsedResponse = JSON.parse(content) as OpenAIRecommendationResponse;
-      const recommendations = parsedResponse.recommendations;
-
-      // Fetch or create company data for each recommendation
-      const enhancedRecommendations = await Promise.all(
-        recommendations.map(async (rec) => {
-          const company = await getOrCreateCompany(rec.name, rec.industry, locale);
-
-          return {
-            id: rec.id || uuid(),
-            company,
-            matching_points: rec.matching_points,
-            value_match_ratings: rec.value_match_ratings,
-            strength_match_ratings: rec.strength_match_ratings,
-            value_matching_details: rec.value_matching_details,
-            strength_matching_details: rec.strength_matching_details,
-            company_values: rec.company_values
-          };
-        })
-      );
-
-      return enhancedRecommendations;
-    } catch (error) {
-      console.error("Error processing recommendations:", error);
-      throw new Error("Failed to generate recommendations");
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("Empty response from OpenAI");
     }
+
+    const parsedResponse = JSON.parse(content) as OpenAIRecommendationResponse;
+    const recommendations = parsedResponse.recommendations;
+
+    // Fetch or create company data for each recommendation
+    const enhancedRecommendations = await Promise.all(
+      recommendations.map(async (rec) => {
+        const company = await getOrCreateCompany(rec.name, rec.industry, locale);
+
+        return {
+          id: rec.id || uuid(),
+          company,
+          matching_points: rec.matching_points,
+          value_match_ratings: rec.value_match_ratings,
+          strength_match_ratings: rec.strength_match_ratings,
+          value_matching_details: rec.value_matching_details,
+          strength_matching_details: rec.strength_matching_details,
+          company_values: rec.company_values
+        };
+      })
+    );
+
+    return enhancedRecommendations;
+  } catch (error) {
+    console.error("Error processing recommendations:", error);
+    throw new Error("Failed to generate recommendations");
+  }
 }
 
 /**
