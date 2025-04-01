@@ -51,7 +51,7 @@ export default function GoogleSignUpButton({
       <Button
         variant="outline"
         size="lg"
-        className="w-full transition-all border border-white sm:w-auto hover:scale-105 active:scale-95 backdrop-blur-sm"
+        className="w-full text-black transition-all border border-white sm:w-auto hover:scale-105 active:scale-95 backdrop-blur-sm"
         onClick={handleGoogleSignIn}
         disabled={isLoading}
       >
