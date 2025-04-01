@@ -254,26 +254,31 @@ BEGIN
     GROUP BY lower(properties->>'surveyType')
   ) survey_types;
 
-  -- Get step stats
-  SELECT jsonb_object_agg(
-    step,
-    jsonb_build_object('unique_users', unique_users)
+  -- Get step stats - FIXED to use the correct event type 'survey_step_completed' 
+  -- instead of previously incorrect 'survey_step_complete'
+  -- And return as an array of objects instead of a JSON object
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'step_id', step,
+      'unique_users', unique_users
+    )
   )
   INTO step_stats
   FROM (
     SELECT
-      properties->>'step' as step,
+      properties->>'stepId' as step,
       count(distinct user_id) as unique_users
     FROM analytics_events
-    WHERE event_type = 'survey_step_complete'
+    WHERE event_type = 'survey_step_completed'
     AND created_at >= start_date
-    GROUP BY properties->>'step'
+    GROUP BY properties->>'stepId'
   ) step_counts;
 
-  -- Get dropoff stats
-  SELECT jsonb_object_agg(
-    step,
+  -- Get dropoff stats - Using 'survey_step_abandoned' instead of 'survey_step_dropoff'
+  -- Also return as an array for consistency
+  SELECT jsonb_agg(
     jsonb_build_object(
+      'step_id', step,
       'unique_users', unique_users,
       'avg_time_spent', avg_time_spent
     )
@@ -281,13 +286,13 @@ BEGIN
   INTO dropoff_stats
   FROM (
     SELECT
-      properties->>'step' as step,
+      properties->>'stepId' as step,
       count(distinct user_id) as unique_users,
       avg((properties->>'timeSpentSeconds')::numeric) as avg_time_spent
     FROM analytics_events
-    WHERE event_type = 'survey_step_dropoff'
+    WHERE event_type = 'survey_step_abandoned'
     AND created_at >= start_date
-    GROUP BY properties->>'step'
+    GROUP BY properties->>'stepId'
   ) dropoff_counts;
 
   -- Get anonymous user stats
