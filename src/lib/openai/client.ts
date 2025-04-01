@@ -550,7 +550,7 @@ export async function generateRecommendations(
 
   const promptTemplate = locale === 'ja' 
     ? `
-    ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。
+    ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。様々な企業を含めるようにしてください。
 
     重要: すべての回答は必ず日本語のみで提供。企業名や業界名も含め、英語の単語や文を混在させないでください。
     
