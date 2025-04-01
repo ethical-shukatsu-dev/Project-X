@@ -220,7 +220,8 @@
       "missing_user_id": "ユーザーIDが必要です",
       "fetch_failed": "推薦の取得に失敗しました",
       "feedback_failed": "フィードバックの送信に失敗しました",
-      "try_again": "再試行"
+      "try_again": "再試行",
+      "try_again_for_more": "もっと試してみる"
     }
   },
   "cta": {

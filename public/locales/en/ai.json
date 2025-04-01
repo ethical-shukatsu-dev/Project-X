@@ -220,7 +220,8 @@
       "missing_user_id": "User ID is required",
       "fetch_failed": "Failed to fetch recommendations",
       "feedback_failed": "Failed to submit feedback",
-      "try_again": "Try Again"
+      "try_again": "Try Again",
+      "try_again_for_more": "Get More Recommendations"
     }
   },
   "cta": {
