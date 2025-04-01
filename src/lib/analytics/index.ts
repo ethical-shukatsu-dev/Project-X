@@ -33,6 +33,31 @@ interface AnalyticsEvent {
   properties?: Record<string, unknown>;
 }
 
+// Get or create a user ID with a 30-day expiration
+const getUserId = (): string => {
+  if (typeof window === 'undefined') return '';
+  
+  // Check for existing user ID in cookie
+  const userIdCookie = document.cookie.split(';')
+    .find(item => item.trim().startsWith('analytics_user_id='));
+  
+  if (userIdCookie) {
+    return userIdCookie.split('=')[1];
+  }
+  
+  // Create new user ID if none exists
+  const userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  
+  // Set cookie to expire in 30 days
+  const expires = new Date();
+  expires.setTime(expires.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+  
+  // Set secure cookie with SameSite policy
+  document.cookie = `analytics_user_id=${userId}; expires=${expires.toUTCString()}; path=/; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
+  
+  return userId;
+};
+
 // Get or create a session ID
 const getSessionId = (): string => {
   if (typeof window === 'undefined') return '';
@@ -61,8 +86,9 @@ export const trackEvent = async (
   properties?: Record<string, unknown>
 ): Promise<void> => {
   try {
-    // Get session ID
+    // Get session ID and user ID
     const sessionId = getSessionId();
+    const userId = getUserId();
     
     // Get anonymous status
     const isAnonymous = getAnonymousStatus();
@@ -72,6 +98,7 @@ export const trackEvent = async (
       event_type: eventType,
       timestamp: Date.now(),
       session_id: sessionId,
+      user_id: userId,
       properties: {
         ...properties,
         isAnonymous
@@ -109,7 +136,26 @@ export const trackSignupClick = async (source: string, properties?: Record<strin
  * Track home page visit
  */
 export const trackHomePageVisit = async (): Promise<void> => {
-  await trackEvent('home_page_visit');
+  // Check if we're in the browser
+  if (typeof window === 'undefined') return;
+
+  // Get the user ID (will create one if it doesn't exist)
+  const userId = getUserId();
+  
+  // Check for visit cookie
+  const hasVisitedCookie = document.cookie.split(';').some(item => item.trim().startsWith('home_page_visited_'));
+  
+  // Only track if this is their first visit
+  if (!hasVisitedCookie) {
+    await trackEvent('home_page_visit');
+    
+    // Set cookie to expire in 24 hours for daily unique tracking
+    const expires = new Date();
+    expires.setTime(expires.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+    
+    // Set secure cookie with SameSite policy
+    document.cookie = `home_page_visited_${userId}=true; expires=${expires.toUTCString()}; path=/; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
+  }
 };
 
 /**
