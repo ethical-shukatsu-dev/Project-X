@@ -137,7 +137,7 @@ export async function streamRecommendations(
     マッチングポイントの悪い例:
     - 「この企業はイノベーションを重視しています」（ユーザーとの具体的な関連性が示されていない）
     - 「良い職場環境を提供しています」（具体性に欠ける）
-    - 「ユーザーの価値観に合っています」（具体的な一致点が示されていない）
+    - 「あなたの価値観に合っています」（具体的な一致点が示されていない）
     
     必ず以下の企業規模をすべて1社を含めた多様な企業を推薦してください：
     - 「スタートアップ（50人未満）」: 少なくとも1社
@@ -591,7 +591,7 @@ export async function generateRecommendations(
     マッチングポイントの悪い例:
     - 「この企業はイノベーションを重視しています」（ユーザーとの具体的な関連性が示されていない）
     - 「良い職場環境を提供しています」（具体性に欠ける）
-    - 「ユーザーの価値観に合っています」（具体的な一致点が示されていない）
+    - 「あなたの価値観に合っています」（具体的な一致点が示されていない）
     
     必ず以下の企業規模をすべて1社を含めた多様な企業を推薦してください：
     - 「スタートアップ（50人未満）」: 少なくとも1社
@@ -733,7 +733,7 @@ export async function generateRecommendations(
     Poor examples of matching points:
     - "The company values innovation" (doesn't show specific connection to user)
     - "Provides a good work environment" (lacks specificity)
-    - "Aligns with user values" (doesn't identify specific matching points)
+    - "Aligns with your values" (doesn't identify specific matching points)
     
     You must include companies of all the following sizes in your recommendations:
     - Startup: at least 1 company (use the exact text "Startup (less than 50 employees)" for company size)
