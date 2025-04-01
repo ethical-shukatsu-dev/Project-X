@@ -77,10 +77,10 @@ export default function CompanyCard({
   const getInitials = (name: string) => {
     // Remove Japanese corporation designator "株式会社" before getting initials
     const cleanName = name.replace(/株式会社/g, "").trim();
-    
+
     // If the name is empty after removing "株式会社", use the original name
     const nameToUse = cleanName || name;
-    
+
     return nameToUse
       .split(" ")
       .map((n) => n[0])
@@ -209,13 +209,13 @@ export default function CompanyCard({
       <Card className={cardClasses}>
         <CardHeader className="flex flex-row items-center gap-2 px-3 sm:gap-4 ">
           {!shouldAnonymize ? (
-            <Link href={company.site_url || "/"} target="_blank">
-              <Avatar
-                className={`h-10 w-10 sm:h-14 sm:w-14 ring-1 ring-white ${
-                  wasAnonymous && feedback ? "reveal-avatar" : ""
-                }`}
-              >
-                {company.logo_url && !logoError ? (
+            <Avatar
+              className={`h-10 w-10 sm:h-14 sm:w-14 ring-1 ring-white ${
+                wasAnonymous && feedback ? "reveal-avatar" : ""
+              }`}
+            >
+              {company.logo_url && !logoError ? (
+                <Link href={company.site_url || "/"} target="_blank">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -230,10 +230,10 @@ export default function CompanyCard({
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                ) : null}
-                <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
-              </Avatar>
-            </Link>
+                </Link>
+              ) : null}
+              <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
+            </Avatar>
           ) : (
             <Avatar className="relative h-14 w-14">
               <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
