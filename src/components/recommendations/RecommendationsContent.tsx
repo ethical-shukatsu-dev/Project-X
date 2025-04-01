@@ -209,7 +209,7 @@ export default function RecommendationsContent({
         
         // Set up fetch for streaming response
         const response = await fetch(
-          `/api/recommendations/stream?userId=${userId}&locale=${lng}`
+          `/api/recommendations/stream?userId=${userId}&locale=${lng}&refresh=true`
         );
 
         if (!response.ok) {

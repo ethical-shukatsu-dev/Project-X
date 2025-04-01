@@ -1,1 +1,1 @@
-export const RECOMMENDATION_COUNT = 5
+export const RECOMMENDATION_COUNT = 6
