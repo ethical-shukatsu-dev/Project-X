@@ -8,7 +8,6 @@ import {
   ABTestComparison,
 } from "./DashboardCards";
 import {SurveyStepsFunnel} from "./SurveyStepsFunnel";
-import {DropoffAnalysis} from "./DropoffAnalysis";
 import {useAnalytics, TimeRange} from "@/hooks/useAnalytics";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Button} from "@/components/ui/button";
@@ -43,6 +42,7 @@ export function AnalyticsDashboard() {
     dropoffAnalysis: false,
     anonymousUsers: false,
     abTestComparison: false,
+    dialogCloses: false,
     all: false,
   });
 
@@ -98,9 +98,12 @@ export function AnalyticsDashboard() {
     totalEvents: 0,
     signupClicks: 0,
     dialogCloses: 0,
+    uniqueDialogCloses: 0,
+    dialogCloseConversionRate: "0%",
     conversionRate: "0%",
     surveyFunnel: {
       visits: 0,
+      uniqueUsers: 0,
       started: 0,
       completed: 0,
       startRate: "0%",
@@ -117,6 +120,7 @@ export function AnalyticsDashboard() {
       companyInterestClicks: 0,
       companyInterestRate: "0%",
       averageCompaniesPerUser: 0,
+      uniqueCompanyInterests: 0,
     },
     signups: {
       emailSignups: 0,
@@ -124,7 +128,7 @@ export function AnalyticsDashboard() {
       totalSignups: 0,
       uniqueEmailSignups: 0,
       uniqueGoogleSignups: 0,
-      uniqueTotalSignups: 0
+      uniqueTotalSignups: 0,
     },
     surveySteps: [],
     dropoffAnalysis: [],
@@ -132,26 +136,26 @@ export function AnalyticsDashboard() {
       total: 0,
       percentage: "0%",
       conversionRate: "0%",
-      completionRate: "0%"
+      completionRate: "0%",
     },
     abTestComparison: {
       anonymous: {
         total: 0,
         percentage: "0%",
         completionRate: "0%",
-        conversionRate: "0%"
+        conversionRate: "0%",
       },
       nonAnonymous: {
         total: 0,
         percentage: "0%",
         completionRate: "0%",
-        conversionRate: "0%"
+        conversionRate: "0%",
       },
       difference: {
         completionRate: "0%",
-        conversionRate: "0%"
-      }
-    }
+        conversionRate: "0%",
+      },
+    },
   };
 
   // Use the data if available, otherwise use default values
@@ -159,21 +163,66 @@ export function AnalyticsDashboard() {
 
   // Process survey step data for display
   const surveySteps = stats.surveySteps || [];
-  const stepsWithLabels = surveySteps.map(step => {
-    // Parse the step ID to create a readable label
-    // Assuming step IDs are like "work_values", "corporate_culture", etc.
-    const stepName = step.id.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-    
-    return {
+
+  // Define the question order to match the order in ValuesQuestionnaire.tsx
+  const questionOrder = [
+    "work_values",
+    "corporate_culture",
+    "leadership",
+    "workplace_environment",
+    "humanity",
+    "interpersonal_skills",
+    "cognitive_abilities",
+    "self_growth",
+    "job_performance",
+    "mental_strength",
+  ];
+
+  // Map and sort the steps based on the defined order
+  const stepsWithLabels = surveySteps
+    .map((step) => {
+      // Parse the step ID to create a readable label
+      const stepName = step.id
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+
+      // Find the index in the question order array (or default to a high number if not found)
+      const orderIndex = questionOrder.indexOf(step.id);
+
+      return {
+        ...step,
+        label: stepName,
+        orderIndex: orderIndex >= 0 ? orderIndex : 999,
+      };
+    })
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map((step, index) => ({
       ...step,
-      label: stepName
-    };
-  });
+      // Add the step number to the label
+      label: `${index + 1}. ${step.label}`,
+    }));
 
   // Get dropoff analysis data
-  const dropoffData = stats.dropoffAnalysis || [];
+  // const dropoffData = stats.dropoffAnalysis || [];
+
+  // Apply the same ordering to dropoff analysis data
+  // const orderedDropoffData = dropoffData
+  //   .map((item) => {
+  //     // Find the index in the question order array (or default to a high number if not found)
+  //     const orderIndex = questionOrder.indexOf(item.id);
+
+  //     return {
+  //       ...item,
+  //       orderIndex: orderIndex >= 0 ? orderIndex : 999,
+  //     };
+  //   })
+  //   .sort((a, b) => a.orderIndex - b.orderIndex)
+  //   .map((item, index) => ({
+  //     ...item,
+  //     // Add the step number to the label
+  //     label: `${index + 1}. ${item.label}`,
+  //   }));
 
   // Render individual metric cards with conditionally showing skeletons when refreshing
   return (
@@ -221,8 +270,8 @@ export function AnalyticsDashboard() {
         ) : (
           <MetricCard
             title="Unique Visitors"
-            value={stats.totalEvents}
-            description="Total unique visitors"
+            value={stats.surveyFunnel.uniqueUsers}
+            description="Total unique users"
             onRefresh={() => refreshMetric("visitors")}
           />
         )}
@@ -264,6 +313,81 @@ export function AnalyticsDashboard() {
         )}
       </div>
 
+      {/* Unique Dialog Closes Card */}
+      {refreshingStates.dialogCloses ? (
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-32" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-48 mb-2" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-sm font-medium">
+                Signup Dialog Metrics
+              </CardTitle>
+              <RefreshButton onClick={() => refreshMetric("dialogCloses")} />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Dialog Closes</h3>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Total</span>
+                  <span className="font-medium">
+                    {stats.dialogCloses}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Unique</span>
+                  <span className="font-medium">
+                    {stats.uniqueDialogCloses}
+                  </span>
+                </div>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Conversion Rate</h3>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Rate</span>
+                  <span className="font-medium">
+                    {stats.dialogCloseConversionRate}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">From Unique Visitors</span>
+                  <span className="text-xs text-muted-foreground">
+                    {stats.uniqueDialogCloses} / {stats.surveyFunnel.uniqueUsers}
+                  </span>
+                </div>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Impact</h3>
+                <div className="text-xs text-muted-foreground mb-2">
+                  Users who close the signup dialog without completing registration
+                </div>
+                {stats.dialogCloseConversionRate}
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary"
+                    style={{ 
+                      width: `${Math.min(100, parseInt(stats.dialogCloseConversionRate))}%` 
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Conversion Funnel */}
         {refreshingStates.surveyFunnel ? (
@@ -272,9 +396,18 @@ export function AnalyticsDashboard() {
           <ConversionFunnel
             title="Questionnaire Funnel"
             steps={[
-              {name: "Visits", value: stats.surveyFunnel.visits},
-              {name: "Started", value: stats.surveyFunnel.started},
-              {name: "Completed", value: stats.surveyFunnel.completed},
+              {
+                name: "Visits",
+                value: stats.surveyFunnel.uniqueUsers,
+              },
+              {
+                name: "Started",
+                value: stats.surveyFunnel.started,
+              },
+              {
+                name: "Completed",
+                value: stats.surveyFunnel.completed,
+              },
             ]}
             rates={[
               {name: "Start Rate", value: stats.surveyFunnel.startRate},
@@ -305,50 +438,6 @@ export function AnalyticsDashboard() {
             onRefresh={() => refreshMetric("surveyTypes")}
           />
         )}
-        
-        {/* Anonymous Users Card */}
-        {refreshingStates.anonymousUsers ? (
-          <MetricCardSkeleton />
-        ) : (
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-sm font-medium">
-                  Anonymous Users (A/B Test)
-                </CardTitle>
-                <RefreshButton onClick={() => refreshMetric("anonymousUsers")} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Total Users</span>
-                  <span className="font-medium">
-                    {stats.anonymousUsers.total}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Percentage</span>
-                  <span className="font-medium">
-                    {stats.anonymousUsers.percentage}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Completion Rate</span>
-                  <span className="font-medium">
-                    {stats.anonymousUsers.completionRate}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Conversion Rate</span>
-                  <span className="font-medium">
-                    {stats.anonymousUsers.conversionRate}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       {/* A/B Test Comparison */}
@@ -359,27 +448,31 @@ export function AnalyticsDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {Array(3).fill(0).map((_, i) => (
-                <Card key={i} className="bg-muted/50">
-                  <CardHeader>
-                    <Skeleton className="h-4 w-32 mb-1" />
-                    <Skeleton className="h-3 w-24" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {Array(2).fill(0).map((_, j) => (
-                        <div key={j}>
-                          <div className="flex justify-between mb-1">
-                            <Skeleton className="h-3 w-24" />
-                            <Skeleton className="h-3 w-12" />
-                          </div>
-                          <Skeleton className="h-2 w-full" />
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {Array(3)
+                .fill(0)
+                .map((_, i) => (
+                  <Card key={i} className="bg-muted/50">
+                    <CardHeader>
+                      <Skeleton className="h-4 w-32 mb-1" />
+                      <Skeleton className="h-3 w-24" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {Array(2)
+                          .fill(0)
+                          .map((_, j) => (
+                            <div key={j}>
+                              <div className="flex justify-between mb-1">
+                                <Skeleton className="h-3 w-24" />
+                                <Skeleton className="h-3 w-12" />
+                              </div>
+                              <Skeleton className="h-2 w-full" />
+                            </div>
+                          ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </CardContent>
         </Card>
@@ -399,7 +492,9 @@ export function AnalyticsDashboard() {
         <Card className="mt-4">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-sm font-medium">Unique Signup Clicks</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Unique Signup Clicks
+              </CardTitle>
               <RefreshButton onClick={() => refreshMetric("uniqueSignups")} />
             </div>
           </CardHeader>
@@ -409,33 +504,45 @@ export function AnalyticsDashboard() {
                 <h3 className="text-sm font-medium mb-2">Email Signups</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">{stats.signups.emailSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.emailSignups}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">{stats.signups.uniqueEmailSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.uniqueEmailSignups}
+                  </span>
                 </div>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <h3 className="text-sm font-medium mb-2">Google Signups</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">{stats.signups.googleSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.googleSignups}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">{stats.signups.uniqueGoogleSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.uniqueGoogleSignups}
+                  </span>
                 </div>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <h3 className="text-sm font-medium mb-2">Total Signups</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">{stats.signups.totalSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.totalSignups}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">{stats.signups.uniqueTotalSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.uniqueTotalSignups}
+                  </span>
                 </div>
               </div>
             </div>
@@ -456,16 +563,16 @@ export function AnalyticsDashboard() {
       )}
 
       {/* Dropoff Analysis */}
-      {refreshingStates.dropoffAnalysis ? (
+      {/* {refreshingStates.dropoffAnalysis ? (
         <DropoffAnalysisSkeleton />
       ) : (
         <DropoffAnalysis
           title="Drop-off Analysis"
           description="Detailed analysis of where users abandon the survey"
-          data={dropoffData}
+          data={orderedDropoffData}
           onRefresh={() => refreshMetric("dropoffAnalysis")}
         />
-      )}
+      )} */}
 
       {/* Recommendations Metrics */}
       {refreshingStates.recommendations ? (
@@ -495,7 +602,15 @@ export function AnalyticsDashboard() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Interest Rate</span>
+                <span className="text-sm">Interest Clicks Unique Users</span>
+                <span className="font-medium">
+                  {stats.recommendations.uniqueCompanyInterests}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">
+                  Rate of Users who Clicked Interest
+                </span>
                 <span className="font-medium">
                   {stats.recommendations.companyInterestRate}
                 </span>
@@ -606,7 +721,7 @@ function DropoffAnalysisSkeleton() {
       <CardContent>
         <Skeleton className="h-8 w-96 mb-4" />
         <Skeleton className="h-[300px] w-full mb-6" />
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {Array(3)
             .fill(0)
@@ -655,6 +770,34 @@ function DashboardSkeleton() {
           ))}
       </div>
 
+      {/* Dialog Closes Card Skeleton */}
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-48" />
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="p-4 bg-muted/50 rounded-lg">
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ConversionFunnelSkeleton />
 
@@ -671,7 +814,7 @@ function DashboardSkeleton() {
             </Card>
           ))}
       </div>
-      
+
       {/* A/B Test Comparison Skeleton */}
       <Card className="col-span-1 md:col-span-3">
         <CardHeader>
@@ -679,34 +822,38 @@ function DashboardSkeleton() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {Array(3).fill(0).map((_, i) => (
-              <Card key={i} className="bg-muted/50">
-                <CardHeader>
-                  <Skeleton className="h-4 w-32 mb-1" />
-                  <Skeleton className="h-3 w-24" />
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {Array(2).fill(0).map((_, j) => (
-                      <div key={j}>
-                        <div className="flex justify-between mb-1">
-                          <Skeleton className="h-3 w-24" />
-                          <Skeleton className="h-3 w-12" />
-                        </div>
-                        <Skeleton className="h-2 w-full" />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <Card key={i} className="bg-muted/50">
+                  <CardHeader>
+                    <Skeleton className="h-4 w-32 mb-1" />
+                    <Skeleton className="h-3 w-24" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {Array(2)
+                        .fill(0)
+                        .map((_, j) => (
+                          <div key={j}>
+                            <div className="flex justify-between mb-1">
+                              <Skeleton className="h-3 w-24" />
+                              <Skeleton className="h-3 w-12" />
+                            </div>
+                            <Skeleton className="h-2 w-full" />
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
           </div>
         </CardContent>
       </Card>
-      
+
       <SurveyStepsFunnelSkeleton />
       <DropoffAnalysisSkeleton />
-      
+
       {/* Anonymous Users Card Skeleton */}
       <Card>
         <CardHeader>

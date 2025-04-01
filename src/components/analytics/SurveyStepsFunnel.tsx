@@ -47,7 +47,7 @@ export function SurveyStepsFunnel({
                   <span className="text-sm font-medium">{step.label}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">
-                      {step.count}
+                      {step.count}(C) / {totalStarts}(S)
                     </span>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary">
                       {displayPercentage}
