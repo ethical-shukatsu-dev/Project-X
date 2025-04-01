@@ -8,7 +8,6 @@ import {
   ABTestComparison,
 } from "./DashboardCards";
 import {SurveyStepsFunnel} from "./SurveyStepsFunnel";
-import {DropoffAnalysis} from "./DropoffAnalysis";
 import {useAnalytics, TimeRange} from "@/hooks/useAnalytics";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Button} from "@/components/ui/button";
@@ -106,7 +105,7 @@ export function AnalyticsDashboard() {
       completed: 0,
       startRate: "0%",
       completionRate: "0%",
-      overallConversionRate: "0%"
+      overallConversionRate: "0%",
     },
     surveyTypes: {
       text: 0,
@@ -126,7 +125,7 @@ export function AnalyticsDashboard() {
       totalSignups: 0,
       uniqueEmailSignups: 0,
       uniqueGoogleSignups: 0,
-      uniqueTotalSignups: 0
+      uniqueTotalSignups: 0,
     },
     surveySteps: [],
     dropoffAnalysis: [],
@@ -134,26 +133,26 @@ export function AnalyticsDashboard() {
       total: 0,
       percentage: "0%",
       conversionRate: "0%",
-      completionRate: "0%"
+      completionRate: "0%",
     },
     abTestComparison: {
       anonymous: {
         total: 0,
         percentage: "0%",
         completionRate: "0%",
-        conversionRate: "0%"
+        conversionRate: "0%",
       },
       nonAnonymous: {
         total: 0,
         percentage: "0%",
         completionRate: "0%",
-        conversionRate: "0%"
+        conversionRate: "0%",
       },
       difference: {
         completionRate: "0%",
-        conversionRate: "0%"
-      }
-    }
+        conversionRate: "0%",
+      },
+    },
   };
 
   // Use the data if available, otherwise use default values
@@ -161,11 +160,11 @@ export function AnalyticsDashboard() {
 
   // Process survey step data for display
   const surveySteps = stats.surveySteps || [];
-  
+
   // Define the question order to match the order in ValuesQuestionnaire.tsx
   const questionOrder = [
     "work_values",
-    "corporate_culture", 
+    "corporate_culture",
     "leadership",
     "workplace_environment",
     "humanity",
@@ -173,53 +172,54 @@ export function AnalyticsDashboard() {
     "cognitive_abilities",
     "self_growth",
     "job_performance",
-    "mental_strength"
+    "mental_strength",
   ];
-  
+
   // Map and sort the steps based on the defined order
   const stepsWithLabels = surveySteps
-    .map(step => {
+    .map((step) => {
       // Parse the step ID to create a readable label
-      const stepName = step.id.split('_').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      
+      const stepName = step.id
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+
       // Find the index in the question order array (or default to a high number if not found)
       const orderIndex = questionOrder.indexOf(step.id);
-      
+
       return {
         ...step,
         label: stepName,
-        orderIndex: orderIndex >= 0 ? orderIndex : 999
+        orderIndex: orderIndex >= 0 ? orderIndex : 999,
       };
     })
     .sort((a, b) => a.orderIndex - b.orderIndex)
     .map((step, index) => ({
       ...step,
       // Add the step number to the label
-      label: `${index + 1}. ${step.label}`
+      label: `${index + 1}. ${step.label}`,
     }));
 
   // Get dropoff analysis data
-  const dropoffData = stats.dropoffAnalysis || [];
+  // const dropoffData = stats.dropoffAnalysis || [];
 
   // Apply the same ordering to dropoff analysis data
-  const orderedDropoffData = dropoffData
-    .map(item => {
-      // Find the index in the question order array (or default to a high number if not found)
-      const orderIndex = questionOrder.indexOf(item.id);
-      
-      return {
-        ...item,
-        orderIndex: orderIndex >= 0 ? orderIndex : 999
-      };
-    })
-    .sort((a, b) => a.orderIndex - b.orderIndex)
-    .map((item, index) => ({
-      ...item,
-      // Add the step number to the label
-      label: `${index + 1}. ${item.label}`
-    }));
+  // const orderedDropoffData = dropoffData
+  //   .map((item) => {
+  //     // Find the index in the question order array (or default to a high number if not found)
+  //     const orderIndex = questionOrder.indexOf(item.id);
+
+  //     return {
+  //       ...item,
+  //       orderIndex: orderIndex >= 0 ? orderIndex : 999,
+  //     };
+  //   })
+  //   .sort((a, b) => a.orderIndex - b.orderIndex)
+  //   .map((item, index) => ({
+  //     ...item,
+  //     // Add the step number to the label
+  //     label: `${index + 1}. ${item.label}`,
+  //   }));
 
   // Render individual metric cards with conditionally showing skeletons when refreshing
   return (
@@ -320,21 +320,27 @@ export function AnalyticsDashboard() {
             steps={[
               {
                 name: "Visits",
-                value: stats.surveyFunnel.uniqueUsers
+                value: stats.surveyFunnel.uniqueUsers,
               },
               {
                 name: "Started",
-                value: stats.surveyFunnel.started
+                value: stats.surveyFunnel.started,
               },
               {
                 name: "Completed",
-                value: stats.surveyFunnel.completed
+                value: stats.surveyFunnel.completed,
               },
             ]}
             rates={[
               {name: "Start Rate", value: stats.surveyFunnel.startRate},
-              {name: "Completion Rate", value: stats.surveyFunnel.completionRate},
-              {name: "Overall", value: stats.surveyFunnel.overallConversionRate},
+              {
+                name: "Completion Rate",
+                value: stats.surveyFunnel.completionRate,
+              },
+              {
+                name: "Overall",
+                value: stats.surveyFunnel.overallConversionRate,
+              },
             ]}
             onRefresh={() => refreshMetric("surveyFunnel")}
           />
@@ -364,27 +370,31 @@ export function AnalyticsDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {Array(3).fill(0).map((_, i) => (
-                <Card key={i} className="bg-muted/50">
-                  <CardHeader>
-                    <Skeleton className="h-4 w-32 mb-1" />
-                    <Skeleton className="h-3 w-24" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {Array(2).fill(0).map((_, j) => (
-                        <div key={j}>
-                          <div className="flex justify-between mb-1">
-                            <Skeleton className="h-3 w-24" />
-                            <Skeleton className="h-3 w-12" />
-                          </div>
-                          <Skeleton className="h-2 w-full" />
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {Array(3)
+                .fill(0)
+                .map((_, i) => (
+                  <Card key={i} className="bg-muted/50">
+                    <CardHeader>
+                      <Skeleton className="h-4 w-32 mb-1" />
+                      <Skeleton className="h-3 w-24" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {Array(2)
+                          .fill(0)
+                          .map((_, j) => (
+                            <div key={j}>
+                              <div className="flex justify-between mb-1">
+                                <Skeleton className="h-3 w-24" />
+                                <Skeleton className="h-3 w-12" />
+                              </div>
+                              <Skeleton className="h-2 w-full" />
+                            </div>
+                          ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </CardContent>
         </Card>
@@ -404,7 +414,9 @@ export function AnalyticsDashboard() {
         <Card className="mt-4">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-sm font-medium">Unique Signup Clicks</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Unique Signup Clicks
+              </CardTitle>
               <RefreshButton onClick={() => refreshMetric("uniqueSignups")} />
             </div>
           </CardHeader>
@@ -414,33 +426,45 @@ export function AnalyticsDashboard() {
                 <h3 className="text-sm font-medium mb-2">Email Signups</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">{stats.signups.emailSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.emailSignups}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">{stats.signups.uniqueEmailSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.uniqueEmailSignups}
+                  </span>
                 </div>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <h3 className="text-sm font-medium mb-2">Google Signups</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">{stats.signups.googleSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.googleSignups}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">{stats.signups.uniqueGoogleSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.uniqueGoogleSignups}
+                  </span>
                 </div>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <h3 className="text-sm font-medium mb-2">Total Signups</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">{stats.signups.totalSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.totalSignups}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">{stats.signups.uniqueTotalSignups}</span>
+                  <span className="font-medium">
+                    {stats.signups.uniqueTotalSignups}
+                  </span>
                 </div>
               </div>
             </div>
@@ -461,7 +485,7 @@ export function AnalyticsDashboard() {
       )}
 
       {/* Dropoff Analysis */}
-      {refreshingStates.dropoffAnalysis ? (
+      {/* {refreshingStates.dropoffAnalysis ? (
         <DropoffAnalysisSkeleton />
       ) : (
         <DropoffAnalysis
@@ -470,7 +494,7 @@ export function AnalyticsDashboard() {
           data={orderedDropoffData}
           onRefresh={() => refreshMetric("dropoffAnalysis")}
         />
-      )}
+      )} */}
 
       {/* Recommendations Metrics */}
       {refreshingStates.recommendations ? (
@@ -506,7 +530,9 @@ export function AnalyticsDashboard() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Rate of Users who Clicked Interest</span>
+                <span className="text-sm">
+                  Rate of Users who Clicked Interest
+                </span>
                 <span className="font-medium">
                   {stats.recommendations.companyInterestRate}
                 </span>
@@ -617,7 +643,7 @@ function DropoffAnalysisSkeleton() {
       <CardContent>
         <Skeleton className="h-8 w-96 mb-4" />
         <Skeleton className="h-[300px] w-full mb-6" />
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {Array(3)
             .fill(0)
@@ -682,7 +708,7 @@ function DashboardSkeleton() {
             </Card>
           ))}
       </div>
-      
+
       {/* A/B Test Comparison Skeleton */}
       <Card className="col-span-1 md:col-span-3">
         <CardHeader>
@@ -690,34 +716,38 @@ function DashboardSkeleton() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {Array(3).fill(0).map((_, i) => (
-              <Card key={i} className="bg-muted/50">
-                <CardHeader>
-                  <Skeleton className="h-4 w-32 mb-1" />
-                  <Skeleton className="h-3 w-24" />
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {Array(2).fill(0).map((_, j) => (
-                      <div key={j}>
-                        <div className="flex justify-between mb-1">
-                          <Skeleton className="h-3 w-24" />
-                          <Skeleton className="h-3 w-12" />
-                        </div>
-                        <Skeleton className="h-2 w-full" />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <Card key={i} className="bg-muted/50">
+                  <CardHeader>
+                    <Skeleton className="h-4 w-32 mb-1" />
+                    <Skeleton className="h-3 w-24" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {Array(2)
+                        .fill(0)
+                        .map((_, j) => (
+                          <div key={j}>
+                            <div className="flex justify-between mb-1">
+                              <Skeleton className="h-3 w-24" />
+                              <Skeleton className="h-3 w-12" />
+                            </div>
+                            <Skeleton className="h-2 w-full" />
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
           </div>
         </CardContent>
       </Card>
-      
+
       <SurveyStepsFunnelSkeleton />
       <DropoffAnalysisSkeleton />
-      
+
       {/* Anonymous Users Card Skeleton */}
       <Card>
         <CardHeader>

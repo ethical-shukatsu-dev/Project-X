@@ -217,8 +217,6 @@ export async function GET(request: NextRequest) {
         abandoned: step.unique_users,
         completionRate: `${Math.round((uniqueCounts?.survey_steps?.find((s: SurveyStep) => s.step_id === step.step_id)?.unique_users || 0) / 
                                     (step.unique_users + (uniqueCounts?.survey_steps?.find((s: SurveyStep) => s.step_id === step.step_id)?.unique_users || 0)) * 100)}%`,
-        abandonmentRate: `${Math.round(step.unique_users / 
-                                    (step.unique_users + (uniqueCounts?.survey_steps?.find((s: SurveyStep) => s.step_id === step.step_id)?.unique_users || 0)) * 100)}%`,
         avgTimeSpentSeconds: Math.round(step.avg_time_spent || 0),
         stepIndex: step.stepIndex || 0
       }))

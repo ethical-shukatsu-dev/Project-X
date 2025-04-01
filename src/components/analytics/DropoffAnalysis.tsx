@@ -20,7 +20,6 @@ interface StepDropoffData {
   completed: number;
   abandoned: number;
   completionRate: string;
-  abandonmentRate: string;
   avgTimeSpentSeconds: number;
 }
 
@@ -35,9 +34,7 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
   // Prepare chart data
   const completionChart = data.map(step => ({
     step: step.label,
-    Completed: step.completed,
-    Abandoned: step.abandoned,
-  }));
+    Completed: step.completed  }));
 
   const timeSpentChart = data.map(step => ({
     step: step.label,
@@ -91,7 +88,6 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
                   />
                   <Legend />
                   <Bar dataKey="Completed" fill="#22c55e" />
-                  <Bar dataKey="Abandoned" fill="#ef4444" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -109,14 +105,8 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
                       <div className="text-muted-foreground">Completed:</div>
                       <div className="font-medium text-right">{step.completed}</div>
                       
-                      <div className="text-muted-foreground">Abandoned:</div>
-                      <div className="font-medium text-right">{step.abandoned}</div>
-                      
                       <div className="text-muted-foreground">Completion:</div>
                       <div className="font-medium text-right text-green-500">{step.completionRate}</div>
-                      
-                      <div className="text-muted-foreground">Abandonment:</div>
-                      <div className="font-medium text-right text-red-500">{step.abandonmentRate}</div>
                     </div>
                   </CardContent>
                 </Card>
