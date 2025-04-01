@@ -19,10 +19,13 @@ export default function GoogleSignUpButton({
     try {
       // Show loading indicator
       setIsLoading(true);
-      
+
       // Track click event
       if (onClick) {
         onClick();
+        // Initiate Google sign-in
+        await initiateGoogleSignIn();
+
         // If custom onClick is provided, we hide the loader after it's done
         setIsLoading(false);
       } else {
@@ -31,12 +34,11 @@ export default function GoogleSignUpButton({
           method: "google",
           source: "google_button",
         });
-        
+
         // Initiate Google sign-in
         await initiateGoogleSignIn();
-        
-        // Note: we don't set isLoading to false here because the page will redirect on success
-        // If there's an error, it will be caught by the catch block and the loader will be hidden
+
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error with Google sign-in:", error);
@@ -49,7 +51,7 @@ export default function GoogleSignUpButton({
       <Button
         variant="outline"
         size="lg"
-        className="w-full transition-all border border-white sm:w-auto hover:scale-105 active:scale-95 backdrop-blur-sm"
+        className="w-full text-black transition-all border border-white sm:w-auto hover:scale-105 active:scale-95 backdrop-blur-sm"
         onClick={handleGoogleSignIn}
         disabled={isLoading}
       >

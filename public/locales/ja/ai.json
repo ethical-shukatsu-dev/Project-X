@@ -4,7 +4,6 @@
     "submit": "送信"
   },
   "response": {
-    "loading": "考え中...",
     "error": "エラーが発生しました"
   },
   "questionnaire": {
@@ -184,14 +183,18 @@
     "refreshing": "更新中...",
     "anonymized": "匿名企業",
     "thisCompany": "この企業",
+    "partial_success": "{{count}}件のマッチのみが見つかりました。さらに試してみますか？",
+    "get_more": "さらに企業を探す",
     "loading": {
       "title": "マッチを検索中...",
-      "description": "あなたの価値観と好みを分析して、最適な企業マッチを見つけています。"
+      "description": "あなたの価値観と好みを分析して、最適な企業マッチを見つけています。この処理には最大30秒かかることがあります。",
+      "streaming": "あなたに合った企業を検索中...",
+      "more_coming": "あなたの価値観に合った企業をさらに検索中..."
     },
     "tabs": {
       "all": "すべて",
       "pending": "保留中",
-      "interested": "企業の詳細をみる",
+      "interested": "興味あり",
       "not_interested": "興味なし"
     },
     "size_tabs": {
@@ -202,7 +205,7 @@
       "large": "大規模 (10,000人以上)"
     },
     "feedback": {
-      "interested": "企業の詳細をみる",
+      "interested": "興味あり",
       "notInterested": "興味なし",
       "markedInterested": "興味ありとマークしました",
       "markedNotInterested": "興味なしとマークしました",
@@ -217,7 +220,8 @@
       "missing_user_id": "ユーザーIDが必要です",
       "fetch_failed": "推薦の取得に失敗しました",
       "feedback_failed": "フィードバックの送信に失敗しました",
-      "try_again": "再試行"
+      "try_again": "再試行",
+      "try_again_for_more": "もっと試してみる"
     }
   },
   "cta": {
@@ -236,7 +240,7 @@
     },
     "primaryButton": "メールで登録",
     "secondaryButton": "Googleで続ける",
-    "disclaimer": "登録すると、利用規約とプライバシーポリシーに同意したことになります。これは現在模擬機能です。"
+    "disclaimer": "利用を開始することで、利用規約とプライバシーポリシーに同意したものとみなされます。"
   },
   "systemPrompt": {
     "questionnaire": "あなたはユーザーが自分の価値観や興味に合った企業を見つけるのを手伝うAIアシスタントです。日本語で応答してください。",

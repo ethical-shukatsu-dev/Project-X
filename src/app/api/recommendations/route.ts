@@ -75,14 +75,14 @@ export async function GET(request: Request) {
     //   .from("companies")
     //   .select("name")
     //   .in("id", previousCompanyIds.length > 0 ? previousCompanyIds : ['no-companies']);
-    
+
     // // Extract just the company names
     // const previousCompanyNames = previousCompanies?.map(company => company.name) || [];
 
     // Generate new recommendations with real company data, passing the locale and previously recommended companies
     const recommendations = await generateRecommendations(
       userData,
-      locale as "en" | "ja",
+      locale as "en" | "ja"
     );
 
     // Save recommendations to Supabase
@@ -119,7 +119,10 @@ export async function GET(request: Request) {
       return NextResponse.json({recommendations: recommendationsWithCompanies});
     } else {
       console.error("Error saving recommendations:", insertError);
-      return NextResponse.json({error: "Failed to save recommendations"}, {status: 500});
+      return NextResponse.json(
+        {error: "Failed to save recommendations"},
+        {status: 500}
+      );
     }
   } catch (error) {
     console.error("Error processing request:", error);

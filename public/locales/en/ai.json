@@ -4,7 +4,6 @@
     "submit": "Send"
   },
   "response": {
-    "loading": "Thinking...",
     "error": "An error occurred"
   },
   "questionnaire": {
@@ -184,9 +183,13 @@
     "refreshing": "Refreshing...",
     "anonymized": "Anonymous company",
     "thisCompany": "this company",
+    "partial_success": "We only found {{count}} matches. Would you like to try for more?",
+    "get_more": "Get More Recommendations",
     "loading": {
       "title": "Finding Your Matches...",
-      "description": "We're analyzing your values and preferences to find the best company matches for you."
+      "description": "We're analyzing your values and preferences to find the best company matches for you. This process may take up to 30 seconds.",
+      "streaming": "Finding company matches for you...",
+      "more_coming": "Finding more companies that match your values..."
     },
     "tabs": {
       "all": "All",
@@ -202,7 +205,7 @@
       "large": "Large (10,000+ employees)"
     },
     "feedback": {
-      "interested": "Show Company",
+      "interested": "Interested",
       "notInterested": "Not Interested",
       "markedInterested": "You marked this as interesting",
       "markedNotInterested": "You marked this as not interesting",
@@ -217,7 +220,8 @@
       "missing_user_id": "User ID is required",
       "fetch_failed": "Failed to fetch recommendations",
       "feedback_failed": "Failed to submit feedback",
-      "try_again": "Try Again"
+      "try_again": "Try Again",
+      "try_again_for_more": "Get More Recommendations"
     }
   },
   "cta": {
@@ -236,7 +240,7 @@
     },
     "primaryButton": "Sign up with Email",
     "secondaryButton": "Continue with Google",
-    "disclaimer": "By signing up, you agree to our Terms and Privacy Policy. This is currently a mock feature."
+    "disclaimer": "By signing up, you agree to our Terms and Privacy Policy."
   },
   "systemPrompt": {
     "questionnaire": "You are an AI assistant helping users find companies that match their values and interests. Please respond in {{language}}.",
