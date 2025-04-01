@@ -4,7 +4,10 @@
     "submit": "送信"
   },
   "response": {
-    "loading": "考え中...",
+    "title": "マッチを検索中...",
+    "description": "あなたの価値観と好みを分析して、最適な企業マッチを見つけています。",
+    "streaming": "あなたに合った企業を検索中...",
+    "more_coming": "あなたの価値観に合った企業をさらに検索中...",
     "error": "エラーが発生しました"
   },
   "questionnaire": {
@@ -184,10 +187,8 @@
     "refreshing": "更新中...",
     "anonymized": "匿名企業",
     "thisCompany": "この企業",
-    "loading": {
-      "title": "マッチを検索中...",
-      "description": "あなたの価値観と好みを分析して、最適な企業マッチを見つけています。"
-    },
+    "partial_success": "{{count}}件のマッチのみが見つかりました。さらに試してみますか？",
+    "get_more": "さらに企業を探す",
     "tabs": {
       "all": "すべて",
       "pending": "保留中",

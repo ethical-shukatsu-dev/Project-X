@@ -50,6 +50,7 @@ export default function RecommendationsContent({
   const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
   const [, setFeedbackCount] = useState(0);
   const [hasClosedDialog, setHasClosedDialog] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   useEffect(() => {
     // Scroll to top of page
@@ -67,25 +68,121 @@ export default function RecommendationsContent({
         return;
       }
 
+      // Set loading state if not refreshing
+      if (!refresh) {
+        setLoading(true);
+      } else {
+        setRefreshing(true);
+      }
+
+      // Check if we should use streaming or not
+      const useStreaming = true; // Can be made configurable if needed
+
       try {
-        const response = await fetch(
-          `/api/recommendations?userId=${userId}&locale=${lng}${
-            refresh ? "&refresh=true" : ""
-          }`
-        );
+        if (useStreaming) {
+          // Use streaming API
+          setIsStreaming(true);
+          setRecommendations([]); // Clear existing recommendations
+          
+          // Set up fetch for streaming response
+          const response = await fetch(
+            `/api/recommendations/stream?userId=${userId}&locale=${lng}`
+          );
 
-        if (!response.ok) {
-          throw new Error(t("recommendations.errors.fetch_failed"));
+          if (!response.ok) {
+            throw new Error(t("recommendations.errors.fetch_failed"));
+          }
+
+          if (!response.body) {
+            throw new Error("ReadableStream not supported");
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          
+          let done = false;
+          while (!done) {
+            const { value, done: readerDone } = await reader.read();
+            done = readerDone;
+            
+            if (done) {
+              // Streaming finished
+              setIsStreaming(false);
+              setLoading(false);
+              setRefreshing(false);
+              break;
+            }
+            
+            const chunk = decoder.decode(value, { stream: true });
+            // Split the chunk into lines (each line is a JSON object)
+            const lines = chunk.split('\n').filter(line => line.trim() !== '');
+            
+            console.log("Stream received:", { chunk, lineCount: lines.length });
+            
+            for (const line of lines) {
+              try {
+                console.log("Processing line:", line.substring(0, 100) + (line.length > 100 ? "..." : ""));
+                
+                // Make sure the line is valid JSON
+                if (!line.trim().startsWith('{') || !line.trim().endsWith('}')) {
+                  console.warn("Line doesn't appear to be valid JSON:", line);
+                  continue;
+                }
+                
+                const data = JSON.parse(line);
+                console.log("Parsed data:", data);
+                
+                if (data.recommendation) {
+                  console.log("Found recommendation for:", data.recommendation.company?.name || "Unknown company");
+                  console.log("Recommendation details:", {
+                    id: data.recommendation.id,
+                    companyId: data.recommendation.company?.id,
+                    matchingPoints: data.recommendation.matching_points?.length || 0
+                  });
+                  
+                  // Add the new recommendation to the state
+                  setRecommendations(prev => {
+                    // Check if we already have this recommendation
+                    const exists = prev.some(r => r.id === data.recommendation.id);
+                    if (exists) {
+                      console.log("Recommendation already exists, skipping");
+                      return prev;
+                    }
+                    
+                    console.log("Adding new recommendation to state");
+                    return [...prev, data.recommendation];
+                  });
+                } else {
+                  console.warn("Parsed JSON does not contain a recommendation property:", data);
+                }
+              } catch (e) {
+                console.error("Error parsing JSON from stream:", e, "Line:", line);
+              }
+            }
+          }
+        } else {
+          // Use regular API
+          const response = await fetch(
+            `/api/recommendations?userId=${userId}&locale=${lng}${
+              refresh ? "&refresh=true" : ""
+            }`
+          );
+
+          if (!response.ok) {
+            throw new Error(t("recommendations.errors.fetch_failed"));
+          }
+
+          const data = await response.json();
+          setRecommendations(data.recommendations);
+          setLoading(false);
+          setRefreshing(false);
         }
-
-        const data = await response.json();
-        setRecommendations(data.recommendations);
       } catch (err) {
         console.error("Error fetching recommendations:", err);
         setError(t("recommendations.errors.general"));
-      } finally {
         setLoading(false);
         setRefreshing(false);
+        setIsStreaming(false);
       }
     };
 
@@ -104,21 +201,90 @@ export default function RecommendationsContent({
       }
 
       try {
+        // Always use streaming for refresh
+        setIsStreaming(true);
+        setRecommendations([]); // Clear existing recommendations
+        
+        // Set up fetch for streaming response
         const response = await fetch(
-          `/api/recommendations?userId=${userId}&locale=${lng}&refresh=true`
+          `/api/recommendations/stream?userId=${userId}&locale=${lng}`
         );
 
         if (!response.ok) {
           throw new Error(t("recommendations.errors.fetch_failed"));
         }
 
-        const data = await response.json();
-        setRecommendations(data.recommendations);
+        if (!response.body) {
+          throw new Error("ReadableStream not supported");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        let done = false;
+        while (!done) {
+          const { value, done: readerDone } = await reader.read();
+          done = readerDone;
+          
+          if (done) {
+            // Streaming finished
+            setIsStreaming(false);
+            setRefreshing(false);
+            break;
+          }
+          
+          const chunk = decoder.decode(value, { stream: true });
+          // Split the chunk into lines (each line is a JSON object)
+          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+          
+          console.log("Stream received:", { chunk, lineCount: lines.length });
+          
+          for (const line of lines) {
+            try {
+              console.log("Processing line:", line.substring(0, 100) + (line.length > 100 ? "..." : ""));
+              
+              // Make sure the line is valid JSON
+              if (!line.trim().startsWith('{') || !line.trim().endsWith('}')) {
+                console.warn("Line doesn't appear to be valid JSON:", line);
+                continue;
+              }
+              
+              const data = JSON.parse(line);
+              console.log("Parsed data:", data);
+              
+              if (data.recommendation) {
+                console.log("Found recommendation for:", data.recommendation.company?.name || "Unknown company");
+                console.log("Recommendation details:", {
+                  id: data.recommendation.id,
+                  companyId: data.recommendation.company?.id,
+                  matchingPoints: data.recommendation.matching_points?.length || 0
+                });
+                
+                // Add the new recommendation to the state
+                setRecommendations(prev => {
+                  // Check if we already have this recommendation
+                  const exists = prev.some(r => r.id === data.recommendation.id);
+                  if (exists) {
+                    console.log("Recommendation already exists, skipping");
+                    return prev;
+                  }
+                  
+                  console.log("Adding new recommendation to state");
+                  return [...prev, data.recommendation];
+                });
+              } else {
+                console.warn("Parsed JSON does not contain a recommendation property:", data);
+              }
+            } catch (e) {
+              console.error("Error parsing JSON from stream:", e, "Line:", line);
+            }
+          }
+        }
       } catch (err) {
         console.error("Error fetching recommendations:", err);
         setError(t("recommendations.errors.general"));
-      } finally {
         setRefreshing(false);
+        setIsStreaming(false);
       }
     };
 
@@ -246,7 +412,7 @@ export default function RecommendationsContent({
     );
   }
 
-  if (loading) {
+  if (loading && recommendations.length === 0) {
     return (
       <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto text-center">
@@ -273,7 +439,7 @@ export default function RecommendationsContent({
     );
   }
 
-  if (error) {
+  if (error && recommendations.length === 0) {
     return (
       <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto">
@@ -326,7 +492,16 @@ export default function RecommendationsContent({
 
         {/* Display filtered recommendations */}
         <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
-          {getFilteredRecommendations().length > 0 ? (
+          {isStreaming && recommendations.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-gray-300">
+                {t("recommendations.loading.streaming")}
+              </p>
+              <div className="flex justify-center mt-4">
+                <div className="w-6 h-6 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+              </div>
+            </div>
+          ) : getFilteredRecommendations().length > 0 ? (
             getFilteredRecommendations().map((recommendation, index) => (
               <AnimatedContent
                 key={recommendation.id || recommendation.company.id}
@@ -358,17 +533,39 @@ export default function RecommendationsContent({
               <p className="text-gray-300">{t("recommendations.no_matches")}</p>
             </div>
           )}
+
+          {/* Display streaming indicator at the end if still streaming */}
+          {isStreaming && recommendations.length > 0 && (
+            <div className="flex items-center justify-center py-4 mt-4 text-gray-300">
+              <div className="w-5 h-5 mr-3 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+              <span>{t("recommendations.loading.more_coming")}</span>
+            </div>
+          )}
+          
+          {/* Show partial success message if we got fewer recommendations than expected */}
+          {!isStreaming && recommendations.length > 0 && recommendations.length < 5 && (
+            <div className="flex flex-col items-center justify-center py-4 mt-4 text-gray-300">
+              <p className="mb-2">{t("recommendations.partial_success", { count: recommendations.length })}</p>
+              <Button 
+                onClick={handleRefresh}
+                variant="outline"
+                className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
+              >
+                {t("recommendations.get_more")}
+              </Button>
+            </div>
+          )}
         </div>
 
         <AnimatedContent direction="vertical" distance={20} delay={100}>
           <div className="flex justify-end my-6">
             <Button
               onClick={handleRefresh}
-              disabled={refreshing}
+              disabled={refreshing || isStreaming}
               variant="outline"
               className="w-full flex items-center gap-2 text-sm sm:text-base bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
             >
-              {refreshing ? (
+              {refreshing || isStreaming ? (
                 <>
                   <svg
                     className="w-4 h-4 mr-2 -ml-1 animate-spin text-primary"
