@@ -101,11 +101,12 @@ export function AnalyticsDashboard() {
     conversionRate: "0%",
     surveyFunnel: {
       visits: 0,
+      uniqueUsers: 0,
       started: 0,
       completed: 0,
       startRate: "0%",
       completionRate: "0%",
-      overallConversionRate: "0%",
+      overallConversionRate: "0%"
     },
     surveyTypes: {
       text: 0,
@@ -221,8 +222,8 @@ export function AnalyticsDashboard() {
         ) : (
           <MetricCard
             title="Unique Visitors"
-            value={stats.totalEvents}
-            description="Total unique visitors"
+            value={stats.surveyFunnel.uniqueUsers}
+            description="Total unique users"
             onRefresh={() => refreshMetric("visitors")}
           />
         )}
@@ -272,20 +273,23 @@ export function AnalyticsDashboard() {
           <ConversionFunnel
             title="Questionnaire Funnel"
             steps={[
-              {name: "Visits", value: stats.surveyFunnel.visits},
-              {name: "Started", value: stats.surveyFunnel.started},
-              {name: "Completed", value: stats.surveyFunnel.completed},
+              {
+                name: "Visits",
+                value: stats.surveyFunnel.uniqueUsers
+              },
+              {
+                name: "Started",
+                value: stats.surveyFunnel.started
+              },
+              {
+                name: "Completed",
+                value: stats.surveyFunnel.completed
+              },
             ]}
             rates={[
               {name: "Start Rate", value: stats.surveyFunnel.startRate},
-              {
-                name: "Completion Rate",
-                value: stats.surveyFunnel.completionRate,
-              },
-              {
-                name: "Overall",
-                value: stats.surveyFunnel.overallConversionRate,
-              },
+              {name: "Completion Rate", value: stats.surveyFunnel.completionRate},
+              {name: "Overall", value: stats.surveyFunnel.overallConversionRate},
             ]}
             onRefresh={() => refreshMetric("surveyFunnel")}
           />

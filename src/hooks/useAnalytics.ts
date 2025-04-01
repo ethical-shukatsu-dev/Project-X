@@ -57,6 +57,17 @@ export interface ABTestComparisonMetrics {
   };
 }
 
+// Define survey funnel metrics
+interface SurveyFunnelMetrics {
+  visits: number;
+  uniqueUsers: number;
+  started: number;
+  completed: number;
+  startRate: string;
+  completionRate: string;
+  overallConversionRate: string;
+}
+
 // Type definitions for the analytics data
 export interface AnalyticsData {
   events: AnalyticsEvent[];
@@ -69,14 +80,7 @@ export interface AnalyticsData {
     signupClicks: number;
     dialogCloses: number;
     conversionRate: string;
-    surveyFunnel: {
-      visits: number;
-      started: number;
-      completed: number;
-      startRate: string;
-      completionRate: string;
-      overallConversionRate: string;
-    };
+    surveyFunnel: SurveyFunnelMetrics;
     surveyTypes: {
       text: number;
       image: number;

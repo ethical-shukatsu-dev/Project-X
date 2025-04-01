@@ -13,6 +13,7 @@ interface EventCount {
 // Define survey funnel metrics
 interface SurveyFunnelMetrics {
   visits: number;
+  uniqueUsers: number;
   started: number;
   completed: number;
   startRate: string;
@@ -142,6 +143,22 @@ export async function GET(request: NextRequest) {
     if (countError) {
       console.error('Error fetching event counts:', countError);
     }
+
+    // Get unique visitor counts for home page (both by session and user)
+    const { data: uniqueVisitorCounts, error: visitorError } = await supabaseAdmin
+      .rpc('get_unique_visitor_counts', { 
+        start_date: startDate ? startDate.toISOString() : '2025-03-01',
+        event_type_param: 'home_page_visit'
+      });
+
+    if (visitorError) {
+      console.error('Error fetching unique visitors:', visitorError);
+    }
+
+    const homePageVisits = {
+      uniqueSessions: uniqueVisitorCounts?.unique_sessions || 0,
+      uniqueUsers: uniqueVisitorCounts?.unique_users || 0
+    };
     
     // Cast the event counts to the proper type
     const typedEventCounts = (eventCounts || []) as EventCount[];
@@ -152,24 +169,24 @@ export async function GET(request: NextRequest) {
     };
     
     // Home page and survey funnel metrics
-    const homePageVisits = findEventCount('home_page_visit');
     const surveyStartClicks = findEventCount('survey_start_click');
     const surveyCompletions = findEventCount('survey_completed');
     
-    const surveyStartRate = homePageVisits > 0 
-      ? Math.round((surveyStartClicks / homePageVisits) * 100) 
+    const surveyStartRate = homePageVisits.uniqueUsers > 0 
+      ? Math.round((surveyStartClicks / homePageVisits.uniqueUsers) * 100) 
       : 0;
       
     const surveyCompletionRate = surveyStartClicks > 0 
       ? Math.round((surveyCompletions / surveyStartClicks) * 100) 
       : 0;
       
-    const overallConversionRate = homePageVisits > 0 
-      ? Math.round((surveyCompletions / homePageVisits) * 100) 
+    const overallConversionRate = homePageVisits.uniqueUsers > 0 
+      ? Math.round((surveyCompletions / homePageVisits.uniqueUsers) * 100) 
       : 0;
     
     const surveyFunnel: SurveyFunnelMetrics = {
-      visits: homePageVisits,
+      visits: homePageVisits.uniqueUsers,
+      uniqueUsers: homePageVisits.uniqueUsers,
       started: surveyStartClicks,
       completed: surveyCompletions,
       startRate: `${surveyStartRate}%`,
