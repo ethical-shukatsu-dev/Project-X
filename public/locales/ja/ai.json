@@ -194,7 +194,7 @@
     "tabs": {
       "all": "すべて",
       "pending": "保留中",
-      "interested": "企業の詳細をみる",
+      "interested": "興味あり",
       "not_interested": "興味なし"
     },
     "size_tabs": {
@@ -205,7 +205,7 @@
       "large": "大規模 (10,000人以上)"
     },
     "feedback": {
-      "interested": "企業の詳細をみる",
+      "interested": "興味あり",
       "notInterested": "興味なし",
       "markedInterested": "興味ありとマークしました",
       "markedNotInterested": "興味なしとマークしました",

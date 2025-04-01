@@ -349,7 +349,9 @@ export default function CompanyCard({
                 className="w-full font-bold transition-all sm:w-fit bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
               >
                 <PartyPopper className="w-4 h-4 mr-2 text-white" />
-                {t("recommendations.feedback.interested")}
+                {isAnonymous
+                  ? t("recommendations.viewDetails")
+                  : t("recommendations.feedback.interested")}
               </Button>
             </>
           )}
