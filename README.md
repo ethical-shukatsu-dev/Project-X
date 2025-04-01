@@ -50,6 +50,8 @@ bun run verify-supabase
 
 This will check if your Supabase connection is working and if all required tables are set up correctly.
 
+### Database Schema
+
 **user_values**
 ```sql
 CREATE TABLE user_values (
@@ -105,6 +107,211 @@ CREATE TABLE value_images (
   image_sizes JSONB -- Different size variants of the image for responsive usage
 );
 ```
+
+5. Create the required database functions:
+
+```sql
+-- Analytics function for counting unique visitors and actions
+create or replace function get_unique_visitor_counts(start_date timestamp, event_type_param text)
+returns json
+language plpgsql
+security definer
+as $$
+declare
+  result json;
+begin
+  select json_build_object(
+    'unique_sessions', (
+      select count(distinct session_id)
+      from analytics_events
+      where analytics_events.event_type = event_type_param
+      and session_id is not null
+      and timestamp >= start_date
+    ),
+    'unique_users', (
+      select count(distinct user_id)
+      from analytics_events
+      where analytics_events.event_type = event_type_param
+      and user_id is not null
+      and timestamp >= start_date
+    )
+  ) into result;
+  
+  return result;
+end;
+$$;
+
+-- Function to get unique counts for multiple event types
+create or replace function get_multiple_event_counts(start_date timestamp with time zone)
+returns jsonb
+language plpgsql
+security definer
+as $$
+declare
+  home_visits jsonb;
+  survey_start jsonb;
+  survey_complete jsonb;
+  rec_visits jsonb;
+  company_int jsonb;
+  signup_stats jsonb;
+  survey_type_stats jsonb;
+  step_stats jsonb;
+  dropoff_stats jsonb;
+  anon_stats jsonb;
+  email_signups bigint;
+  google_signups bigint;
+  total_signups bigint;
+  total_anon_users bigint;
+  completed_anon_surveys bigint;
+begin
+  -- Get unique home page visits
+  select jsonb_build_object(
+    'unique_users', count(distinct user_id)
+  )
+  into home_visits
+  from analytics_events
+  where event_type = 'home_page_visit'
+  and created_at >= start_date;
+
+  -- Get unique survey starts
+  select jsonb_build_object(
+    'unique_users', count(distinct user_id)
+  )
+  into survey_start
+  from analytics_events
+  where event_type = 'survey_start_click'
+  and created_at >= start_date;
+
+  -- Get unique survey completions
+  select jsonb_build_object(
+    'unique_users', count(distinct user_id)
+  )
+  into survey_complete
+  from analytics_events
+  where event_type = 'survey_completed'
+  and created_at >= start_date;
+
+  -- Get unique recommendations page visits
+  select jsonb_build_object(
+    'unique_users', count(distinct user_id)
+  )
+  into rec_visits
+  from analytics_events
+  where event_type = 'recommendations_page_visit'
+  and created_at >= start_date;
+
+  -- Get unique company interested clicks and total clicks
+  select jsonb_build_object(
+    'unique_users', count(distinct user_id),
+    'total_clicks', count(*)
+  )
+  into company_int
+  from analytics_events
+  where event_type = 'company_interested_click'
+  and created_at >= start_date;
+
+  -- Get signup counts
+  select 
+    count(*) filter (where event_type = 'signup_email'),
+    count(*) filter (where event_type = 'signup_google'),
+    count(distinct user_id)
+  into 
+    email_signups,
+    google_signups,
+    total_signups
+  from analytics_events
+  where event_type in ('signup_email', 'signup_google')
+  and created_at >= start_date;
+
+  signup_stats := jsonb_build_object(
+    'email_signups', email_signups,
+    'google_signups', google_signups,
+    'unique_users', total_signups
+  );
+
+  -- Get survey type stats
+  select jsonb_object_agg(
+    survey_type,
+    jsonb_build_object('unique_users', unique_users)
+  )
+  into survey_type_stats
+  from (
+    select
+      properties->>'surveyType' as survey_type,
+      count(distinct user_id) as unique_users
+    from analytics_events
+    where event_type = 'survey_completed'
+    and created_at >= start_date
+    group by properties->>'surveyType'
+  ) survey_types;
+
+  -- Get step stats
+  select jsonb_object_agg(
+    step,
+    jsonb_build_object('unique_users', unique_users)
+  )
+  into step_stats
+  from (
+    select
+      properties->>'step' as step,
+      count(distinct user_id) as unique_users
+    from analytics_events
+    where event_type = 'survey_step_complete'
+    and created_at >= start_date
+    group by properties->>'step'
+  ) step_counts;
+
+  -- Get dropoff stats
+  select jsonb_object_agg(
+    step,
+    jsonb_build_object(
+      'unique_users', unique_users,
+      'avg_time_spent', avg_time_spent
+    )
+  )
+  into dropoff_stats
+  from (
+    select
+      properties->>'step' as step,
+      count(distinct user_id) as unique_users,
+      avg((properties->>'timeSpentSeconds')::numeric) as avg_time_spent
+    from analytics_events
+    where event_type = 'survey_step_dropoff'
+    and created_at >= start_date
+    group by properties->>'step'
+  ) dropoff_counts;
+
+  -- Get anonymous user stats
+  select
+    count(distinct user_id),
+    count(distinct case when event_type = 'survey_completed' then user_id end)
+  into
+    total_anon_users,
+    completed_anon_surveys
+  from analytics_events
+  where properties->>'isAnonymous' = 'true'
+  and created_at >= start_date;
+
+  anon_stats := jsonb_build_object(
+    'total_unique_users', total_anon_users,
+    'completed_surveys', completed_anon_surveys
+  );
+
+  -- Return combined stats
+  return jsonb_build_object(
+    'home_page_visits', home_visits,
+    'survey_starts', survey_start,
+    'survey_completions', survey_complete,
+    'recommendations_page_visits', rec_visits,
+    'company_interests', company_int,
+    'signups', signup_stats,
+    'survey_types', survey_type_stats,
+    'survey_steps', step_stats,
+    'survey_dropoffs', dropoff_stats,
+    'anonymous_users', anon_stats
+  );
+end;
+$$;
 
 ### Installation
 
