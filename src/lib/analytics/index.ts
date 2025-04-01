@@ -25,8 +25,8 @@ type EventType =
   | "recommendations_page_visit"
   | "company_interested_click"
   // Signup events
-  | "email_signup_click"
-  | "google_signup_click";
+  | "signup_email"
+  | "signup_google";
 
 interface AnalyticsEvent {
   event_type: EventType;
@@ -262,12 +262,12 @@ export const trackCompanyInterestedClick = async (
  * Track email signup click
  */
 export const trackEmailSignupClick = async (): Promise<void> => {
-  await trackEvent("email_signup_click");
+  await trackEvent("signup_email");
 };
 
 /**
  * Track Google signup click
  */
 export const trackGoogleSignupClick = async (): Promise<void> => {
-  await trackEvent("google_signup_click");
+  await trackEvent("signup_google");
 };
