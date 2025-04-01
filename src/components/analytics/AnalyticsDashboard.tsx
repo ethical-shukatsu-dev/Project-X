@@ -160,21 +160,65 @@ export function AnalyticsDashboard() {
 
   // Process survey step data for display
   const surveySteps = stats.surveySteps || [];
-  const stepsWithLabels = surveySteps.map(step => {
-    // Parse the step ID to create a readable label
-    // Assuming step IDs are like "work_values", "corporate_culture", etc.
-    const stepName = step.id.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-    
-    return {
+  
+  // Define the question order to match the order in ValuesQuestionnaire.tsx
+  const questionOrder = [
+    "work_values",
+    "corporate_culture", 
+    "leadership",
+    "workplace_environment",
+    "humanity",
+    "interpersonal_skills",
+    "cognitive_abilities",
+    "self_growth",
+    "job_performance",
+    "mental_strength"
+  ];
+  
+  // Map and sort the steps based on the defined order
+  const stepsWithLabels = surveySteps
+    .map(step => {
+      // Parse the step ID to create a readable label
+      const stepName = step.id.split('_').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+      
+      // Find the index in the question order array (or default to a high number if not found)
+      const orderIndex = questionOrder.indexOf(step.id);
+      
+      return {
+        ...step,
+        label: stepName,
+        orderIndex: orderIndex >= 0 ? orderIndex : 999
+      };
+    })
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map((step, index) => ({
       ...step,
-      label: stepName
-    };
-  });
+      // Add the step number to the label
+      label: `${index + 1}. ${step.label}`
+    }));
 
   // Get dropoff analysis data
   const dropoffData = stats.dropoffAnalysis || [];
+
+  // Apply the same ordering to dropoff analysis data
+  const orderedDropoffData = dropoffData
+    .map(item => {
+      // Find the index in the question order array (or default to a high number if not found)
+      const orderIndex = questionOrder.indexOf(item.id);
+      
+      return {
+        ...item,
+        orderIndex: orderIndex >= 0 ? orderIndex : 999
+      };
+    })
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map((item, index) => ({
+      ...item,
+      // Add the step number to the label
+      label: `${index + 1}. ${item.label}`
+    }));
 
   // Render individual metric cards with conditionally showing skeletons when refreshing
   return (
@@ -422,7 +466,7 @@ export function AnalyticsDashboard() {
         <DropoffAnalysis
           title="Drop-off Analysis"
           description="Detailed analysis of where users abandon the survey"
-          data={dropoffData}
+          data={orderedDropoffData}
           onRefresh={() => refreshMetric("dropoffAnalysis")}
         />
       )}
