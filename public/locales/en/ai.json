@@ -187,7 +187,7 @@
     "get_more": "Get More Recommendations",
     "loading": {
       "title": "Finding Your Matches...",
-      "description": "We're analyzing your values and preferences to find the best company matches for you.",
+      "description": "We're analyzing your values and preferences to find the best company matches for you. This process may take up to 30 seconds.",
       "streaming": "Finding company matches for you...",
       "more_coming": "Finding more companies that match your values..."
     },
@@ -239,7 +239,7 @@
     },
     "primaryButton": "Sign up with Email",
     "secondaryButton": "Continue with Google",
-    "disclaimer": "By signing up, you agree to our Terms and Privacy Policy. This is currently a mock feature."
+    "disclaimer": "By signing up, you agree to our Terms and Privacy Policy."
   },
   "systemPrompt": {
     "questionnaire": "You are an AI assistant helping users find companies that match their values and interests. Please respond in {{language}}.",
