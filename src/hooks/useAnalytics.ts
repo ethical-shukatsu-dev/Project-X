@@ -89,6 +89,7 @@ export interface AnalyticsData {
     recommendations: {
       pageVisits: number;
       companyInterestClicks: number;
+      uniqueCompanyInterests: number;
       companyInterestRate: string;
       averageCompaniesPerUser: number;
     };

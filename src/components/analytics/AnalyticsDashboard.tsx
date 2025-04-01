@@ -118,6 +118,7 @@ export function AnalyticsDashboard() {
       companyInterestClicks: 0,
       companyInterestRate: "0%",
       averageCompaniesPerUser: 0,
+      uniqueCompanyInterests: 0,
     },
     signups: {
       emailSignups: 0,
@@ -499,7 +500,13 @@ export function AnalyticsDashboard() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Interest Rate</span>
+                <span className="text-sm">Interest Clicks Unique Users</span>
+                <span className="font-medium">
+                  {stats.recommendations.uniqueCompanyInterests}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Rate of Users who Clicked Interest</span>
                 <span className="font-medium">
                   {stats.recommendations.companyInterestRate}
                 </span>
