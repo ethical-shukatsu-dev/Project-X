@@ -231,18 +231,19 @@ begin
 
   -- Get survey type stats
   select jsonb_object_agg(
-    survey_type,
+    coalesce(survey_type, 'unknown'),
     jsonb_build_object('unique_users', unique_users)
   )
   into survey_type_stats
   from (
     select
-      properties->>'surveyType' as survey_type,
+      lower(properties->>'surveyType') as survey_type,
       count(distinct user_id) as unique_users
     from analytics_events
     where event_type = 'survey_completed'
     and created_at >= start_date
-    group by properties->>'surveyType'
+    and properties->>'surveyType' is not null
+    group by lower(properties->>'surveyType')
   ) survey_types;
 
   -- Get step stats

@@ -155,11 +155,19 @@ export async function GET(request: NextRequest) {
     };
     
     // Survey type metrics
+    const textSurveys = uniqueCounts?.survey_types?.text?.unique_users || 0;
+    const imageSurveys = uniqueCounts?.survey_types?.image?.unique_users || 0;
+    const otherSurveys = Object.entries(uniqueCounts?.survey_types || {})
+      .filter(([key]) => !['text', 'image'].includes(key))
+      .reduce((sum, [, value]) => {
+        const count = (value as { unique_users?: number })?.unique_users || 0;
+        return sum + count;
+      }, 0);
+    
     const surveyTypes = {
-      text: uniqueCounts?.survey_types?.text_surveys || 0,
-      image: uniqueCounts?.survey_types?.image_surveys || 0,
-      total: (uniqueCounts?.survey_types?.text_surveys || 0) + 
-             (uniqueCounts?.survey_types?.image_surveys || 0)
+      text: textSurveys,
+      image: imageSurveys,
+      total: textSurveys + imageSurveys + otherSurveys
     };
     
     // Recommendations metrics

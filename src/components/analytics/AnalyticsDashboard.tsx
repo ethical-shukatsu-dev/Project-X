@@ -309,50 +309,6 @@ export function AnalyticsDashboard() {
             onRefresh={() => refreshMetric("surveyTypes")}
           />
         )}
-        
-        {/* Anonymous Users Card */}
-        {refreshingStates.anonymousUsers ? (
-          <MetricCardSkeleton />
-        ) : (
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-sm font-medium">
-                  Anonymous Users (A/B Test)
-                </CardTitle>
-                <RefreshButton onClick={() => refreshMetric("anonymousUsers")} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Total Users</span>
-                  <span className="font-medium">
-                    {stats.anonymousUsers.total}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Percentage</span>
-                  <span className="font-medium">
-                    {stats.anonymousUsers.percentage}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Completion Rate</span>
-                  <span className="font-medium">
-                    {stats.anonymousUsers.completionRate}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Conversion Rate</span>
-                  <span className="font-medium">
-                    {stats.anonymousUsers.conversionRate}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       {/* A/B Test Comparison */}
