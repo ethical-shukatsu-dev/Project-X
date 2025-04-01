@@ -158,6 +158,7 @@ DECLARE
   step_stats jsonb;
   dropoff_stats jsonb;
   anon_stats jsonb;
+  dialog_closes jsonb;
   email_signups bigint;
   google_signups bigint;
   unique_email_users bigint;
@@ -311,6 +312,16 @@ BEGIN
     'completed_surveys', completed_anon_surveys
   );
 
+  -- Get dialog closes stats
+  SELECT jsonb_build_object(
+    'unique_users', count(distinct user_id),
+    'total_clicks', count(*)
+  )
+  INTO dialog_closes
+  FROM analytics_events
+  WHERE event_type = 'dialog_closes'
+  AND created_at >= start_date;
+
   -- Return combined stats
   RETURN jsonb_build_object(
     'home_page_visits', home_visits,
@@ -322,7 +333,8 @@ BEGIN
     'survey_types', survey_type_stats,
     'survey_steps', step_stats,
     'survey_dropoffs', dropoff_stats,
-    'anonymous_users', anon_stats
+    'anonymous_users', anon_stats,
+    'dialog_closes', dialog_closes
   );
 END;
 $$; 

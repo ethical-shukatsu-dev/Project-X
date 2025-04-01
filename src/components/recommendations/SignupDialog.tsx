@@ -108,7 +108,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   const handleDialogClose = () => {
     // Only track dismissal if not in in-page mode (since there's no close button in in-page mode)
     if (!showInPage) {
-      trackEvent("dialog_close", {
+      trackEvent("dialog_closes", {
         dialog_type: "signup",
         revealed_companies: filteredRecommendations.filter(
           (rec) => rec.feedback

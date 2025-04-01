@@ -231,6 +231,12 @@ export async function GET(request: NextRequest) {
       conversionRate: `${Math.round(((uniqueCounts?.anonymous_users?.completed_surveys || 0) / uniqueVisits) * 100)}%`
     };
 
+    // Dialog closes metrics
+    const uniqueDialogCloses = uniqueCounts?.dialog_closes?.unique_users || 0;
+    const dialogCloseConversionRate = uniqueVisits > 0
+      ? Math.round((uniqueDialogCloses / uniqueVisits) * 100)
+      : 0;
+
     // Calculate non-anonymous users metrics
     const nonAnonymousTotal = uniqueVisits - (uniqueCounts?.anonymous_users?.total_unique_users || 0);
     const nonAnonymousCompletions = uniqueCompletions - (uniqueCounts?.anonymous_users?.completed_surveys || 0);
@@ -267,6 +273,9 @@ export async function GET(request: NextRequest) {
       eventCounts: typedEventCounts,
       stats: {
         totalEvents: data.length,
+        uniqueDialogCloses: uniqueDialogCloses,
+        dialogCloses: uniqueCounts?.dialog_closes?.total_clicks || 0,
+        dialogCloseConversionRate: `${dialogCloseConversionRate}%`,
         surveyFunnel,
         surveyTypes,
         recommendations: recommendationsMetrics,

@@ -79,6 +79,8 @@ export interface AnalyticsData {
     totalEvents: number;
     signupClicks: number;
     dialogCloses: number;
+    uniqueDialogCloses: number;
+    dialogCloseConversionRate: string;
     conversionRate: string;
     surveyFunnel: SurveyFunnelMetrics;
     surveyTypes: {

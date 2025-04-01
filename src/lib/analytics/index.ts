@@ -7,7 +7,7 @@ import {v4 as uuid} from "uuid";
 type EventType =
   // Existing events
   | "signup_click"
-  | "dialog_close"
+  | "dialog_closes"
   | "feedback"
   | "page_view"
   // Home page events

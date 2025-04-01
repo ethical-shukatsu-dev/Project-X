@@ -42,6 +42,7 @@ export function AnalyticsDashboard() {
     dropoffAnalysis: false,
     anonymousUsers: false,
     abTestComparison: false,
+    dialogCloses: false,
     all: false,
   });
 
@@ -97,6 +98,8 @@ export function AnalyticsDashboard() {
     totalEvents: 0,
     signupClicks: 0,
     dialogCloses: 0,
+    uniqueDialogCloses: 0,
+    dialogCloseConversionRate: "0%",
     conversionRate: "0%",
     surveyFunnel: {
       visits: 0,
@@ -309,6 +312,81 @@ export function AnalyticsDashboard() {
           />
         )}
       </div>
+
+      {/* Unique Dialog Closes Card */}
+      {refreshingStates.dialogCloses ? (
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-32" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-48 mb-2" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-sm font-medium">
+                Signup Dialog Metrics
+              </CardTitle>
+              <RefreshButton onClick={() => refreshMetric("dialogCloses")} />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Dialog Closes</h3>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Total</span>
+                  <span className="font-medium">
+                    {stats.dialogCloses}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Unique</span>
+                  <span className="font-medium">
+                    {stats.uniqueDialogCloses}
+                  </span>
+                </div>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Conversion Rate</h3>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Rate</span>
+                  <span className="font-medium">
+                    {stats.dialogCloseConversionRate}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">From Unique Visitors</span>
+                  <span className="text-xs text-muted-foreground">
+                    {stats.uniqueDialogCloses} / {stats.surveyFunnel.uniqueUsers}
+                  </span>
+                </div>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Impact</h3>
+                <div className="text-xs text-muted-foreground mb-2">
+                  Users who close the signup dialog without completing registration
+                </div>
+                {stats.dialogCloseConversionRate}
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary"
+                    style={{ 
+                      width: `${Math.min(100, parseInt(stats.dialogCloseConversionRate))}%` 
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Conversion Funnel */}
@@ -691,6 +769,34 @@ function DashboardSkeleton() {
             <MetricCardSkeleton key={i} />
           ))}
       </div>
+
+      {/* Dialog Closes Card Skeleton */}
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-48" />
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="p-4 bg-muted/50 rounded-lg">
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ConversionFunnelSkeleton />
