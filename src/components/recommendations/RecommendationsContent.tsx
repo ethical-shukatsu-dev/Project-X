@@ -425,16 +425,18 @@ export default function RecommendationsContent({
             {t("recommendations.loading.description")}
           </p>
           <div className="max-w-4xl mx-auto">
-            <AnimatedContent direction="vertical" distance={20} delay={300}>
+            <AnimatedContent direction="vertical" distance={20} delay={500}>
               <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
             </AnimatedContent>
-            <AnimatedContent direction="vertical" distance={20} delay={600}>
+            <AnimatedContent direction="vertical" distance={20} delay={2000}>
               <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
             </AnimatedContent>
-            <AnimatedContent direction="vertical" distance={20} delay={900}>
+            <AnimatedContent direction="vertical" distance={20} delay={3000}>
               <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
             </AnimatedContent>
-            <Skeleton className="h-[200px] w-full bg-white/10 border border-white/10 backdrop-blur-sm" />
+            <AnimatedContent direction="vertical" distance={20} delay={4000}>
+              <Skeleton className="h-[200px] w-full bg-white/10 border border-white/10 backdrop-blur-sm" />
+            </AnimatedContent>
           </div>
         </div>
       </div>
