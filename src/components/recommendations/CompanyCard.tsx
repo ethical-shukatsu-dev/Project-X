@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Company} from "@/lib/supabase/client";
 import {useTranslation} from "@/i18n-client";
-import {ExternalLink, EyeOff, PartyPopper, ThumbsDown, ChevronDown, ChevronUp} from "lucide-react";
+import {ExternalLink, EyeOff, PartyPopper, ThumbsDown} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -51,7 +51,6 @@ export default function CompanyCard({
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [isRevealing, setIsRevealing] = useState<boolean>(false);
   const [wasAnonymous, setWasAnonymous] = useState<boolean>(false);
-  const [showChart, setShowChart] = useState<boolean>(false);
 
   // Generate match scores from actual match ratings data
   const generateMatchScores = (): MatchScore[] => {
@@ -195,7 +194,6 @@ export default function CompanyCard({
     if (feedback && isAnonymous) {
       setWasAnonymous(true);
       setIsRevealing(true);
-      setShowChart(true);
 
       // Reset the revealing animation state after animation completes
       const timer = setTimeout(() => {
@@ -424,79 +422,69 @@ export default function CompanyCard({
                 : company.industry}
             </span>
           </div>
-
-          {/* Match Score Chart Toggle Button - Only show when not anonymized or after feedback */}
-          {(!shouldAnonymize || feedback) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto text-white/70 hover:text-white hover:bg-white/5"
-              onClick={() => setShowChart(!showChart)}
-              aria-label={showChart ? "Hide match details" : "Show match details"}
-            >
-              {showChart ? 
-                <ChevronUp size={16} /> : 
-                <ChevronDown size={16} />
-              }
-            </Button>
-          )}
         </CardHeader>
 
         <CardContent className="px-3 sm:px-6">
-          {/* Match Score Visualization - Only show when not anonymized or after feedback */}
-          {(!shouldAnonymize || feedback) && showChart && (
-            <div className={`mb-4 transition-opacity duration-300 ${wasAnonymous && feedback ? "reveal-chart" : ""}`}>
-              <h3 className="mb-1 text-sm font-medium text-white">
-                {t("recommendations.matchScore") || "Match Breakdown"}
-              </h3>
-              <div className="mt-1 text-xs text-white/60 mb-1">
-                {t("recommendations.hoverForDetails") || "Hover/tap categories for details"}
+          {/* Content now always uses a vertical layout */}
+          <div className="flex flex-col gap-4">
+            {/* Match Score Visualization - Only show when not anonymized or after feedback */}
+            {(!shouldAnonymize || feedback) && (
+              <div className={`w-full transition-opacity duration-300 ${wasAnonymous && feedback ? "reveal-chart" : ""}`}>
+                <h3 className="mb-1 text-sm font-medium text-white">
+                  {t("recommendations.matchScore") || "Match Breakdown"}
+                </h3>
+                <div className="mt-1 text-xs text-white/60 mb-1">
+                  {t("recommendations.hoverForDetails") || "Hover/tap categories for details"}
+                </div>
+                <MatchScoreChart 
+                  matchingScores={matchScores}
+                  className="mt-2"
+                />
               </div>
-              <MatchScoreChart 
-                matchingScores={matchScores}
-                className="mt-2"
-              />
-            </div>
-          )}
+            )}
 
-          <div className="mb-3 sm:mb-4">
-            <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
-              {t("recommendations.about")}
-            </h3>
-            <p
-              className={`text-xs sm:text-sm text-white/80 ${
-                wasAnonymous && feedback ? "reveal-text-delay" : ""
-              }`}
-            >
-              {shouldAnonymize
-                ? getSanitizedDescription(company.description, company.name)
-                : company.description}
-            </p>
-          </div>
-          <div>
-            <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
-              {t("recommendations.whyMatch")}
-            </h3>
-            <ul className="pl-4 text-xs list-disc sm:pl-5 sm:text-sm text-white/80">
-              {matchingPoints && matchingPoints.length > 0 ? (
-                matchingPoints.map((point, index) => (
-                  <li
-                    key={index}
-                    className={
-                      wasAnonymous && feedback
-                        ? `reveal-text-delay-${(index % 3) + 2}`
-                        : ""
-                    }
-                  >
-                    {shouldAnonymize
-                      ? getSanitizedDescription(point, company.name)
-                      : point}
-                  </li>
-                ))
-              ) : (
-                <li>{t("recommendations.noMatchingPoints")}</li>
-              )}
-            </ul>
+            {/* Company details section */}
+            <div className="w-full">
+              <div className="mb-3 sm:mb-4">
+                <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
+                  {t("recommendations.about")}
+                </h3>
+                <p
+                  className={`text-xs sm:text-sm text-white/80 ${
+                    wasAnonymous && feedback ? "reveal-text-delay" : ""
+                  }`}
+                >
+                  {shouldAnonymize
+                    ? getSanitizedDescription(company.description, company.name)
+                    : company.description}
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
+                  {t("recommendations.whyMatch")}
+                </h3>
+                <ul className="pl-4 text-xs list-disc sm:pl-5 sm:text-sm text-white/80">
+                  {matchingPoints && matchingPoints.length > 0 ? (
+                    matchingPoints.map((point, index) => (
+                      <li
+                        key={index}
+                        className={
+                          wasAnonymous && feedback
+                            ? `reveal-text-delay-${(index % 3) + 2}`
+                            : ""
+                        }
+                      >
+                        {shouldAnonymize
+                          ? getSanitizedDescription(point, company.name)
+                          : point}
+                      </li>
+                    ))
+                  ) : (
+                    <li>{t("recommendations.noMatchingPoints")}</li>
+                  )}
+                </ul>
+              </div>
+            </div>
           </div>
         </CardContent>
 
