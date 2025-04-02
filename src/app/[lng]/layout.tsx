@@ -32,17 +32,17 @@ export default function RootLayout({
   const RootLayoutContent = async () => {
     const resolvedParams = await params;
     return (
-      <Suspense fallback={<div className="container mx-auto py-10">Loading...</div>}>
+      <Suspense fallback={<div className="w-vh h-dvh bg-black"></div>}>
         <html
           lang={resolvedParams.lng}
           dir={dir(resolvedParams.lng)}
           className={inter.className}
-      >
-        <Head>
-          <GoogleAuthHead />
-        </Head>
-        <body>
-          <Header />
+        >
+          <Head>
+            <GoogleAuthHead />
+          </Head>
+          <body>
+            <Header />
             {children}
           </body>
         </html>
