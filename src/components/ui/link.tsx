@@ -1,14 +1,14 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
+import NextLink from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
-interface QueryLinkProps extends React.ComponentPropsWithoutRef<typeof Link> {
+interface LinkProps extends React.ComponentPropsWithoutRef<typeof NextLink> {
   preserveQuery?: boolean;
 }
 
-export const QueryLink: React.FC<QueryLinkProps> = ({
+export const Link: React.FC<LinkProps> = ({
   href,
   preserveQuery = true,
   children,
@@ -18,7 +18,7 @@ export const QueryLink: React.FC<QueryLinkProps> = ({
   
   // If preserveQuery is false or there are no search params, just use the original href
   if (!preserveQuery || !searchParams.size) {
-    return <Link href={href} {...props}>{children}</Link>;
+    return <NextLink href={href} {...props}>{children}</NextLink>;
   }
 
   // Convert href to string if it's an object
@@ -37,7 +37,7 @@ export const QueryLink: React.FC<QueryLinkProps> = ({
     ? `${hrefString}&${queryString}` 
     : `${hrefString}${queryString ? `?${queryString}` : ''}`;
 
-  return <Link href={newHref} {...props}>{children}</Link>;
+  return <NextLink href={newHref} {...props}>{children}</NextLink>;
 };
 
-export default QueryLink; 
+export default Link; 
