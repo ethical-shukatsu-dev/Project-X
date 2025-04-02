@@ -1,9 +1,9 @@
 "use client";
 
 import { useScrollDirection } from "@/hooks";
-import Link from "next/link";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Image from "next/image";
+import { QueryLink } from "@/components/ui/link";
 
 export default function Header() {
   const { scrollDirection } = useScrollDirection(3);
@@ -16,7 +16,7 @@ export default function Header() {
     >
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between p-4">
-          <Link 
+          <QueryLink 
             href="/" 
             className="text-xl font-bold transition-colors duration-200 hover:text-primary"
           >
@@ -27,7 +27,7 @@ export default function Header() {
               height={30} 
               priority
             />
-          </Link>
+          </QueryLink>
           <LanguageSwitcher />
         </div>
       </div>

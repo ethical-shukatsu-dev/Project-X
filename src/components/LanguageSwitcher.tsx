@@ -1,18 +1,24 @@
 'use client';
 
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { languages } from '../i18n-config';
 import { Button } from './ui/button';
+import { createUrlWithParams } from '@/lib/utils';
 
 export default function LanguageSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   
   const switchLanguage = (locale: string) => {
     // Get the current path without the locale prefix
     const currentPath = pathname.split('/').slice(2).join('/');
-    // Navigate to the new locale path
-    router.push(`/${locale}/${currentPath}`);
+    
+    // Use the utility function to create a URL with preserved query parameters
+    const url = createUrlWithParams(`/${locale}/${currentPath}`, searchParams);
+    
+    // Navigate to the new locale path with preserved query parameters
+    router.push(url);
   };
 
   // Determine current language from pathname

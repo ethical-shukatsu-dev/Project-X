@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import StarBorder from "@/components/ui/Animations/StarBorder/StarBorder";
 import {trackSurveyStartClick, trackSurveyTypeSelection} from "@/lib/analytics";
+import { QueryLink } from "@/components/ui/link";
 
 interface QuestionnaireOptionsProps {
   lng: string;
@@ -27,7 +27,7 @@ export default function QuestionnaireOptions({
     <div
       className={`space-y-4 sm:space-y-6  ${className}`}
     >
-        <Link
+        <QueryLink
           href={`/${lng}/questionnaire?type=text`}
           onClick={() => handleSurveyStart("text")}
         >
@@ -54,7 +54,7 @@ export default function QuestionnaireOptions({
               {lng === "ja" ? "始める" : "Start"}
             </span>
           </StarBorder>
-        </Link>
+        </QueryLink>
     </div>
   );
 
