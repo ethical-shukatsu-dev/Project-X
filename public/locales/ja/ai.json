@@ -7,15 +7,15 @@
     "error": "エラーが発生しました"
   },
   "questionnaire": {
-    "title": "企業マッチングアンケート",
+    "title": "質問に答えるだけで業界＆企業診断",
     "description": "いくつかの質問に答えて、あなたの価値観や興味に合った企業を見つけましょう。",
     "submit": "おすすめを取得",
     "submitting": "送信中...",
     "next": "次へ",
     "previous": "前へ",
     "progress": "質問 {{current}} / {{total}}",
-    "complete": "アンケート完了",
-    "thankyou": "アンケートにご回答いただきありがとうございます。最適な企業マッチングを分析しています。",
+    "complete": "診断完了",
+    "thankyou": "診断にご回答いただきありがとうございます。最適な企業マッチングを分析しています。",
     "no_images": "この質問に利用可能な画像がありません。次の質問に進んでください。",
     "image_questions": {
       "work_values": {
