@@ -3,7 +3,7 @@ import {Inter} from "next/font/google";
 import "../globals.css";
 import {dir} from "i18next";
 import {languages} from "../../i18n-config";
-import {ReactNode} from "react";
+import {ReactNode, Suspense} from "react";
 import Header from "@/components/Header";
 import GoogleAuthHead from "@/components/ui/GoogleAuthHead";
 import Head from "next/head";
@@ -32,19 +32,21 @@ export default function RootLayout({
   const RootLayoutContent = async () => {
     const resolvedParams = await params;
     return (
-      <html
-        lang={resolvedParams.lng}
-        dir={dir(resolvedParams.lng)}
-        className={inter.className}
+      <Suspense fallback={<div className="container mx-auto py-10">Loading...</div>}>
+        <html
+          lang={resolvedParams.lng}
+          dir={dir(resolvedParams.lng)}
+          className={inter.className}
       >
         <Head>
           <GoogleAuthHead />
         </Head>
         <body>
           <Header />
-          {children}
-        </body>
-      </html>
+            {children}
+          </body>
+        </html>
+      </Suspense>
     );
   };
 
