@@ -99,11 +99,7 @@ export default function FeaturesSection({
 
         {showQuestionnaireOptions && lng && (
           <div className="flex items-center justify-center mt-16 text-center">
-            <QuestionnaireOptions
-              lng={lng}
-              showAnimation={true}
-              animationDelay={100}
-            />
+            <QuestionnaireOptions lng={lng} />
           </div>
         )}
       </div>
