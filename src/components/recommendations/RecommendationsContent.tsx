@@ -23,6 +23,7 @@ import {
   trackRecommendationsPageVisit,
   trackCompanyInterestedClick,
 } from "@/lib/analytics";
+import { createUrlWithParams } from "@/lib/utils";
 
 interface RecommendationsContentProps {
   lng: string;
@@ -458,7 +459,12 @@ export default function RecommendationsContent({
             </CardHeader>
             <CardFooter className="flex justify-center">
               <Button
-                onClick={() => (window.location.href = `/${lng}/questionnaire`)}
+                onClick={() => {
+                  // Create URL with preserved query parameters 
+                  const currentParams = new URLSearchParams(window.location.search);
+                  const url = createUrlWithParams(`/${lng}/questionnaire`, currentParams);
+                  window.location.href = url;
+                }}
                 className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
               >
                 {t("recommendations.errors.try_again")}

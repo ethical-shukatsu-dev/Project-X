@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import StarBorder from "@/components/ui/Animations/StarBorder/StarBorder";
 import {trackSurveyStartClick, trackSurveyTypeSelection} from "@/lib/analytics";
+import { Link } from "@/components/ui/link";
 
 interface QuestionnaireOptionsProps {
   lng: string;

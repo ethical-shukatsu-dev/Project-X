@@ -21,6 +21,7 @@ import {
   trackSurveyCompleted,
   trackSurveyStepAbandoned,
 } from "@/lib/analytics";
+import {createUrlWithParams} from "@/lib/utils";
 
 // A/B Testing Toggle - This will be overridden by the questionnaireType prop if provided
 const DEFAULT_QUESTIONNAIRE_TYPE = "text"; // "text" or "image"
@@ -958,8 +959,9 @@ export default function ValuesQuestionnaire({
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
     try {
+      setIsSubmitting(true);
+      
       // Track survey completion
       const surveyDurationSeconds = Math.floor(
         (Date.now() - surveyStartTime) / 1000
@@ -1045,11 +1047,22 @@ export default function ValuesQuestionnaire({
       }
 
       const data = await response.json();
-
-      // Redirect to recommendations page with locale and userId
-      router.push(
-        `/${lng}/recommendations?userId=${data.userId}&locale=${lng}`
+      
+      // Use the utility function to create URL with preserved params from window.location.search
+      const searchParamsObj = new URLSearchParams(window.location.search);
+      const url = createUrlWithParams(
+        `/${lng}/recommendations`, 
+        searchParamsObj,
+        {
+          exclude: ['userId', 'type'],
+          include: {
+            userId: data.userId,
+          }
+        }
       );
+      
+      // Navigate to recommendations page
+      router.push(url);
     } catch (error) {
       console.error("Error submitting values:", error);
       // Handle error (show toast, etc.)

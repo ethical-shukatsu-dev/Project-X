@@ -1,9 +1,9 @@
 "use client";
 
 import { useScrollDirection } from "@/hooks";
-import Link from "next/link";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Image from "next/image";
+import { Link } from "@/components/ui/link";
 
 export default function Header() {
   const { scrollDirection } = useScrollDirection(3);

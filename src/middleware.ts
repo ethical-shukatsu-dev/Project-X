@@ -32,7 +32,15 @@ export function middleware(request: NextRequest) {
     // If not authenticated, redirect to the login page
     if (!adminSession || adminSession.value !== 'authenticated') {
       const url = new URL(`/${getLocale(request)}/admin/login`, request.url);
+      
+      // Preserve the original query parameters
+      request.nextUrl.searchParams.forEach((value, key) => {
+        url.searchParams.set(key, value);
+      });
+      
+      // Add the redirect parameter
       url.searchParams.set('redirect', pathname);
+      
       return NextResponse.redirect(url);
     }
     
@@ -60,15 +68,20 @@ export function middleware(request: NextRequest) {
   // Redirect if there is no locale
   if (pathnameIsMissingLocale) {
     const locale = getLocale(request);
-
-    // e.g. incoming request is /products
-    // The new URL is now /en/products
-    return NextResponse.redirect(
-      new URL(
-        `/${locale}${pathname.startsWith('/') ? '' : '/'}${pathname}`,
-        request.url
-      )
+    
+    // Create new URL with the locale prefix
+    const newUrl = new URL(
+      `/${locale}${pathname.startsWith('/') ? '' : '/'}${pathname}`,
+      request.url
     );
+    
+    // Preserve all query parameters from the original request
+    request.nextUrl.searchParams.forEach((value, key) => {
+      newUrl.searchParams.set(key, value);
+    });
+    
+    // Redirect to the new URL
+    return NextResponse.redirect(newUrl);
   }
 
   // Get the response
