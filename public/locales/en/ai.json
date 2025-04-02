@@ -173,6 +173,8 @@
     "noMatchingPoints": "No specific matching points available",
     "about": "About",
     "whyMatch": "Why it's a match",
+    "matchScore": "Match Breakdown",
+    "hoverForDetails": "Hover/tap categories for details",
     "no_matches": "No matches found",
     "no_pending": "No pending recommendations",
     "no_interested": "No companies marked as interested",
