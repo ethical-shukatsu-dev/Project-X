@@ -1,6 +1,7 @@
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 // import AnonymousModeToggle from "@/components/AnonymousModeToggle";
 import QuestionnaireOptions from "@/components/ui/QuestionnaireOptions/QuestionnaireOptions";
+import CompanyLogos from "@/components/ui/CompanyLogos/CompanyLogos";
 
 interface HeroSectionProps {
   title: string;
@@ -35,11 +36,13 @@ export default function HeroSection({
             </p>
           </AnimatedContent>
 
-          <QuestionnaireOptions
-            lng={lng}
-            showAnimation={true}
-            animationDelay={900}
-          />
+          <AnimatedContent direction="vertical" distance={20} delay={900}>
+            <CompanyLogos />
+          </AnimatedContent>
+
+          <AnimatedContent direction="vertical" distance={10} delay={1200}>
+            <QuestionnaireOptions lng={lng} />
+          </AnimatedContent>
 
           {/* <AnimatedContent direction="vertical" distance={20} delay={1200}>
             <div className="flex justify-center pt-3 mt-6">
