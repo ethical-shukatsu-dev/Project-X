@@ -25,9 +25,8 @@ export default function QuestionnaireOptions({
 
   const content = (
     <div
-      className={`px-4 mt-4 space-y-4 sm:space-y-6 sm:mt-6 md:mt-10 ${className}`}
+      className={`space-y-4 sm:space-y-6  ${className}`}
     >
-      <div className="flex justify-center w-full sm:w-auto">
         <Link
           href={`/${lng}/questionnaire?type=text`}
           onClick={() => handleSurveyStart("text")}
@@ -37,7 +36,7 @@ export default function QuestionnaireOptions({
             color="#3B82F6"
             className="transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]"
           >
-            <span className="flex items-center justify-center gap-2">
+            <span className="flex items-center justify-center gap-2 px-12">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -56,7 +55,6 @@ export default function QuestionnaireOptions({
             </span>
           </StarBorder>
         </Link>
-      </div>
     </div>
   );
 
