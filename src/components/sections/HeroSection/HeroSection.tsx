@@ -57,7 +57,7 @@ export default function HeroSection({
           {/* Right side iPhone mockup */}
           <div className="md:flex-1">
             <AnimatedContent direction="horizontal" distance={40} delay={600}>
-              <PhoneMockup imageSrc="/images/mockups/iphone-mockup-2.png" />
+              <PhoneMockup imageSrc="/images/mockups/iphone_mockup_2.png" />
             </AnimatedContent>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function HeroSection({
           <AnimatedContent direction="vertical" distance={20} delay={2000}>
             <div className="w-full flex justify-center">
               <PhoneMockup
-                imageSrc="/images/mockups/iphone-mockup-2.png"
+                imageSrc="/images/mockups/iphone_mockup_2.png"
                 className="mt-4 h-[400px] w-[200px] max-w-none"
               />
             </div>
