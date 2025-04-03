@@ -6,15 +6,15 @@ import Image from "next/image";
 import { Link } from "@/components/ui/link";
 
 export default function Header() {
-  const { scrollDirection } = useScrollDirection(3);
+  const { scrollDirection } = useScrollDirection(10);
   
   return (
     <header 
-      className={`sticky top-0 z-50 transition-all duration-300 border-b backdrop-blur-sm bg-background/80 border-border ${
+      className={`fixed top-0 z-50 w-full transition-all duration-300 border-b backdrop-blur-sm bg-background/80 border-border ${
         scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"
       }`}
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto">
         <div className="flex items-center justify-between p-4">
           <Link 
             href="/" 

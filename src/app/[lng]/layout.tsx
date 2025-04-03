@@ -43,7 +43,7 @@ export default function RootLayout({
             <GoogleAuthHead />
           </Head>
           <FacebookPixel />
-          <body>
+          <body className="pt-16 border-t border-border">
             <Header />
             {children}
           </body>
