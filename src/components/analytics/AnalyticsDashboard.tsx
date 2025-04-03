@@ -306,8 +306,8 @@ export function AnalyticsDashboard() {
         ) : (
           <MetricCard
             title="Signups"
-            value={stats.signups.totalSignups}
-            description="Total account signups"
+            value={stats.signups.uniqueTotalSignups}
+            description="Total unique account signups"
             onRefresh={() => refreshMetric("signups")}
           />
         )}
