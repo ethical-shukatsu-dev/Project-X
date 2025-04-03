@@ -16,6 +16,9 @@ const FacebookPixel = ({
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    // Only initialize in production
+    if (process.env.NODE_ENV !== 'production') return;
+    
     if (!pixelId || !trackable) return;
 
     // Dynamically import react-facebook-pixel
@@ -24,7 +27,7 @@ const FacebookPixel = ({
       .then((ReactPixel) => {
         const options = {
           autoConfig: true,
-          debug: process.env.NODE_ENV !== 'production',
+          debug: false, // Always false since we're only running in production
         };
         
         ReactPixel.init(pixelId, undefined, options);
