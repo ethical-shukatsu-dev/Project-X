@@ -92,9 +92,29 @@ export function MatchScoreChart({
     matchPoints: item.matchPoints || [],
   }));
 
+  // Calculate container height based on viewport
+  const getContainerHeight = () => {
+    if (typeof window === 'undefined') return 192; // 12rem (h-48) default
+    if (window.innerWidth >= 768) return 256; // md:h-64
+    if (window.innerWidth >= 640) return 208; // sm:h-52
+    return 192; // h-48
+  };
+
+  const [containerHeight, setContainerHeight] = React.useState(getContainerHeight());
+
+  // Update height on window resize
+  React.useEffect(() => {
+    const handleResize = () => {
+      setContainerHeight(getContainerHeight());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <div className={`w-full h-48 sm:h-52 md:h-64 ${className}`}>
-      <ResponsiveContainer width="100%" height="100%">
+    <div style={{ width: '100%', height: containerHeight }} className={className}>
+      <ResponsiveContainer width="100%" height={containerHeight}>
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
           <PolarGrid strokeDasharray="3 3" strokeOpacity={0.3} />
           <PolarAngleAxis
