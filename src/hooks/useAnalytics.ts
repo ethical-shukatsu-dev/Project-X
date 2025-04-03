@@ -1,117 +1,8 @@
 import { useState, useEffect } from 'react';
-
-// Define a type for an analytics event
-export interface AnalyticsEvent {
-  id: string;
-  event_type: string;
-  timestamp: string;
-  session_id?: string;
-  user_id?: string;
-  properties?: Record<string, unknown>;
-  created_at: string;
-}
-
-// Survey step interface
-export interface SurveyStepMetric {
-  id: string;
-  count: number;
-  percentage: string;
-}
-
-// Survey step drop-off interface
-export interface StepDropoffMetric {
-  id: string;
-  label: string;
-  completed: number;
-  abandoned: number;
-  completionRate: string;
-  abandonmentRate: string;
-  avgTimeSpentSeconds: number;
-}
-
-// Define anonymous user metrics type
-export interface AnonymousUserMetrics {
-  total: number;
-  percentage: string;
-  conversionRate: string;
-  completionRate: string;
-}
-
-// Define A/B test comparison metrics type
-export interface ABTestComparisonMetrics {
-  anonymous: {
-    total: number;
-    percentage: string;
-    completionRate: string;
-    conversionRate: string;
-  };
-  nonAnonymous: {
-    total: number;
-    percentage: string;
-    completionRate: string;
-    conversionRate: string;
-  };
-  difference: {
-    completionRate: string;
-    conversionRate: string;
-  };
-}
-
-// Define survey funnel metrics
-interface SurveyFunnelMetrics {
-  visits: number;
-  uniqueUsers: number;
-  started: number;
-  completed: number;
-  startRate: string;
-  completionRate: string;
-  overallConversionRate: string;
-}
-
-// Type definitions for the analytics data
-export interface AnalyticsData {
-  events: AnalyticsEvent[];
-  eventCounts: {
-    event_type: string;
-    count: number;
-  }[];
-  stats: {
-    totalEvents: number;
-    signupClicks: number;
-    dialogCloses: number;
-    uniqueDialogCloses: number;
-    dialogCloseConversionRate: string;
-    conversionRate: string;
-    surveyFunnel: SurveyFunnelMetrics;
-    surveyTypes: {
-      text: number;
-      image: number;
-      total: number;
-    };
-    recommendations: {
-      pageVisits: number;
-      companyInterestClicks: number;
-      uniqueCompanyInterests: number;
-      companyInterestRate: string;
-      averageCompaniesPerUser: number;
-    };
-    signups: {
-      emailSignups: number;
-      googleSignups: number;
-      totalSignups: number;
-      uniqueEmailSignups: number;
-      uniqueGoogleSignups: number;
-      uniqueTotalSignups: number;
-    };
-    surveySteps: SurveyStepMetric[];
-    dropoffAnalysis: StepDropoffMetric[];
-    anonymousUsers: AnonymousUserMetrics;
-    abTestComparison: ABTestComparisonMetrics;
-  };
-}
-
-// Type for the time range filter
-export type TimeRange = '24h' | '7d' | '30d' | 'all';
+import { 
+  AnalyticsData, 
+  TimeRange
+} from '@/types/analytics';
 
 export function useAnalytics(initialTimeRange: TimeRange = '7d') {
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -120,19 +11,69 @@ export function useAnalytics(initialTimeRange: TimeRange = '7d') {
   const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
 
   // Fetch analytics data
-  const fetchAnalytics = async (selectedTimeRange: TimeRange = timeRange) => {
+  const fetchAnalytics = async (selectedTimeRange: TimeRange = timeRange, metricKey?: string) => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`/api/admin/analytics?timeRange=${selectedTimeRange}`);
+      const url = `/api/admin/analytics?timeRange=${selectedTimeRange}${metricKey ? `&metric=${metricKey}` : ''}`;
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch analytics: ${response.status} ${response.statusText}`);
       }
       
       const analyticsData = await response.json();
-      setData(analyticsData);
+      
+      // If fetching a specific metric, merge with existing data
+      if (metricKey && data) {
+        // For specific metrics, the API returns partial data
+        // so we need to merge it with existing data
+        setData({
+          ...data,
+          stats: {
+            ...data.stats,
+            ...analyticsData.stats,
+            // Handle nested objects that might be partial
+            surveyFunnel: analyticsData.stats.surveyFunnel 
+              ? { ...data.stats.surveyFunnel, ...analyticsData.stats.surveyFunnel }
+              : data.stats.surveyFunnel,
+            surveyTypes: analyticsData.stats.surveyTypes
+              ? { ...data.stats.surveyTypes, ...analyticsData.stats.surveyTypes }
+              : data.stats.surveyTypes,
+            recommendations: analyticsData.stats.recommendations
+              ? { ...data.stats.recommendations, ...analyticsData.stats.recommendations }
+              : data.stats.recommendations,
+            signups: analyticsData.stats.signups
+              ? { ...data.stats.signups, ...analyticsData.stats.signups }
+              : data.stats.signups,
+            anonymousUsers: analyticsData.stats.anonymousUsers
+              ? { ...data.stats.anonymousUsers, ...analyticsData.stats.anonymousUsers }
+              : data.stats.anonymousUsers,
+            abTestComparison: analyticsData.stats.abTestComparison
+              ? {
+                  ...data.stats.abTestComparison,
+                  ...analyticsData.stats.abTestComparison,
+                  anonymous: analyticsData.stats.abTestComparison.anonymous
+                    ? { ...data.stats.abTestComparison.anonymous, ...analyticsData.stats.abTestComparison.anonymous }
+                    : data.stats.abTestComparison.anonymous,
+                  nonAnonymous: analyticsData.stats.abTestComparison.nonAnonymous
+                    ? { ...data.stats.abTestComparison.nonAnonymous, ...analyticsData.stats.abTestComparison.nonAnonymous }
+                    : data.stats.abTestComparison.nonAnonymous,
+                  difference: analyticsData.stats.abTestComparison.difference
+                    ? { ...data.stats.abTestComparison.difference, ...analyticsData.stats.abTestComparison.difference }
+                    : data.stats.abTestComparison.difference,
+                }
+              : data.stats.abTestComparison,
+            // Arrays can be replaced if present
+            surveySteps: analyticsData.stats.surveySteps || data.stats.surveySteps,
+            dropoffAnalysis: analyticsData.stats.dropoffAnalysis || data.stats.dropoffAnalysis,
+          }
+        });
+      } else {
+        // If fetching all data, replace the entire state
+        setData(analyticsData);
+      }
     } catch (err) {
       console.error('Error fetching analytics data:', err);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));

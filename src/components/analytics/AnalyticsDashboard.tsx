@@ -8,13 +8,14 @@ import {
   ABTestComparison,
 } from "./DashboardCards";
 import {SurveyStepsFunnel} from "./SurveyStepsFunnel";
-import {useAnalytics, TimeRange} from "@/hooks/useAnalytics";
+import {useAnalytics} from "@/hooks/useAnalytics";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Button} from "@/components/ui/button";
 import {RefreshCw} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Skeleton} from "@/components/ui/skeleton";
 import {useState} from "react";
+import {TimeRange} from "@/types/analytics";
 
 const timeRangeLabels: Record<TimeRange, string> = {
   "24h": "Last 24 Hours",
@@ -50,8 +51,8 @@ export function AnalyticsDashboard() {
     // Set the specific metric loading state
     setRefreshingStates((prev) => ({...prev, [metricKey]: true}));
 
-    // Refresh all data
-    await refreshData();
+    // Refresh only the specific metric
+    await refreshData(timeRange, metricKey);
 
     // Reset loading state after a short delay for visual feedback
     setTimeout(() => {
@@ -301,14 +302,14 @@ export function AnalyticsDashboard() {
         )}
 
         {/* Signups */}
-        {refreshingStates.signups ? (
+        {refreshingStates.uniqueSignups ? (
           <MetricCardSkeleton />
         ) : (
           <MetricCard
             title="Signups"
             value={stats.signups.uniqueTotalSignups}
             description="Total unique account signups"
-            onRefresh={() => refreshMetric("signups")}
+            onRefresh={() => refreshMetric("uniqueSignups")}
           />
         )}
       </div>
