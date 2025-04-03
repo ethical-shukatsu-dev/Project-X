@@ -1,18 +1,16 @@
 import ValuesQuestionnaire from "@/components/forms/ValuesQuestionnaire";
 import {
   Card,
-  CardDescription,
   CardHeader,
-  CardTitle,
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
 import {Suspense} from "react";
 import {Skeleton} from "@/components/ui/skeleton";
-import {getTranslation} from "@/i18n-server";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 import BackgroundEffects from "@/components/ui/BackgroundEffects/BackgroundEffects";
 import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
+import Image from "next/image";
 
 // Loading skeleton component for the questionnaire
 function QuestionnaireLoadingSkeleton() {
@@ -71,7 +69,6 @@ export default function QuestionnairePage({
     const resolvedParams = await params;
     const resolvedSearchParams = await searchParams;
     const lng = resolvedParams.lng;
-    const {t} = await getTranslation(lng, "ai");
 
     // Get the questionnaire type from the URL query parameters
     const questionnaireType = resolvedSearchParams.type || "text"; // Default to text if not specified
@@ -82,20 +79,17 @@ export default function QuestionnairePage({
         <FloatingDecorations />
 
         <Suspense fallback={<QuestionnaireLoadingSkeleton />}>
-          <main className="relative z-20 flex-1 pt-12 pb-20">
-            <div className="container px-4 py-8 mx-auto">
-              <div className="max-w-2xl mx-auto">
+          <main className="relative z-20 flex-1 pt-4 sm:pt-12 pb-20">
+            <div className="container px-4  mx-auto">
+              <div className="flex flex-col items-center gap-8 sm:gap-12 max-w-2xl mx-auto">
                 <AnimatedContent direction="vertical" distance={40} delay={300}>
-                  <Card className="mb-8 text-center bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10">
-                    <CardHeader>
-                      <CardTitle className="text-3xl font-bold text-transparent md:text-4xl bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
-                        {t("questionnaire.title")}
-                      </CardTitle>
-                      <CardDescription className="text-lg text-gray-300">
-                        {t("questionnaire.description")}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
+                  <Image
+                    src="/images/questionnaire/questionnaire_header.png"
+                    alt="Questionnaire header"
+                    width={700}
+                    height={300}
+                    priority
+                  />
                 </AnimatedContent>
 
                 <AnimatedContent direction="vertical" distance={30} delay={600}>
