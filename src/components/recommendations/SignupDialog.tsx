@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {
   Dialog,
   DialogClose,
@@ -12,11 +12,17 @@ import BounceCards from "@/components/ui/Components/BounceCards/BounceCards";
 import CompanyCard from "@/components/ui/Components/BounceCards/CompanyCard";
 import {RecommendationResult} from "@/lib/openai/client";
 import {Button} from "../ui/button";
-import {trackSignupClick, trackEvent, trackEmailSignupClick, trackGoogleSignupClick} from "@/lib/analytics";
+import {
+  trackSignupClick,
+  trackEvent,
+  trackEmailSignupClick,
+  trackGoogleSignupClick,
+} from "@/lib/analytics";
 import {useIsMobile} from "../../hooks/useIsMobile";
 import GoogleSignUpButton from "../ui/GoogleSignUpButton";
 import {useRouter} from "next/navigation";
 import {BASE_URL} from "@/lib/constants/domain";
+import { LOCALSTORAGE_KEYS } from "@/lib/constants/localStorage";
 
 // Extend the RecommendationResult type to include the feedback property
 interface ExtendedRecommendationResult extends RecommendationResult {
@@ -43,6 +49,17 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   const {t} = useTranslation(lng, "ai");
   const isMobile = useIsMobile();
   const router = useRouter();
+  const [isAnonymous, setIsAnonymous] = useState(false);
+
+  // Check if we're in a browser environment before accessing localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedValue = localStorage.getItem(
+        LOCALSTORAGE_KEYS.ANONYMOUS_COMPANIES
+      );
+      setIsAnonymous(storedValue === "true");
+    }
+  }, []);
 
   // Create company cards for the first 5 recommendations
   // If showRevealedOnly is true, only show companies with feedback
@@ -57,7 +74,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
         key={rec.id || rec.company.id}
         name={rec.company.name}
         logoUrl={rec.company.logo_url}
-        shouldAnonymize={!rec.feedback}
+        shouldAnonymize={!rec.feedback && isAnonymous}
       />
     ))
     .reverse();
@@ -67,12 +84,13 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
     try {
       // Track email signup click
       await trackEmailSignupClick();
-      
+
       // Also track the legacy signup click event
       await trackSignupClick("signup_dialog", {
         dialog_type: showInPage ? "in_page" : "modal",
-        revealed_companies: filteredRecommendations.filter((rec) => rec.feedback)
-          .length,
+        revealed_companies: filteredRecommendations.filter(
+          (rec) => rec.feedback
+        ).length,
         total_companies: recommendations.length,
       });
     } catch (error) {

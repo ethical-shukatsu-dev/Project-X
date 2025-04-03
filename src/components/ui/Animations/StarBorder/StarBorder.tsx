@@ -16,7 +16,7 @@ type StarBorderProps<T extends React.ElementType> =
 const StarBorder = <T extends React.ElementType = "button">({
   as,
   className = "",
-  color = "white",
+  color = "#ffd129",
   speed = "6s",
   children,
   ...rest
@@ -42,7 +42,10 @@ const StarBorder = <T extends React.ElementType = "button">({
           animationDuration: speed,
         }}
       ></div>
-      <div className="relative z-1 bg-gradient-to-b from-black to-gray-900 border border-gray-800 text-white text-center text-[16px] py-[16px] px-[26px] rounded-[20px]">
+      <div
+        className="relative z-1 bg-[#ffd129] bg-opacity-100 backdrop-blur-none border border-gray-800 text-gray-900 text-center text-[16px] py-[16px] px-[26px] rounded-[20px]"
+        style={{backgroundColor: "#ffd129"}}
+      >
         {children}
       </div>
     </Component>

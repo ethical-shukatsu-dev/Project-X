@@ -23,7 +23,7 @@ import {
   trackRecommendationsPageVisit,
   trackCompanyInterestedClick,
 } from "@/lib/analytics";
-import { createUrlWithParams } from "@/lib/utils";
+import {createUrlWithParams} from "@/lib/utils";
 
 interface RecommendationsContentProps {
   lng: string;
@@ -84,7 +84,7 @@ export default function RecommendationsContent({
           // Use streaming API
           setIsStreaming(true);
           setRecommendations([]); // Clear existing recommendations
-          
+
           // Set up fetch for streaming response
           const response = await fetch(
             `/api/recommendations/stream?userId=${userId}&locale=${lng}${
@@ -102,12 +102,12 @@ export default function RecommendationsContent({
 
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
-          
+
           let done = false;
           while (!done) {
-            const { value, done: readerDone } = await reader.read();
+            const {value, done: readerDone} = await reader.read();
             done = readerDone;
-            
+
             if (done) {
               // Streaming finished
               setIsStreaming(false);
@@ -115,51 +115,73 @@ export default function RecommendationsContent({
               setRefreshing(false);
               break;
             }
-            
-            const chunk = decoder.decode(value, { stream: true });
+
+            const chunk = decoder.decode(value, {stream: true});
             // Split the chunk into lines (each line is a JSON object)
-            const lines = chunk.split('\n').filter(line => line.trim() !== '');
-            
-            console.log("Stream received:", { chunk, lineCount: lines.length });
-            
+            const lines = chunk
+              .split("\n")
+              .filter((line) => line.trim() !== "");
+
+            console.log("Stream received:", {chunk, lineCount: lines.length});
+
             for (const line of lines) {
               try {
-                console.log("Processing line:", line.substring(0, 100) + (line.length > 100 ? "..." : ""));
-                
+                console.log(
+                  "Processing line:",
+                  line.substring(0, 100) + (line.length > 100 ? "..." : "")
+                );
+
                 // Make sure the line is valid JSON
-                if (!line.trim().startsWith('{') || !line.trim().endsWith('}')) {
+                if (
+                  !line.trim().startsWith("{") ||
+                  !line.trim().endsWith("}")
+                ) {
                   console.warn("Line doesn't appear to be valid JSON:", line);
                   continue;
                 }
-                
+
                 const data = JSON.parse(line);
                 console.log("Parsed data:", data);
-                
+
                 if (data.recommendation) {
-                  console.log("Found recommendation for:", data.recommendation.company?.name || "Unknown company");
+                  console.log(
+                    "Found recommendation for:",
+                    data.recommendation.company?.name || "Unknown company"
+                  );
                   console.log("Recommendation details:", {
                     id: data.recommendation.id,
                     companyId: data.recommendation.company?.id,
-                    matchingPoints: data.recommendation.matching_points?.length || 0
+                    matchingPoints:
+                      data.recommendation.matching_points?.length || 0,
                   });
-                  
+
                   // Add the new recommendation to the state
-                  setRecommendations(prev => {
+                  setRecommendations((prev) => {
                     // Check if we already have this recommendation
-                    const exists = prev.some(r => r.id === data.recommendation.id);
+                    const exists = prev.some(
+                      (r) => r.id === data.recommendation.id
+                    );
                     if (exists) {
                       console.log("Recommendation already exists, skipping");
                       return prev;
                     }
-                    
+
                     console.log("Adding new recommendation to state");
                     return [...prev, data.recommendation];
                   });
                 } else {
-                  console.warn("Parsed JSON does not contain a recommendation property:", data);
+                  console.warn(
+                    "Parsed JSON does not contain a recommendation property:",
+                    data
+                  );
                 }
               } catch (e) {
-                console.error("Error parsing JSON from stream:", e, "Line:", line);
+                console.error(
+                  "Error parsing JSON from stream:",
+                  e,
+                  "Line:",
+                  line
+                );
               }
             }
           }
@@ -207,7 +229,7 @@ export default function RecommendationsContent({
         // Always use streaming for refresh
         setIsStreaming(true);
         setRecommendations([]); // Clear existing recommendations
-        
+
         // Set up fetch for streaming response
         const response = await fetch(
           `/api/recommendations/stream?userId=${userId}&locale=${lng}&refresh=true`
@@ -223,63 +245,80 @@ export default function RecommendationsContent({
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        
+
         let done = false;
         while (!done) {
-          const { value, done: readerDone } = await reader.read();
+          const {value, done: readerDone} = await reader.read();
           done = readerDone;
-          
+
           if (done) {
             // Streaming finished
             setIsStreaming(false);
             setRefreshing(false);
             break;
           }
-          
-          const chunk = decoder.decode(value, { stream: true });
+
+          const chunk = decoder.decode(value, {stream: true});
           // Split the chunk into lines (each line is a JSON object)
-          const lines = chunk.split('\n').filter(line => line.trim() !== '');
-          
-          console.log("Stream received:", { chunk, lineCount: lines.length });
-          
+          const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+
+          console.log("Stream received:", {chunk, lineCount: lines.length});
+
           for (const line of lines) {
             try {
-              console.log("Processing line:", line.substring(0, 100) + (line.length > 100 ? "..." : ""));
-              
+              console.log(
+                "Processing line:",
+                line.substring(0, 100) + (line.length > 100 ? "..." : "")
+              );
+
               // Make sure the line is valid JSON
-              if (!line.trim().startsWith('{') || !line.trim().endsWith('}')) {
+              if (!line.trim().startsWith("{") || !line.trim().endsWith("}")) {
                 console.warn("Line doesn't appear to be valid JSON:", line);
                 continue;
               }
-              
+
               const data = JSON.parse(line);
               console.log("Parsed data:", data);
-              
+
               if (data.recommendation) {
-                console.log("Found recommendation for:", data.recommendation.company?.name || "Unknown company");
+                console.log(
+                  "Found recommendation for:",
+                  data.recommendation.company?.name || "Unknown company"
+                );
                 console.log("Recommendation details:", {
                   id: data.recommendation.id,
                   companyId: data.recommendation.company?.id,
-                  matchingPoints: data.recommendation.matching_points?.length || 0
+                  matchingPoints:
+                    data.recommendation.matching_points?.length || 0,
                 });
-                
+
                 // Add the new recommendation to the state
-                setRecommendations(prev => {
+                setRecommendations((prev) => {
                   // Check if we already have this recommendation
-                  const exists = prev.some(r => r.id === data.recommendation.id);
+                  const exists = prev.some(
+                    (r) => r.id === data.recommendation.id
+                  );
                   if (exists) {
                     console.log("Recommendation already exists, skipping");
                     return prev;
                   }
-                  
+
                   console.log("Adding new recommendation to state");
                   return [...prev, data.recommendation];
                 });
               } else {
-                console.warn("Parsed JSON does not contain a recommendation property:", data);
+                console.warn(
+                  "Parsed JSON does not contain a recommendation property:",
+                  data
+                );
               }
             } catch (e) {
-              console.error("Error parsing JSON from stream:", e, "Line:", line);
+              console.error(
+                "Error parsing JSON from stream:",
+                e,
+                "Line:",
+                line
+              );
             }
           }
         }
@@ -460,9 +499,14 @@ export default function RecommendationsContent({
             <CardFooter className="flex justify-center">
               <Button
                 onClick={() => {
-                  // Create URL with preserved query parameters 
-                  const currentParams = new URLSearchParams(window.location.search);
-                  const url = createUrlWithParams(`/${lng}/questionnaire`, currentParams);
+                  // Create URL with preserved query parameters
+                  const currentParams = new URLSearchParams(
+                    window.location.search
+                  );
+                  const url = createUrlWithParams(
+                    `/${lng}/questionnaire`,
+                    currentParams
+                  );
                   window.location.href = url;
                 }}
                 className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
@@ -555,20 +599,26 @@ export default function RecommendationsContent({
               <span>{t("recommendations.loading.more_coming")}</span>
             </div>
           )}
-          
+
           {/* Show partial success message if we got fewer recommendations than expected */}
-          {!isStreaming && recommendations.length > 0 && recommendations.length < 5 && (
-            <div className="flex flex-col items-center justify-center py-4 mt-4 text-gray-300">
-              <p className="mb-2">{t("recommendations.partial_success", { count: recommendations.length })}</p>
-              <Button 
-                onClick={handleRefresh}
-                variant="outline"
-                className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
-              >
-                {t("recommendations.get_more")}
-              </Button>
-            </div>
-          )}
+          {!isStreaming &&
+            recommendations.length > 0 &&
+            recommendations.length < 5 && (
+              <div className="flex flex-col items-center justify-center py-4 mt-4 text-gray-300">
+                <p className="mb-2">
+                  {t("recommendations.partial_success", {
+                    count: recommendations.length,
+                  })}
+                </p>
+                <Button
+                  onClick={handleRefresh}
+                  variant="outline"
+                  className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
+                >
+                  {t("recommendations.get_more")}
+                </Button>
+              </div>
+            )}
         </div>
 
         <AnimatedContent direction="vertical" distance={20} delay={100}>
