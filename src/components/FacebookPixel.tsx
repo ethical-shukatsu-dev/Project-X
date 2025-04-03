@@ -1,21 +1,36 @@
 'use client';
 
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
-import ReactPixel from 'react-facebook-pixel';
 
-const FacebookPixel = () => {
+type Props = {
+  pixelId?: string;
+  trackable?: boolean;
+}
+
+const FacebookPixel = ({ 
+  pixelId = process.env.NEXT_PUBLIC_FB_PIXEL_ID,
+  trackable = true 
+}: Props) => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   useEffect(() => {
-    // Initialize Facebook Pixel
-    if (typeof window !== 'undefined') {
-      const options = {
-        autoConfig: true,
-        debug: process.env.NODE_ENV !== 'production',
-      };
-      
-      ReactPixel.init(process.env.NEXT_PUBLIC_FB_PIXEL_ID as string, undefined, options);
-      ReactPixel.pageView();
-    }
-  }, []);
+    if (!pixelId || !trackable) return;
+
+    // Dynamically import react-facebook-pixel
+    import('react-facebook-pixel')
+      .then((x) => x.default)
+      .then((ReactPixel) => {
+        const options = {
+          autoConfig: true,
+          debug: process.env.NODE_ENV !== 'production',
+        };
+        
+        ReactPixel.init(pixelId, undefined, options);
+        ReactPixel.pageView();
+      });
+  }, [pixelId, trackable, pathname, searchParams]);
 
   return null;
 };
