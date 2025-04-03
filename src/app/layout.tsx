@@ -1,5 +1,6 @@
 import type {Metadata} from "next";
 import {languages} from "@/i18n-config";
+import FacebookPixel from "@/components/FacebookPixel";
 
 export const metadata: Metadata = {
   title: "Project X - Find Your Perfect Company Match",
@@ -12,5 +13,10 @@ export async function generateStaticParams() {
 }
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
-  return children;
+  return (
+    <>
+      <FacebookPixel />
+      {children}
+    </>
+  );
 }
