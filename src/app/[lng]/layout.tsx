@@ -7,6 +7,7 @@ import {ReactNode, Suspense} from "react";
 import Header from "@/components/Header";
 import GoogleAuthHead from "@/components/ui/GoogleAuthHead";
 import Head from "next/head";
+import FacebookPixel from "@/components/FacebookPixel";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -41,6 +42,7 @@ export default function RootLayout({
           <Head>
             <GoogleAuthHead />
           </Head>
+          <FacebookPixel />
           <body>
             <Header />
             {children}
