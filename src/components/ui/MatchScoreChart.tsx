@@ -42,26 +42,28 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
   if (active && payload && payload.length) {
     const data = payload[0].payload as ChartData;
     return (
-      <div className="bg-background/90 p-2 rounded-md border border-white/10 shadow-lg max-w-xs">
+      <div className="border border-white/10 shadow-lg max-w-xs p-2 rounded-md backdrop-blur-md bg-white/90 dark:bg-gray-900/90">
         <p className="font-semibold text-sm">
           {data.category}: {data.value}
         </p>
 
         {/* If we have detailed explanation, show it */}
         {data.details && (
-          <p className="mt-1 text-xs text-gray-800 italic">{data.details}</p>
+          <p className="mt-1 text-xs text-gray-800 dark:text-gray-200 italic">
+            {data.details}
+          </p>
         )}
 
         {/* If we have specific matching points, show them as a list */}
         {data.matchPoints && data.matchPoints.length > 0 ? (
-          <ul className="mt-1 text-xs text-gray-800 list-disc pl-4">
+          <ul className="mt-1 text-xs text-gray-800 dark:text-gray-200 list-disc pl-4">
             {data.matchPoints.slice(0, 3).map((point: string, i: number) => (
               <li key={i} className="line-clamp-2">
                 {point}
               </li>
             ))}
             {data.matchPoints.length > 3 && (
-              <li className="text-gray-800 italic">
+              <li className="text-gray-800 dark:text-gray-200 italic">
                 +{data.matchPoints.length - 3} more
               </li>
             )}
@@ -70,7 +72,9 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
 
         {/* Show the category if available */}
         {data.matchCategory && (
-          <p className="mt-1 text-xs text-gray-800">{data.matchCategory}</p>
+          <p className="mt-1 text-xs text-gray-800 dark:text-gray-200">
+            {data.matchCategory}
+          </p>
         )}
       </div>
     );
@@ -94,13 +98,15 @@ export function MatchScoreChart({
 
   // Calculate container height based on viewport
   const getContainerHeight = () => {
-    if (typeof window === 'undefined') return 192; // 12rem (h-48) default
+    if (typeof window === "undefined") return 192; // 12rem (h-48) default
     if (window.innerWidth >= 768) return 256; // md:h-64
     if (window.innerWidth >= 640) return 208; // sm:h-52
     return 192; // h-48
   };
 
-  const [containerHeight, setContainerHeight] = React.useState(getContainerHeight());
+  const [containerHeight, setContainerHeight] = React.useState(
+    getContainerHeight()
+  );
 
   // Update height on window resize
   React.useEffect(() => {
@@ -108,12 +114,12 @@ export function MatchScoreChart({
       setContainerHeight(getContainerHeight());
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
-    <div style={{ width: '100%', height: containerHeight }} className={className}>
+    <div style={{width: "100%", height: containerHeight}} className={className}>
       <ResponsiveContainer width="100%" height={containerHeight}>
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
           <PolarGrid strokeDasharray="3 3" strokeOpacity={0.3} />
