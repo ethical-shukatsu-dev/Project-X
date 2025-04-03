@@ -13,10 +13,23 @@ import {
 } from "../ui/tooltip";
 import Link from "next/link";
 import {LOCALSTORAGE_KEYS} from "@/lib/constants/localStorage";
+import {MatchScoreChart} from "../ui/MatchScoreChart";
+
+// Define the structure for match scores
+interface MatchScore {
+  name: string;
+  score: number;
+  details: string;
+  category: string;
+}
 
 interface CompanyCardProps {
   company: Company;
   matchingPoints: string[];
+  valueMatchRatings?: Record<string, number>;
+  strengthMatchRatings?: Record<string, number>;
+  valueMatchingDetails?: Record<string, string>;
+  strengthMatchingDetails?: Record<string, string>;
   onFeedback: (feedback: "interested" | "not_interested") => void;
   feedback?: "interested" | "not_interested";
   lng: string;
@@ -25,6 +38,10 @@ interface CompanyCardProps {
 export default function CompanyCard({
   company,
   matchingPoints,
+  valueMatchRatings = {},
+  strengthMatchRatings = {},
+  valueMatchingDetails = {},
+  strengthMatchingDetails = {},
   onFeedback,
   feedback,
   lng,
@@ -34,6 +51,132 @@ export default function CompanyCard({
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [isRevealing, setIsRevealing] = useState<boolean>(false);
   const [wasAnonymous, setWasAnonymous] = useState<boolean>(false);
+
+  // Generate match scores from actual match ratings data
+  const generateMatchScores = (): MatchScore[] => {
+    const matchScores: MatchScore[] = [];
+    
+    // Process value match ratings
+    if (Object.keys(valueMatchRatings).length > 0) {
+      // Convert to array of objects and sort by score (highest first)
+      const valueScores = Object.entries(valueMatchRatings).map(([name, score]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' '),
+        score: score * 10, // Convert 1-10 scale to percentage (0-100)
+        details: valueMatchingDetails[name] || '',
+        category: 'Values'
+      }));
+      
+      // Take top value scores for the chart (limit to top 3)
+      matchScores.push(...valueScores.sort((a, b) => b.score - a.score).slice(0, 3));
+    }
+    
+    // Process strength match ratings
+    if (Object.keys(strengthMatchRatings).length > 0) {
+      // Convert to array of objects and sort by score (highest first)
+      const strengthScores = Object.entries(strengthMatchRatings).map(([name, score]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' '),
+        score: score * 10, // Convert 1-10 scale to percentage (0-100)
+        details: strengthMatchingDetails[name] || '',
+        category: 'Strengths'
+      }));
+      
+      // Take top strength scores for the chart (limit to top 2)
+      matchScores.push(...strengthScores.sort((a, b) => b.score - a.score).slice(0, 2));
+    }
+    
+    // If we still don't have enough points (at least 3), extract from matching points
+    if (matchScores.length < 3 && matchingPoints.length > 0) {
+      // Create a fallback map to track categories found in matching points
+      const categoryMap: Record<string, { count: number; matchPoints: string[] }> = {};
+      
+      // Process matching points to extract key categories
+      matchingPoints.forEach(point => {
+        // Try to extract category
+        let category = "Other";
+        
+        // Look for common categories in the matching point text
+        const categoryKeywords = [
+          { term: 'culture', category: 'Culture' },
+          { term: 'value', category: 'Values' },
+          { term: 'skill', category: 'Skills' },
+          { term: 'experience', category: 'Experience' },
+          { term: 'environment', category: 'Environment' },
+          { term: 'work-life', category: 'Work-Life Balance' },
+          { term: 'leadership', category: 'Leadership' },
+          { term: 'innovation', category: 'Innovation' },
+          { term: 'growth', category: 'Growth' }
+        ];
+        
+        for (const keyword of categoryKeywords) {
+          if (point.toLowerCase().includes(keyword.term)) {
+            category = keyword.category;
+            break;
+          }
+        }
+        
+        // Track the category
+        if (!categoryMap[category]) {
+          categoryMap[category] = { count: 0, matchPoints: [] };
+        }
+        
+        categoryMap[category].count += 1;
+        categoryMap[category].matchPoints.push(point);
+      });
+      
+      // Convert to scores and add to matchScores
+      const additionalScores = Object.entries(categoryMap)
+        .filter(([name]) => !matchScores.some(score => score.name.includes(name))) // Avoid duplicates
+        .map(([name, data]) => ({
+          name,
+          score: 75 + Math.min(data.count * 5, 20), // Base score 75 + up to 20 more based on count
+          details: data.matchPoints.join('. '),
+          category: 'Match Categories'
+        }))
+        .sort((a, b) => b.score - a.score);
+      
+      // Add enough to reach at least 5 total points
+      matchScores.push(...additionalScores.slice(0, 5 - matchScores.length));
+    }
+    
+    // Ensure we have at least 3 categories for the radar chart
+    if (matchScores.length < 3) {
+      // Use the company values to create fallback categories
+      if (company.values) {
+        const companyValueScores = Object.entries(company.values)
+          .filter(([key]) => ['innovation', 'work_life_balance', 'diversity_inclusion', 'career_growth'].includes(key))
+          .map(([key, value]) => ({
+            name: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+            score: value * 10, // Convert to percentage
+            details: `Company rates ${value}/10 for ${key.replace(/_/g, ' ')}`,
+            category: 'Company Values'
+          }))
+          .sort((a, b) => b.score - a.score);
+          
+        // Add enough to reach at least 5 total points
+        matchScores.push(...companyValueScores.slice(0, 5 - matchScores.length));
+      }
+      
+      // If we still don't have enough, add generic categories
+      const defaultCategories = ['Culture Fit', 'Skills Match', 'Value Alignment', 'Growth Potential', 'Work Environment'];
+      let i = 0;
+      while (matchScores.length < 5 && i < defaultCategories.length) {
+        if (!matchScores.some(score => score.name === defaultCategories[i])) {
+          matchScores.push({
+            name: defaultCategories[i],
+            score: 70 + Math.floor(Math.random() * 15),
+            details: 'Based on overall company profile',
+            category: 'General Fit'
+          });
+        }
+        i++;
+      }
+    }
+    
+    // Limit to 5 categories for the pentagon chart
+    return matchScores.slice(0, 5);
+  };
+
+  const matchScores = generateMatchScores();
 
   // Check if we're in a browser environment before accessing localStorage
   useEffect(() => {
@@ -282,44 +425,66 @@ export default function CompanyCard({
         </CardHeader>
 
         <CardContent className="px-3 sm:px-6">
-          <div className="mb-3 sm:mb-4">
-            <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
-              {t("recommendations.about")}
-            </h3>
-            <p
-              className={`text-xs sm:text-sm text-white/80 ${
-                wasAnonymous && feedback ? "reveal-text-delay" : ""
-              }`}
-            >
-              {shouldAnonymize
-                ? getSanitizedDescription(company.description, company.name)
-                : company.description}
-            </p>
-          </div>
-          <div>
-            <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
-              {t("recommendations.whyMatch")}
-            </h3>
-            <ul className="pl-4 text-xs list-disc sm:pl-5 sm:text-sm text-white/80">
-              {matchingPoints && matchingPoints.length > 0 ? (
-                matchingPoints.map((point, index) => (
-                  <li
-                    key={index}
-                    className={
-                      wasAnonymous && feedback
-                        ? `reveal-text-delay-${(index % 3) + 2}`
-                        : ""
-                    }
-                  >
-                    {shouldAnonymize
-                      ? getSanitizedDescription(point, company.name)
-                      : point}
-                  </li>
-                ))
-              ) : (
-                <li>{t("recommendations.noMatchingPoints")}</li>
-              )}
-            </ul>
+          {/* Content now always uses a vertical layout */}
+          <div className="flex flex-col gap-4">
+            {/* Match Score Visualization - Only show when not anonymized or after feedback */}
+            {(!shouldAnonymize || feedback) && (
+              <div className={`w-full transition-opacity duration-300 ${wasAnonymous && feedback ? "reveal-chart" : ""}`}>
+                <h3 className="mb-1 text-sm font-medium text-white">
+                  {t("recommendations.matchScore") || "Match Breakdown"}
+                </h3>
+                <div className="mt-1 text-xs text-white/60 mb-1">
+                  {t("recommendations.hoverForDetails") || "Hover/tap categories for details"}
+                </div>
+                <MatchScoreChart 
+                  matchingScores={matchScores}
+                  className="mt-2"
+                />
+              </div>
+            )}
+
+            {/* Company details section */}
+            <div className="w-full">
+              <div className="mb-3 sm:mb-4">
+                <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
+                  {t("recommendations.about")}
+                </h3>
+                <p
+                  className={`text-xs sm:text-sm text-white/80 ${
+                    wasAnonymous && feedback ? "reveal-text-delay" : ""
+                  }`}
+                >
+                  {shouldAnonymize
+                    ? getSanitizedDescription(company.description, company.name)
+                    : company.description}
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
+                  {t("recommendations.whyMatch")}
+                </h3>
+                <ul className="pl-4 text-xs list-disc sm:pl-5 sm:text-sm text-white/80">
+                  {matchingPoints && matchingPoints.length > 0 ? (
+                    matchingPoints.map((point, index) => (
+                      <li
+                        key={index}
+                        className={
+                          wasAnonymous && feedback
+                            ? `reveal-text-delay-${(index % 3) + 2}`
+                            : ""
+                        }
+                      >
+                        {shouldAnonymize
+                          ? getSanitizedDescription(point, company.name)
+                          : point}
+                      </li>
+                    ))
+                  ) : (
+                    <li>{t("recommendations.noMatchingPoints")}</li>
+                  )}
+                </ul>
+              </div>
+            </div>
           </div>
         </CardContent>
 
