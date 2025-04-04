@@ -3,6 +3,7 @@ import AnimatedContent from "@/components/ui/Animations/AnimatedContent/Animated
 import QuestionnaireOptions from "@/components/ui/QuestionnaireOptions/QuestionnaireOptions";
 import CompanyLogos from "@/components/ui/CompanyLogos/CompanyLogos";
 import PhoneMockup from "@/components/ui/PhoneMockup/PhoneMockup";
+import AnonymousModeToggle from "@/components/AnonymousModeToggle";
 
 interface HeroSectionProps {
   title: string;
@@ -47,11 +48,12 @@ export default function HeroSection({
             <AnimatedContent direction="vertical" distance={10} delay={1200}>
               <QuestionnaireOptions lng={lng} />
             </AnimatedContent>
-            {/* <AnimatedContent direction="vertical" distance={20} delay={1200}>
-              <div className="flex justify-center pt-3 mt-6">
+            
+            <AnimatedContent direction="vertical" distance={20} delay={1200}>
+              <div className="flex justify-center pt-3 mt-6 hidden">
                 <AnonymousModeToggle lng={lng} />
               </div>
-            </AnimatedContent> */}
+            </AnimatedContent>
           </div>
 
           {/* Right side iPhone mockup */}
