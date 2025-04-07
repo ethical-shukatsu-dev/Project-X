@@ -113,6 +113,12 @@ export interface SignupMetrics {
   uniqueEmailSignups: number;
   uniqueGoogleSignups: number;
   uniqueTotalSignups: number;
+  anonymousEmailSignups: number;
+  nonAnonymousEmailSignups: number;
+  anonymousGoogleSignups: number;
+  nonAnonymousGoogleSignups: number;
+  anonymousTotalSignups: number;
+  nonAnonymousTotalSignups: number;
 }
 
 // Survey type metrics

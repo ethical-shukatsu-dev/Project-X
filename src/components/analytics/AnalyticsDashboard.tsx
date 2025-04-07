@@ -134,6 +134,12 @@ export function AnalyticsDashboard() {
       uniqueEmailSignups: 0,
       uniqueGoogleSignups: 0,
       uniqueTotalSignups: 0,
+      anonymousEmailSignups: 0,
+      nonAnonymousEmailSignups: 0,
+      anonymousGoogleSignups: 0,
+      nonAnonymousGoogleSignups: 0,
+      anonymousTotalSignups: 0,
+      nonAnonymousTotalSignups: 0,
     },
     surveySteps: [],
     dropoffAnalysis: [],
@@ -523,6 +529,21 @@ export function AnalyticsDashboard() {
                     {stats.signups.uniqueEmailSignups}
                   </span>
                 </div>
+                <div className="mt-2 pt-2 border-t border-border">
+                  <h4 className="text-xs font-medium mb-1">Unique User Breakdown</h4>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Anonymous Users</span>
+                    <span className="text-xs font-medium">
+                      {stats.signups.anonymousEmailSignups}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Non-Anonymous Users</span>
+                    <span className="text-xs font-medium">
+                      {stats.signups.nonAnonymousEmailSignups}
+                    </span>
+                  </div>
+                </div>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <h3 className="text-sm font-medium mb-2">Google Signups</h3>
@@ -538,6 +559,21 @@ export function AnalyticsDashboard() {
                     {stats.signups.uniqueGoogleSignups}
                   </span>
                 </div>
+                <div className="mt-2 pt-2 border-t border-border">
+                  <h4 className="text-xs font-medium mb-1">Unique User Breakdown</h4>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Anonymous Users</span>
+                    <span className="text-xs font-medium">
+                      {stats.signups.anonymousGoogleSignups}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Non-Anonymous Users</span>
+                    <span className="text-xs font-medium">
+                      {stats.signups.nonAnonymousGoogleSignups}
+                    </span>
+                  </div>
+                </div>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <h3 className="text-sm font-medium mb-2">Total Signups</h3>
@@ -552,6 +588,21 @@ export function AnalyticsDashboard() {
                   <span className="font-medium">
                     {stats.signups.uniqueTotalSignups}
                   </span>
+                </div>
+                <div className="mt-2 pt-2 border-t border-border">
+                  <h4 className="text-xs font-medium mb-1">Unique User Breakdown</h4>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Anonymous Users</span>
+                    <span className="text-xs font-medium">
+                      {stats.signups.anonymousTotalSignups}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Non-Anonymous Users</span>
+                    <span className="text-xs font-medium">
+                      {stats.signups.nonAnonymousTotalSignups}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -822,6 +873,18 @@ function DashboardSkeleton() {
                       <Skeleton className="h-4 w-16" />
                       <Skeleton className="h-4 w-12" />
                     </div>
+                    {/* Add breakdown section skeleton */}
+                    <div className="mt-2 pt-2 border-t border-border">
+                      <Skeleton className="h-4 w-24 mb-1" />
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-3 w-10" />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-3 w-10" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -888,16 +951,37 @@ function DashboardSkeleton() {
       {/* Anonymous Users Card Skeleton */}
       <Card>
         <CardHeader>
-          <Skeleton className="h-6 w-48 mb-2" />
+          <Skeleton className="h-5 w-48" />
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {Array(4)
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Array(3)
               .fill(0)
               .map((_, i) => (
-                <div key={i} className="flex justify-between items-center">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-16" />
+                <div key={i} className="p-4 bg-muted/50 rounded-lg">
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    {/* Add breakdown section skeleton */}
+                    <div className="mt-2 pt-2 border-t border-border">
+                      <Skeleton className="h-4 w-24 mb-1" />
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-3 w-10" />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-3 w-10" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
           </div>

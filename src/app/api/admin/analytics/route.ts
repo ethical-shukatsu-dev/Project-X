@@ -195,8 +195,19 @@ export async function GET(
         (uniqueCounts?.signups?.email_signups || 0) +
         (uniqueCounts?.signups?.google_signups || 0),
       uniqueEmailSignups: uniqueCounts?.signups?.unique_email_users || 0,
-      uniqueGoogleSignups: uniqueCounts?.signups?.unique_google_users || 0,
+      uniqueGoogleSignups:
+        uniqueCounts?.signups?.unique_google_users || 0,
       uniqueTotalSignups: uniqueCounts?.signups?.unique_users || 0,
+      anonymousEmailSignups: uniqueCounts?.signups?.anonymous_email_signups || 0,
+      nonAnonymousEmailSignups: uniqueCounts?.signups?.non_anonymous_email_signups || 0,
+      anonymousGoogleSignups: uniqueCounts?.signups?.anonymous_google_signups || 0,
+      nonAnonymousGoogleSignups: uniqueCounts?.signups?.non_anonymous_google_signups || 0,
+      anonymousTotalSignups: 
+        (uniqueCounts?.signups?.anonymous_email_signups || 0) +
+        (uniqueCounts?.signups?.anonymous_google_signups || 0),
+      nonAnonymousTotalSignups: 
+        (uniqueCounts?.signups?.non_anonymous_email_signups || 0) +
+        (uniqueCounts?.signups?.non_anonymous_google_signups || 0),
     };
 
     // Process survey step completion data
@@ -429,6 +440,16 @@ async function getSpecificMetric(
             uniqueGoogleSignups:
               uniqueCounts?.signups?.unique_google_users || 0,
             uniqueTotalSignups: uniqueCounts?.signups?.unique_users || 0,
+            anonymousEmailSignups: uniqueCounts?.signups?.anonymous_email_signups || 0,
+            nonAnonymousEmailSignups: uniqueCounts?.signups?.non_anonymous_email_signups || 0,
+            anonymousGoogleSignups: uniqueCounts?.signups?.anonymous_google_signups || 0,
+            nonAnonymousGoogleSignups: uniqueCounts?.signups?.non_anonymous_google_signups || 0,
+            anonymousTotalSignups: 
+              (uniqueCounts?.signups?.anonymous_email_signups || 0) +
+              (uniqueCounts?.signups?.anonymous_google_signups || 0),
+            nonAnonymousTotalSignups: 
+              (uniqueCounts?.signups?.non_anonymous_email_signups || 0) +
+              (uniqueCounts?.signups?.non_anonymous_google_signups || 0),
           },
         };
         break;
@@ -512,6 +533,16 @@ async function getSpecificMetric(
             uniqueGoogleSignups:
               uniqueCounts?.signups?.unique_google_users || 0,
             uniqueTotalSignups: uniqueCounts?.signups?.unique_users || 0,
+            anonymousEmailSignups: uniqueCounts?.signups?.anonymous_email_signups || 0,
+            nonAnonymousEmailSignups: uniqueCounts?.signups?.non_anonymous_email_signups || 0,
+            anonymousGoogleSignups: uniqueCounts?.signups?.anonymous_google_signups || 0,
+            nonAnonymousGoogleSignups: uniqueCounts?.signups?.non_anonymous_google_signups || 0,
+            anonymousTotalSignups: 
+              (uniqueCounts?.signups?.anonymous_email_signups || 0) +
+              (uniqueCounts?.signups?.anonymous_google_signups || 0),
+            nonAnonymousTotalSignups: 
+              (uniqueCounts?.signups?.non_anonymous_email_signups || 0) +
+              (uniqueCounts?.signups?.non_anonymous_google_signups || 0),
           },
         };
         break;
