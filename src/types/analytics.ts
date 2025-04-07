@@ -101,6 +101,8 @@ export interface RecommendationsMetrics {
   uniqueCompanyInterests: number;
   companyInterestRate: string;
   averageCompaniesPerUser: number;
+  anonymousInterests: number;
+  nonAnonymousInterests: number;
 }
 
 // Define signup metrics

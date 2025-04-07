@@ -215,10 +215,12 @@ BEGIN
   WHERE event_type = 'recommendations_page_visit'
   AND created_at >= start_date;
 
-  -- Get unique company interested clicks and total clicks
+  -- Get unique company interested clicks and total clicks with anonymous breakdown
   SELECT jsonb_build_object(
     'unique_users', count(distinct user_id),
-    'total_clicks', count(*)
+    'total_clicks', count(*),
+    'anonymous_clicks', count(distinct case when properties->>'isAnonymous' = 'true' then user_id end),
+    'non_anonymous_clicks', count(distinct case when properties->>'isAnonymous' = 'false' then user_id end)
   )
   INTO company_int
   FROM analytics_events

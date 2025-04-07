@@ -165,14 +165,12 @@ export async function GET(
     const recommendationsMetrics = {
       pageVisits: uniqueCounts?.recommendations_page_visits?.unique_users || 0,
       companyInterestClicks: uniqueCounts?.company_interests?.total_clicks || 0,
-      uniqueCompanyInterests:
-        uniqueCounts?.company_interests?.unique_users || 0,
+      uniqueCompanyInterests: uniqueCounts?.company_interests?.unique_users || 0,
       companyInterestRate: `${
         uniqueCounts?.recommendations_page_visits?.unique_users > 0
           ? Math.round(
               ((uniqueCounts?.company_interests?.unique_users || 0) /
-                (uniqueCounts?.recommendations_page_visits?.unique_users ||
-                  1)) *
+                (uniqueCounts?.recommendations_page_visits?.unique_users || 1)) *
                 100
             )
           : 0
@@ -185,6 +183,8 @@ export async function GET(
                 10
             ) / 10
           : 0,
+      anonymousInterests: uniqueCounts?.company_interests?.anonymous_clicks || 0,
+      nonAnonymousInterests: uniqueCounts?.company_interests?.non_anonymous_clicks || 0,
     };
 
     // Signup metrics
@@ -543,6 +543,8 @@ async function getSpecificMetric(
                       10
                   ) / 10
                 : 0,
+            anonymousInterests: uniqueCounts?.company_interests?.anonymous_clicks || 0,
+            nonAnonymousInterests: uniqueCounts?.company_interests?.non_anonymous_clicks || 0,
           },
         };
         break;
