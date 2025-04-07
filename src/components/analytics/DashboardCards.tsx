@@ -84,6 +84,10 @@ interface ConversionFunnelProps {
   steps: {
     name: string;
     value: number;
+    breakdown?: {
+      anonymous: number;
+      nonAnonymous: number;
+    };
   }[];
   rates: {
     name: string;
@@ -108,20 +112,49 @@ export function ConversionFunnel({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          {/* Steps */}
           <div className="grid grid-cols-3 gap-4">
             {steps.map((step, i) => (
               <div key={i} className="text-center">
-                <div className="text-2xl font-bold">{step.value.toLocaleString()}</div>
-                <div className="text-sm text-muted-foreground">{step.name}</div>
+                <div className="text-2xl font-bold">{step.value}</div>
+                <div className="text-xs text-muted-foreground">{step.name}</div>
               </div>
             ))}
           </div>
-          <div className="h-2 bg-muted rounded-full" />
+
+          {/* Started Breakdown */}
+          {steps[1]?.name === "Started" && steps[1]?.breakdown && (
+            <div className="pt-2 border-t">
+              <h4 className="text-sm font-medium mb-2">Started Breakdown</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-2 bg-muted/50 rounded-lg text-center">
+                  <div className="text-sm font-medium">{steps[1].breakdown.anonymous}</div>
+                  <div className="text-xs text-muted-foreground">Anonymous</div>
+                </div>
+                <div className="p-2 bg-muted/50 rounded-lg text-center">
+                  <div className="text-sm font-medium">{steps[1].breakdown.nonAnonymous}</div>
+                  <div className="text-xs text-muted-foreground">Non-Anonymous</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Progress Bar */}
+          <div className="h-2 bg-muted rounded-full">
+            <div
+              className="h-2 bg-primary rounded-full"
+              style={{
+                width: rates[rates.length - 1]?.value || "0%",
+              }}
+            />
+          </div>
+
+          {/* Rates */}
           <div className="grid grid-cols-3 gap-4">
             {rates.map((rate, i) => (
               <div key={i} className="text-center">
-                <div className="text-2xl font-bold">{rate.value}</div>
-                <div className="text-sm text-muted-foreground">{rate.name}</div>
+                <div className="text-sm font-medium">{rate.value}</div>
+                <div className="text-xs text-muted-foreground">{rate.name}</div>
               </div>
             ))}
           </div>

@@ -141,6 +141,8 @@ export async function GET(
       startRate: `${surveyStartRate}%`,
       completionRate: `${surveyCompletionRate}%`,
       overallConversionRate: `${overallConversionRate}%`,
+      anonymousStarts: uniqueCounts?.survey_starts?.anonymous_starts || 0,
+      nonAnonymousStarts: uniqueCounts?.survey_starts?.non_anonymous_starts || 0,
     };
 
     // Survey type metrics

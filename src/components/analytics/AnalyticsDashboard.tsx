@@ -110,6 +110,8 @@ export function AnalyticsDashboard() {
       startRate: "0%",
       completionRate: "0%",
       overallConversionRate: "0%",
+      anonymousStarts: 0,
+      nonAnonymousStarts: 0,
     },
     surveyTypes: {
       text: 0,
@@ -404,6 +406,10 @@ export function AnalyticsDashboard() {
               {
                 name: "Started",
                 value: stats.surveyFunnel.started,
+                breakdown: {
+                  anonymous: stats.surveyFunnel.anonymousStarts,
+                  nonAnonymous: stats.surveyFunnel.nonAnonymousStarts,
+                },
               },
               {
                 name: "Completed",

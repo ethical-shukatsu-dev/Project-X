@@ -67,6 +67,8 @@ export interface SurveyFunnelMetrics {
   startRate: string;
   completionRate: string;
   overallConversionRate: string;
+  anonymousStarts: number;
+  nonAnonymousStarts: number;
 }
 
 // Define anonymous user metrics type
