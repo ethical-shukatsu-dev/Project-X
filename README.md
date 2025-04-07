@@ -245,12 +245,32 @@ BEGIN
   AND created_at >= start_date;
 
   signup_stats := jsonb_build_object(
-    'email_signups', email_signups,
-    'google_signups', google_signups,
-    'unique_email_users', unique_email_users,
-    'unique_google_users', unique_google_users,
-    'unique_users', total_signups
-  );
+  'email_signups', email_signups,
+  'google_signups', google_signups,
+  'unique_email_users', unique_email_users,
+  'unique_google_users', unique_google_users,
+  'unique_users', total_signups,
+  'anonymous_email_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events 
+    WHERE event_type = 'signup_email' 
+    AND properties->>'isAnonymous' = 'true' 
+    AND user_id IS NOT NULL 
+    AND created_at >= start_date),
+  'non_anonymous_email_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events 
+    WHERE event_type = 'signup_email' 
+    AND (properties->>'isAnonymous' = 'false' OR properties->>'isAnonymous' IS NULL) 
+    AND user_id IS NOT NULL 
+    AND created_at >= start_date),
+  'anonymous_google_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events 
+    WHERE event_type = 'signup_google' 
+    AND properties->>'isAnonymous' = 'true' 
+    AND user_id IS NOT NULL 
+    AND created_at >= start_date),
+  'non_anonymous_google_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events 
+    WHERE event_type = 'signup_google' 
+    AND (properties->>'isAnonymous' = 'false' OR properties->>'isAnonymous' IS NULL) 
+    AND user_id IS NOT NULL 
+    AND created_at >= start_date)
+);
 
   -- Get survey type stats
   SELECT jsonb_object_agg(
