@@ -110,6 +110,8 @@ export function AnalyticsDashboard() {
       startRate: "0%",
       completionRate: "0%",
       overallConversionRate: "0%",
+      anonymousStarts: 0,
+      nonAnonymousStarts: 0,
     },
     surveyTypes: {
       text: 0,
@@ -122,6 +124,8 @@ export function AnalyticsDashboard() {
       companyInterestRate: "0%",
       averageCompaniesPerUser: 0,
       uniqueCompanyInterests: 0,
+      anonymousInterests: 0,
+      nonAnonymousInterests: 0,
     },
     signups: {
       emailSignups: 0,
@@ -404,6 +408,10 @@ export function AnalyticsDashboard() {
               {
                 name: "Started",
                 value: stats.surveyFunnel.started,
+                breakdown: {
+                  anonymous: stats.surveyFunnel.anonymousStarts,
+                  nonAnonymous: stats.surveyFunnel.nonAnonymousStarts,
+                },
               },
               {
                 name: "Completed",
@@ -589,38 +597,60 @@ export function AnalyticsDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Page Visits</span>
-                <span className="font-medium">
-                  {stats.recommendations.pageVisits}
-                </span>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Page Visits</span>
+                  <span className="font-medium">
+                    {stats.recommendations.pageVisits}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Interest Clicks</span>
+                  <span className="font-medium">
+                    {stats.recommendations.companyInterestClicks}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Interest Clicks Unique Users</span>
+                  <span className="font-medium">
+                    {stats.recommendations.uniqueCompanyInterests}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Interest Clicks</span>
-                <span className="font-medium">
-                  {stats.recommendations.companyInterestClicks}
-                </span>
+
+              {/* Interest Breakdown */}
+              <div className="pt-2 border-t">
+                <h4 className="text-sm font-medium mb-2">Interest Breakdown</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-2 bg-muted/50 rounded-lg text-center">
+                    <div className="text-sm font-medium">
+                      {stats.recommendations.anonymousInterests}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Anonymous Users</div>
+                  </div>
+                  <div className="p-2 bg-muted/50 rounded-lg text-center">
+                    <div className="text-sm font-medium">
+                      {stats.recommendations.nonAnonymousInterests}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Non-Anonymous Users</div>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Interest Clicks Unique Users</span>
-                <span className="font-medium">
-                  {stats.recommendations.uniqueCompanyInterests}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">
-                  Rate of Users who Clicked Interest
-                </span>
-                <span className="font-medium">
-                  {stats.recommendations.companyInterestRate}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Avg. Companies/User</span>
-                <span className="font-medium">
-                  {stats.recommendations.averageCompaniesPerUser}
-                </span>
+
+              <div className="space-y-2 pt-2 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Rate of Users who Clicked Interest</span>
+                  <span className="font-medium">
+                    {stats.recommendations.companyInterestRate}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Avg. Companies/User</span>
+                  <span className="font-medium">
+                    {stats.recommendations.averageCompaniesPerUser}
+                  </span>
+                </div>
               </div>
             </div>
           </CardContent>

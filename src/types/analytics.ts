@@ -67,6 +67,8 @@ export interface SurveyFunnelMetrics {
   startRate: string;
   completionRate: string;
   overallConversionRate: string;
+  anonymousStarts: number;
+  nonAnonymousStarts: number;
 }
 
 // Define anonymous user metrics type
@@ -99,6 +101,8 @@ export interface RecommendationsMetrics {
   uniqueCompanyInterests: number;
   companyInterestRate: string;
   averageCompaniesPerUser: number;
+  anonymousInterests: number;
+  nonAnonymousInterests: number;
 }
 
 // Define signup metrics

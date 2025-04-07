@@ -166,6 +166,8 @@ DECLARE
   total_signups bigint;
   total_anon_users bigint;
   completed_anon_surveys bigint;
+  anon_survey_starts bigint;
+  non_anon_survey_starts bigint;
 BEGIN
   -- Get unique home page visits
   SELECT jsonb_build_object(
@@ -176,14 +178,24 @@ BEGIN
   WHERE event_type = 'home_page_visit'
   AND created_at >= start_date;
 
-  -- Get unique survey starts
-  SELECT jsonb_build_object(
-    'unique_users', count(distinct user_id)
-  )
-  INTO survey_start
+  -- Get unique survey starts with anonymous breakdown
+  SELECT 
+    count(distinct case when properties->>'isAnonymous' = 'true' then user_id end) as anon_starts,
+    count(distinct case when properties->>'isAnonymous' = 'false' then user_id end) as non_anon_starts,
+    count(distinct user_id) as total_starts
+  INTO 
+    anon_survey_starts,
+    non_anon_survey_starts,
+    survey_start
   FROM analytics_events
   WHERE event_type = 'survey_start_click'
   AND created_at >= start_date;
+
+  survey_start := jsonb_build_object(
+    'unique_users', survey_start,
+    'anonymous_starts', anon_survey_starts,
+    'non_anonymous_starts', non_anon_survey_starts
+  );
 
   -- Get unique survey completions
   SELECT jsonb_build_object(
@@ -203,10 +215,12 @@ BEGIN
   WHERE event_type = 'recommendations_page_visit'
   AND created_at >= start_date;
 
-  -- Get unique company interested clicks and total clicks
+  -- Get unique company interested clicks and total clicks with anonymous breakdown
   SELECT jsonb_build_object(
     'unique_users', count(distinct user_id),
-    'total_clicks', count(*)
+    'total_clicks', count(*),
+    'anonymous_clicks', count(distinct case when properties->>'isAnonymous' = 'true' then user_id end),
+    'non_anonymous_clicks', count(distinct case when properties->>'isAnonymous' = 'false' then user_id end)
   )
   INTO company_int
   FROM analytics_events
@@ -296,20 +310,23 @@ BEGIN
     GROUP BY properties->>'stepId'
   ) dropoff_counts;
 
-  -- Get anonymous user stats
+  -- Get anonymous user stats with starts included
   SELECT
     count(distinct user_id),
-    count(distinct case when event_type = 'survey_completed' then user_id end)
+    count(distinct case when event_type = 'survey_completed' then user_id end),
+    count(distinct case when event_type = 'survey_start_click' then user_id end)
   INTO
     total_anon_users,
-    completed_anon_surveys
+    completed_anon_surveys,
+    anon_survey_starts
   FROM analytics_events
   WHERE properties->>'isAnonymous' = 'true'
   AND created_at >= start_date;
 
   anon_stats := jsonb_build_object(
     'total_unique_users', total_anon_users,
-    'completed_surveys', completed_anon_surveys
+    'completed_surveys', completed_anon_surveys,
+    'started_surveys', anon_survey_starts
   );
 
   -- Get dialog closes stats
