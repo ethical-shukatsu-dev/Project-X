@@ -17,7 +17,7 @@ export default function Header() {
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between p-4">
           <Link 
-            href="/" 
+            href="/questionnaire" 
             className="text-xl font-bold transition-colors duration-200 hover:text-primary"
           >
             <Image 
