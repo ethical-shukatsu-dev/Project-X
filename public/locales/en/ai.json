@@ -227,7 +227,7 @@
     }
   },
   "cta": {
-    "title": "By registering with BaseMe, \nyou can view information about info sessions, events, and internships from companies that match you.",
+    "title": "Find more info on company events, internships and more on BaseMe",
     "benefit1": {
       "title": "Personalized Matches",
       "description": "Powered by BaseMe AI"
@@ -240,7 +240,7 @@
       "title": "Browse Companies",
       "description": "Access partner listings"
     },
-    "primaryButton": "Sign up with Email",
+    "primaryButton": "Sign up with BaseMe",
     "secondaryButton": "Continue with Google",
     "disclaimer": "By signing up, you agree to our Terms and Privacy Policy."
   },
