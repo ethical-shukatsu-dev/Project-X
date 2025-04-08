@@ -5,6 +5,7 @@ import {getTranslation} from "@/i18n-server";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
 import BackgroundEffects from "@/components/ui/BackgroundEffects/BackgroundEffects";
 import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
+import RecommendationsTracker from "@/components/analytics/RecommendationsTracker";
 
 // Loading fallback component
 async function RecommendationsLoading({lng}: {lng: string}) {
@@ -51,6 +52,8 @@ export default function RecommendationsPage({
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
         <BackgroundEffects />
         <FloatingDecorations />
+        
+        <RecommendationsTracker />
 
         <main className="relative z-20 flex-1">
           <Suspense fallback={<RecommendationsLoading lng={lng} />}>
