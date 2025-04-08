@@ -1,65 +1,66 @@
-import {getTranslation} from "@/i18n-server";
-import BackgroundEffects from "@/components/ui/BackgroundEffects/BackgroundEffects";
-import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
-import HeroSection from "@/components/sections/HeroSection/HeroSection";
-import FeaturesSection from "@/components/sections/FeaturesSection/FeaturesSection";
-import Footer from "@/components/ui/Footer/Footer";
-import HomePageTracker from "@/components/analytics/HomePageTracker";
-
+// import {getTranslation} from "@/i18n-server";
+// import BackgroundEffects from "@/components/ui/BackgroundEffects/BackgroundEffects";
+// import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
+// import HeroSection from "@/components/sections/HeroSection/HeroSection";
+// import FeaturesSection from "@/components/sections/FeaturesSection/FeaturesSection";
+// import Footer from "@/components/ui/Footer/Footer";
+// import HomePageTracker from "@/components/analytics/HomePageTracker";
+import { redirect } from "next/navigation";
 export default function Home({params}: {params: Promise<{lng: string}>}) {
   // Use an async IIFE to handle the Promise
   const HomeContent = async () => {
     const resolvedParams = await params;
     const lng = resolvedParams.lng;
-    const {t} = await getTranslation(lng, "common");
+    // const {t} = await getTranslation(lng, "common");
+    redirect(`/${lng}/questionnaire`);
 
-    const features = [
-      {
-        title: t("features.quick.title"),
-        description: t("features.quick.description"),
-        color: "blue" as const,
-      },
-      {
-        title: t("features.values.title"),
-        description: t("features.values.description"),
-        color: "purple" as const,
-      },
-      {
-        title: t("features.insights.title"),
-        description: t("features.insights.description"),
-        color: "pink" as const,
-      },
-    ];
+    // const features = [
+    //   {
+    //     title: t("features.quick.title"),
+    //     description: t("features.quick.description"),
+    //     color: "blue" as const,
+    //   },
+    //   {
+    //     title: t("features.values.title"),
+    //     description: t("features.values.description"),
+    //     color: "purple" as const,
+    //   },
+    //   {
+    //     title: t("features.insights.title"),
+    //     description: t("features.insights.description"),
+    //     color: "pink" as const,
+    //   },
+    // ];
 
-    const heroProps = {
-      title: t("homepage.title"),
-      description: t("homepage.description"),
-      lng: lng,
-    };
+    // const heroProps = {
+    //   title: t("homepage.title"),
+    //   description: t("homepage.description"),
+    //   lng: lng,
+    // };
 
-    const featuresProps = {
-      title: t("features.quick.title") || "Why Choose Us",
-      features: features,
-      showQuestionnaireOptions: true,
-      lng: lng,
-    };
+    // const featuresProps = {
+    //   title: t("features.quick.title") || "Why Choose Us",
+    //   features: features,
+    //   showQuestionnaireOptions: true,
+    //   lng: lng,
+    // };
 
-    return (
-      <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
-        <BackgroundEffects />
-        <FloatingDecorations />
+    // return (
+    //   <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
+    //     <BackgroundEffects />
+    //     <FloatingDecorations />
 
-        <HomePageTracker />
+    //     <HomePageTracker />
 
-        <main className="relative z-20 flex-1">
-          <HeroSection {...heroProps} />
+    //     <main className="relative z-20 flex-1">
+    //       <HeroSection {...heroProps} />
 
-          <FeaturesSection {...featuresProps} />
-        </main>
+    //       <FeaturesSection {...featuresProps} />
+    //     </main>
 
-        <Footer copyright={t("footer.copyright")} />
-      </div>
-    );
+    //     <Footer copyright={t("footer.copyright")} />
+    //   </div>
+    // );
   };
 
   return HomeContent();
