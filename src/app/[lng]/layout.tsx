@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import GoogleAuthHead from "@/components/ui/GoogleAuthHead";
 import Head from "next/head";
 import FacebookPixel from "@/components/FacebookPixel";
+import ClarityProvider from "@/components/ClarityProvider";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -42,11 +43,13 @@ export default function RootLayout({
           <Head>
             <GoogleAuthHead />
           </Head>
-          <FacebookPixel />
-          <body>
-            <Header />
-            {children}
-          </body>
+          <ClarityProvider>
+            <FacebookPixel />
+            <body>
+              <Header />
+              {children}
+            </body>
+          </ClarityProvider>
         </html>
       </Suspense>
     );

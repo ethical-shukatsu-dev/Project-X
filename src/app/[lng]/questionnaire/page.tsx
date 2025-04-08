@@ -11,6 +11,7 @@ import AnimatedContent from "@/components/ui/Animations/AnimatedContent/Animated
 import BackgroundEffects from "@/components/ui/BackgroundEffects/BackgroundEffects";
 import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
 import Image from "next/image";
+import QuestionnaireTracker from "@/components/analytics/QuestionnaireTracker";
 
 // Loading skeleton component for the questionnaire
 function QuestionnaireLoadingSkeleton() {
@@ -77,6 +78,8 @@ export default function QuestionnairePage({
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
         <BackgroundEffects />
         <FloatingDecorations />
+        
+        <QuestionnaireTracker questionnaireType={questionnaireType} />
 
         <Suspense fallback={<QuestionnaireLoadingSkeleton />}>
           <main className="relative z-20 flex-1 pt-4 sm:pt-12 pb-20">
