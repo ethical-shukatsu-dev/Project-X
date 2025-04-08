@@ -1119,22 +1119,22 @@ export default function ValuesQuestionnaire({
             <RadioGroup
               value={values[question.id] || ""}
               onValueChange={(value) => handleValueChange(question.id, value)}
-              className="space-y-3"
+              className="grid grid-cols-1 gap-3 sm:grid-cols-2"
             >
               {question.options.map(
                 (option: {value: string; labelKey: string}) => (
                   <div
                     key={option.value}
-                    className="flex items-center space-x-2"
+                    className="relative"
                   >
                     <RadioGroupItem
                       id={option.value}
                       value={t(option.labelKey)}
-                      className="border-white/50 text-white data-[state=checked]:bg-white data-[state=checked]:border-white"
+                      className="peer sr-only"
                     />
                     <Label
                       htmlFor={option.value}
-                      className="text-base text-gray-300"
+                      className="flex items-center justify-center w-full p-4 text-base text-gray-300 transition-all duration-300 rounded-lg cursor-pointer border border-white/10 hover:bg-white/5 peer-data-[state=checked]:bg-gradient-to-r peer-data-[state=checked]:from-blue-500/80 peer-data-[state=checked]:to-purple-500/80 peer-data-[state=checked]:border-transparent peer-data-[state=checked]:text-white peer-data-[state=checked]:shadow-lg hover:shadow-blue-500/10"
                     >
                       {t(option.labelKey)}
                     </Label>
