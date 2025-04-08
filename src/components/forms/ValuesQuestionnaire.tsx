@@ -916,6 +916,10 @@ export default function ValuesQuestionnaire({
     setSelectedImageValues((prev) => ({...prev, [questionId]: imageId}));
     // Mark that an answer has been selected
     setAnswerSelected(true);
+    // Automatically progress to next question if not on the last question
+    if (currentQuestion < totalQuestions - 1) {
+      handleNext();
+    }
   };
 
   const handleNext = async () => {
@@ -1073,6 +1077,10 @@ export default function ValuesQuestionnaire({
     setValues((prev) => ({...prev, [questionId]: value}));
     // Mark that an answer has been selected
     setAnswerSelected(true);
+    // Automatically progress to next question if not on the last question
+    if (currentQuestion < totalQuestions - 1) {
+      handleNext();
+    }
   };
 
   // If translations are not loaded yet, show a loading state
