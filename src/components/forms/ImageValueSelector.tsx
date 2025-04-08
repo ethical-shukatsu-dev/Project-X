@@ -64,12 +64,37 @@ export function ImageQuestionGrid({
   selectedImageId,
 }: ImageQuestionGridProps) {
   return (
-    <div className="space-y-4">
-      <ImageValueSelector
-        images={images}
-        onSelect={onSelect}
-        selectedImageId={selectedImageId}
-      />
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 min-h-[300px] max-w-4xl mx-auto">
+      {images.map((image) => (
+        <button
+          key={image.id}
+          onClick={() => onSelect(image.id)}
+          className={`relative flex flex-col items-center p-4 transition-all duration-300 rounded-xl border hover:shadow-blue-500/10 min-h-[250px] ${
+            selectedImageId === image.id
+              ? "border-transparent bg-gradient-to-r from-blue-500/80 to-purple-500/80 shadow-lg"
+              : "border-white/10 hover:bg-white/5"
+          }`}
+        >
+          {/* Image container with consistent aspect ratio */}
+          <div className="relative w-full h-48 rounded-lg overflow-hidden">
+            <img
+              src={image.image_url}
+              alt={image.value_name}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            />
+          </div>
+          {/* Value name label */}
+          <span className={`mt-4 text-lg sm:text-xl ${
+            selectedImageId === image.id
+              ? "text-white"
+              : "text-gray-300"
+          }`}>
+            {image.value_name.split("_").map(word => 
+              word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(" ")}
+          </span>
+        </button>
+      ))}
     </div>
   );
 }
