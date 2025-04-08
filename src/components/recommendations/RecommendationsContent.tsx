@@ -17,7 +17,6 @@ import {Company} from "@/lib/supabase/client";
 import {useTranslation} from "@/i18n-client";
 import SignupDialog from "@/components/recommendations/SignupDialog";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import RecommendationTabs from "@/components/recommendations/RecommendationTabs";
 import {useIsMobile} from "@/hooks/useIsMobile";
 import {
   trackRecommendationsPageVisit,
@@ -46,8 +45,6 @@ export default function RecommendationsContent({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
-  const [activeSizeTab, setActiveSizeTab] = useState("all-sizes");
   const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
   const [, setFeedbackCount] = useState(0);
   const [hasClosedDialog, setHasClosedDialog] = useState(false);
@@ -393,55 +390,6 @@ export default function RecommendationsContent({
     setHasClosedDialog(true);
   };
 
-  // Function to get the filtered recommendations based on both tabs
-  const getFilteredRecommendations = () => {
-    // Helper function to determine company size category
-    const getSizeCategory = (sizeText: string, industry?: string): string => {
-      const normalizedSize = sizeText.toLowerCase();
-      const normalizedIndustry = industry?.toLowerCase() || "";
-
-      if (
-        normalizedSize.includes("startup") ||
-        normalizedSize.includes("スタートアップ") ||
-        normalizedIndustry.includes("startup") ||
-        normalizedIndustry.includes("スタートアップ")
-      ) {
-        return "startup";
-      }
-      if (normalizedSize.includes("small") || normalizedSize.includes("小")) {
-        return "small";
-      }
-      if (normalizedSize.includes("medium") || normalizedSize.includes("中")) {
-        return "medium";
-      }
-      if (normalizedSize.includes("large") || normalizedSize.includes("大")) {
-        return "large";
-      }
-      return "unknown";
-    };
-
-    // First filter by feedback status
-    let filtered = [...recommendations];
-    if (activeTab === "interested") {
-      filtered = filtered.filter((rec) => rec.feedback === "interested");
-    } else if (activeTab === "not-interested") {
-      filtered = filtered.filter((rec) => rec.feedback === "not_interested");
-    } else if (activeTab === "pending") {
-      filtered = filtered.filter((rec) => !rec.feedback);
-    }
-
-    // Then filter by size if not "all-sizes"
-    if (activeSizeTab !== "all-sizes") {
-      filtered = filtered.filter(
-        (rec) =>
-          getSizeCategory(rec.company.size, rec.company.industry) ===
-          activeSizeTab.replace("-sizes", "")
-      );
-    }
-
-    return filtered;
-  };
-
   // Show loading state while translations are loading
   if (!loaded) {
     return (
@@ -535,15 +483,6 @@ export default function RecommendationsContent({
           </p>
         </AnimatedContent>
 
-        <RecommendationTabs
-          lng={lng}
-          recommendations={recommendations}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          activeSizeTab={activeSizeTab}
-          setActiveSizeTab={setActiveSizeTab}
-        />
-
         {/* Display filtered recommendations */}
         <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
           {isStreaming && recommendations.length === 0 ? (
@@ -555,8 +494,8 @@ export default function RecommendationsContent({
                 <div className="w-6 h-6 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
               </div>
             </div>
-          ) : getFilteredRecommendations().length > 0 ? (
-            getFilteredRecommendations().map((recommendation, index) => (
+          ) : recommendations.length > 0 ? (
+            recommendations.map((recommendation, index) => (
               <AnimatedContent
                 key={recommendation.id || recommendation.company.id}
                 direction="vertical"
@@ -572,7 +511,9 @@ export default function RecommendationsContent({
                   valueMatchRatings={recommendation.value_match_ratings}
                   strengthMatchRatings={recommendation.strength_match_ratings}
                   valueMatchingDetails={recommendation.value_matching_details}
-                  strengthMatchingDetails={recommendation.strength_matching_details}
+                  strengthMatchingDetails={
+                    recommendation.strength_matching_details
+                  }
                   feedback={recommendation.feedback}
                   onFeedback={(feedbackType) =>
                     recommendation.id &&
