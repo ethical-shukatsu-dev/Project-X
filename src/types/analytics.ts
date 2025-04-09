@@ -3,7 +3,13 @@
  */
 
 // Define allowed time ranges
-export type TimeRange = "24h" | "7d" | "30d" | "all";
+export type TimeRange = "24h" | "7d" | "30d" | "all" | "custom";
+
+// Custom date range for analytics
+export interface DateRange {
+  startDate: string;
+  endDate: string;
+}
 
 // Types for analytics event data
 export interface AnalyticsEvent {
