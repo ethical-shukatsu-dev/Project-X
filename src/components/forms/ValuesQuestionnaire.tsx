@@ -930,10 +930,6 @@ export default function ValuesQuestionnaire({
     setSelectedImageValues((prev) => ({...prev, [questionId]: imageId}));
     // Mark that an answer has been selected
     setAnswerSelected(true);
-    // Automatically progress to next question if not on the last question
-    if (currentQuestion < totalQuestions - 1) {
-      handleNext();
-    }
   };
 
   const handleNext = async () => {
@@ -1092,10 +1088,6 @@ export default function ValuesQuestionnaire({
     setValues((prev) => ({...prev, [questionId]: value}));
     // Mark that an answer has been selected
     setAnswerSelected(true);
-    // Automatically progress to next question if not on the last question
-    if (currentQuestion < totalQuestions - 1) {
-      handleNext();
-    }
   };
 
   // If translations are not loaded yet, show a loading state
@@ -1119,34 +1111,37 @@ export default function ValuesQuestionnaire({
       const question = randomQuestions[currentQuestion];
       return (
         <>
-          <CardHeader className="flex-none text-center">
-            <CardTitle className="text-2xl sm:text-3xl text-gray-300 mb-4">
+          <CardHeader>
+            <CardTitle className="text-xl text-gray-300">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
                 total: totalTextQuestions,
               })}
             </CardTitle>
-            <CardDescription className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
+            <CardDescription className="text-lg text-gray-300">
               {t(question.questionKey)}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto px-4 sm:px-8">
+          <CardContent>
             <RadioGroup
               value={values[question.id] || ""}
               onValueChange={(value) => handleValueChange(question.id, value)}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 min-h-[200px] max-w-4xl mx-auto"
+              className=" gap-4 sm:gap-6 min-h-[200px] max-w-4xl mx-auto"
             >
               {question.options.map(
                 (option: {value: string; labelKey: string}) => (
-                  <div key={option.value} className="relative">
+                  <div
+                    key={option.value}
+                    className="flex items-center space-x-2"
+                  >
                     <RadioGroupItem
                       id={option.value}
                       value={t(option.labelKey)}
-                      className="peer sr-only"
+                      className="border-white/50 text-white data-[state=checked]:bg-white data-[state=checked]:border-white"
                     />
                     <Label
                       htmlFor={option.value}
-                      className="flex items-center justify-center w-full min-h-[80px] p-4 text-md sm:text-xl text-gray-300 transition-all duration-300 rounded-xl cursor-pointer border border-white/10 hover:bg-white/5 peer-data-[state=checked]:bg-gradient-to-r peer-data-[state=checked]:from-blue-500/80 peer-data-[state=checked]:to-purple-500/80 peer-data-[state=checked]:border-transparent peer-data-[state=checked]:text-white peer-data-[state=checked]:shadow-lg hover:shadow-blue-500/10"
+                      className="text-base text-gray-300"
                     >
                       {t(option.labelKey)}
                     </Label>
@@ -1155,12 +1150,11 @@ export default function ValuesQuestionnaire({
               )}
             </RadioGroup>
           </CardContent>
-          <CardFooter className="flex-none flex justify-between mt-auto pt-6 px-8 border-t border-white/10">
+          <CardFooter className="flex justify-between">
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={currentQuestion === 0}
-              className="text-base px-6 py-2"
             >
               {t("questionnaire.previous")}
             </Button>
@@ -1171,7 +1165,7 @@ export default function ValuesQuestionnaire({
                   : handleNext
               }
               disabled={!values[question.id] || isSubmitting}
-              className="text-base px-6 py-2 text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10"
+              className="text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10"
             >
               {currentQuestion === totalTextQuestions - 1
                 ? isSubmitting
@@ -1192,18 +1186,18 @@ export default function ValuesQuestionnaire({
 
       return (
         <>
-          <CardHeader className="flex-none text-center">
-            <CardTitle className="text-2xl sm:text-3xl text-gray-300 mb-4">
+          <CardHeader>
+            <CardTitle className="text-xl text-gray-300">
               {t("questionnaire.progress", {
                 current: currentQuestion + 1,
                 total: totalImageQuestions,
               })}
             </CardTitle>
-            <CardDescription className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
+            <CardDescription className="text-lg text-gray-300">
               {t(question.questionKey)}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto px-4 sm:px-8">
+          <CardContent>
             {images.length > 0 ? (
               <ImageQuestionGrid
                 images={images}
@@ -1216,12 +1210,11 @@ export default function ValuesQuestionnaire({
               <p>{t("questionnaire.no_images")}</p>
             )}
           </CardContent>
-          <CardFooter className="flex-none flex justify-between mt-auto pt-6 pb-6 px-8 border-t border-white/10">
+          <CardFooter className="flex justify-between">
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={currentQuestion === 0}
-              className="text-base px-6 py-2"
             >
               {t("questionnaire.previous")}
             </Button>
@@ -1235,7 +1228,7 @@ export default function ValuesQuestionnaire({
                 (!selectedImageValues[question.id] && images.length > 0) ||
                 isSubmitting
               }
-              className="text-base px-6 py-2 text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10"
+              className="text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-blue-500/10"
             >
               {currentQuestion === totalImageQuestions - 1
                 ? isSubmitting
@@ -1250,7 +1243,7 @@ export default function ValuesQuestionnaire({
   };
 
   return (
-    <Card className="w-full max-w-[800px] mx-auto bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 shadow-xl hover:shadow-blue-500/10 transition-all duration-300 min-h-[400px] flex flex-col">
+    <Card className="w-full max-w-md  mx-auto bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
       {renderQuestion()}
     </Card>
   );
