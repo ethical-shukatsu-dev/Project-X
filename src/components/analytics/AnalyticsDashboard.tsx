@@ -15,17 +15,22 @@ import {RefreshCw} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Skeleton} from "@/components/ui/skeleton";
 import {useState} from "react";
-import {TimeRange} from "@/types/analytics";
+import {TimeRange, DateRange} from "@/types/analytics";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import {format} from "date-fns";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 
 const timeRangeLabels: Record<TimeRange, string> = {
   "24h": "Last 24 Hours",
   "7d": "Last 7 Days",
   "30d": "Last 30 Days",
   all: "All Time",
+  custom: "Custom Range",
 };
 
 export function AnalyticsDashboard() {
-  const {data, loading, error, timeRange, changeTimeRange, refreshData} =
+  const {data, loading, error, timeRange, dateRange, changeTimeRange, refreshData} =
     useAnalytics();
   const [refreshingStates, setRefreshingStates] = useState<
     Record<string, boolean>
@@ -46,6 +51,11 @@ export function AnalyticsDashboard() {
     dialogCloses: false,
     all: false,
   });
+  
+  // Date picker state
+  const [startDate, setStartDate] = useState<Date | null>(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const refreshMetric = async (metricKey: string) => {
     // Set the specific metric loading state
@@ -66,6 +76,28 @@ export function AnalyticsDashboard() {
     setTimeout(() => {
       setRefreshingStates((prev) => ({...prev, all: false}));
     }, 500);
+  };
+  
+  // Apply custom date range
+  const applyDateRange = () => {
+    if (startDate && endDate) {
+      const customDateRange: DateRange = {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      };
+      changeTimeRange('custom', customDateRange);
+      setDialogOpen(false);
+    }
+  };
+  
+  // Format date for display
+  const formatDateRange = () => {
+    if (timeRange === 'custom' && dateRange) {
+      const start = new Date(dateRange.startDate);
+      const end = new Date(dateRange.endDate);
+      return `${format(start, 'MMM d, yyyy')} - ${format(end, 'MMM d, yyyy')}`;
+    }
+    return timeRangeLabels[timeRange];
   };
 
   if (error) {
@@ -257,20 +289,75 @@ export function AnalyticsDashboard() {
             Refresh All
           </Button>
 
-          <Tabs defaultValue="all">
-            <TabsList>
-              {(Object.keys(timeRangeLabels) as TimeRange[]).map((range) => (
-                <TabsTrigger
-                  key={range}
-                  value={range}
-                  onClick={() => changeTimeRange(range)}
-                  data-state={timeRange === range ? "active" : ""}
-                >
-                  {timeRangeLabels[range]}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <Tabs defaultValue={timeRange}>
+              <TabsList>
+                {(Object.keys(timeRangeLabels) as TimeRange[]).map((range) => {
+                  if (range === 'custom') {
+                    return (
+                      <DialogTrigger key={range} asChild>
+                        <TabsTrigger 
+                          value={range}
+                          data-state={timeRange === range ? "active" : ""}
+                        >
+                          {timeRange === 'custom' ? formatDateRange() : timeRangeLabels[range]}
+                        </TabsTrigger>
+                      </DialogTrigger>
+                    );
+                  }
+                  
+                  return (
+                    <TabsTrigger
+                      key={range}
+                      value={range}
+                      onClick={() => changeTimeRange(range)}
+                      data-state={timeRange === range ? "active" : ""}
+                    >
+                      {timeRangeLabels[range]}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </Tabs>
+            
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Select Date Range</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Start Date</label>
+                    <DatePicker
+                      selected={startDate}
+                      onChange={(date: Date | null) => setStartDate(date)}
+                      selectsStart
+                      startDate={startDate || undefined}
+                      endDate={endDate || undefined}
+                      maxDate={new Date()}
+                      className="w-full border rounded-md p-2"
+                      dateFormat="MMM d, yyyy"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">End Date</label>
+                    <DatePicker
+                      selected={endDate}
+                      onChange={(date: Date | null) => setEndDate(date)}
+                      selectsEnd
+                      startDate={startDate || undefined}
+                      endDate={endDate || undefined}
+                      minDate={startDate || undefined}
+                      maxDate={new Date()}
+                      className="w-full border rounded-md p-2"
+                      dateFormat="MMM d, yyyy"
+                    />
+                  </div>
+                </div>
+                <Button onClick={applyDateRange} className="w-full">Apply Range</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 

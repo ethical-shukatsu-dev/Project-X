@@ -41,25 +41,46 @@ export async function GET(
   try {
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
-    const timeRange = (searchParams.get("timeRange") || "7d") as TimeRange;
+    const timeRange = (searchParams.get("timeRange") || "all") as TimeRange;
     const eventType = searchParams.get("eventType") || undefined;
     const metricKey = searchParams.get("metric") || undefined;
+    
+    // Get custom date range parameters if provided
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
 
     // Calculate the start date based on the time range
     let startDate: Date | null = null;
+    let endDate: Date | null = null;
     const now = new Date();
 
-    if (timeRange === "24h") {
-      startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
-    } else if (timeRange === "7d") {
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
-    } else if (timeRange === "30d") {
-      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+    // Handle custom date range
+    if (timeRange === "custom" && startDateParam && endDateParam) {
+      startDate = new Date(startDateParam);
+      endDate = new Date(endDateParam);
+      
+      // Validate dates
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return NextResponse.json(
+          { error: "Invalid date format" },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Standard time ranges
+      if (timeRange === "24h") {
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
+      } else if (timeRange === "7d") {
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
+      } else if (timeRange === "30d") {
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+      }
+      // For "all" time range, startDate remains null
     }
 
     // If a specific metric is requested, only fetch the data needed for that metric
     if (metricKey) {
-      return await getSpecificMetric(metricKey, startDate);
+      return await getSpecificMetric(metricKey, startDate, endDate);
     }
 
     // Build the query for all data
@@ -68,6 +89,11 @@ export async function GET(
     // Apply filters
     if (startDate) {
       query = query.gte("timestamp", startDate.toISOString());
+    }
+    
+    // Apply end date filter if provided
+    if (endDate) {
+      query = query.lte("timestamp", endDate.toISOString());
     }
 
     if (eventType) {
@@ -85,11 +111,12 @@ export async function GET(
       );
     }
 
-    // Get event counts by type using raw SQL
+    // Get event counts by type using raw SQL, passing in the date parameters
     const {data: eventCounts, error: countError} = await supabaseAdmin.rpc(
       "get_event_counts",
       {
         start_date: startDate ? startDate.toISOString() : "1970-01-01",
+        end_date: endDate ? endDate.toISOString() : now.toISOString(),
       }
     );
 
@@ -104,6 +131,7 @@ export async function GET(
         start_date: startDate
           ? startDate.toISOString()
           : new Date("1970-01-01T00:00:00.000Z").toISOString(),
+        end_date: endDate ? endDate.toISOString() : now.toISOString(),
       }
     );
 
@@ -367,9 +395,12 @@ export async function GET(
  */
 async function getSpecificMetric(
   metricKey: string,
-  startDate: Date | null
+  startDate: Date | null,
+  endDate: Date | null
 ): Promise<NextResponse<PartialAnalyticsData | ErrorResponse>> {
   try {
+    const now = new Date();
+    
     // Get the minimum required data from uniqueCounts for the requested metric
     const {data: uniqueCounts, error: uniqueError} = await supabaseAdmin.rpc(
       "get_multiple_event_counts",
@@ -377,6 +408,7 @@ async function getSpecificMetric(
         start_date: startDate
           ? startDate.toISOString()
           : new Date("1970-01-01T00:00:00.000Z").toISOString(),
+        end_date: endDate ? endDate.toISOString() : now.toISOString(),
       }
     );
 

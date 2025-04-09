@@ -1,22 +1,33 @@
 import { useState, useEffect } from 'react';
 import { 
   AnalyticsData, 
-  TimeRange
+  TimeRange,
+  DateRange
 } from '@/types/analytics';
 
-export function useAnalytics(initialTimeRange: TimeRange = '7d') {
+export function useAnalytics(initialTimeRange: TimeRange = 'all') {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
+  const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
   // Fetch analytics data
-  const fetchAnalytics = async (selectedTimeRange: TimeRange = timeRange, metricKey?: string) => {
+  const fetchAnalytics = async (selectedTimeRange: TimeRange = timeRange, metricKey?: string, customDateRange?: DateRange) => {
     setLoading(true);
     setError(null);
     
     try {
-      const url = `/api/admin/analytics?timeRange=${selectedTimeRange}${metricKey ? `&metric=${metricKey}` : ''}`;
+      let url = `/api/admin/analytics?timeRange=${selectedTimeRange}${metricKey ? `&metric=${metricKey}` : ''}`;
+      
+      // If it's a custom date range, append the date parameters
+      if (selectedTimeRange === 'custom' && (customDateRange || dateRange)) {
+        const dates = customDateRange || dateRange;
+        if (dates) {
+          url += `&startDate=${dates.startDate}&endDate=${dates.endDate}`;
+        }
+      }
+      
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -83,9 +94,16 @@ export function useAnalytics(initialTimeRange: TimeRange = '7d') {
   };
 
   // Change time range and refetch data
-  const changeTimeRange = (newTimeRange: TimeRange) => {
+  const changeTimeRange = (newTimeRange: TimeRange, customDateRange?: DateRange) => {
     setTimeRange(newTimeRange);
-    fetchAnalytics(newTimeRange);
+    
+    if (newTimeRange === 'custom' && customDateRange) {
+      setDateRange(customDateRange);
+      fetchAnalytics(newTimeRange, undefined, customDateRange);
+    } else {
+      setDateRange(null);
+      fetchAnalytics(newTimeRange);
+    }
   };
   
   // Fetch data on initial load
@@ -98,6 +116,7 @@ export function useAnalytics(initialTimeRange: TimeRange = '7d') {
     loading,
     error,
     timeRange,
+    dateRange,
     changeTimeRange,
     refreshData: fetchAnalytics,
   };

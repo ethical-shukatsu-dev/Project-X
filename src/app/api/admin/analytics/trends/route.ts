@@ -17,12 +17,19 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const days = parseInt(searchParams.get('days') || '30', 10);
     const eventType = searchParams.get('eventType') || undefined;
+    const startDate = searchParams.get('startDate') || undefined;
+    const endDate = searchParams.get('endDate') || undefined;
+    
+    // Build parameters for the function call
+    const params: Record<string, string | number> = { days };
+    
+    // Add date parameters if they exist
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
     
     // Get daily event counts
     const { data: dailyCounts, error: countError } = await supabaseAdmin
-      .rpc('get_daily_event_counts', { 
-        days
-      });
+      .rpc('get_daily_event_counts', params);
     
     if (countError) {
       console.error('Error fetching daily event counts:', countError);
