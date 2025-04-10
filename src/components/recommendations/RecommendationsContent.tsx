@@ -565,7 +565,6 @@ export default function RecommendationsContent({ lng }: RecommendationsContentPr
             lng={lng}
             recommendations={recommendations}
             showInPage={true}
-            showRevealedOnly={true}
           />
         )}
       </div>
