@@ -114,7 +114,7 @@ CREATE TABLE value_images (
 
 5. Create the required database functions:
 
-````sql
+```sql
 -- Analytics function for counting unique visitors and actions
 create or replace function get_unique_visitor_counts(start_date timestamp, event_type_param text)
 returns json
@@ -398,14 +398,16 @@ BEGIN
   );
 END;
 $$;
+```
 
 ### Installation
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/project-x.git
 cd project-x
-````
+```
 
 2. Install dependencies
 
