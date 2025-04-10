@@ -558,7 +558,7 @@ export default function RecommendationsContent({ lng }: RecommendationsContentPr
         />
 
         {/* Show SignupDialog as in-page component after user has closed the modal */}
-        {hasClosedDialog && (
+        {recommendations.length > 0 && (
           <SignupDialog
             open={false}
             onClose={() => {}}
