@@ -1,0 +1,41 @@
+name: PR Build Check
+
+on:
+  pull_request:
+    branches: [main, master]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Create dummy env file
+        run: |
+          touch .env.local
+          echo "NEXT_PUBLIC_SUPABASE_URL=dummy_url" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy_key" >> .env.local
+          echo "OPENAI_API_KEY=dummy_key" >> .env.local
+
+      - name: Build project
+        run: bun run build
+
+      - name: Report status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Build successful! PR can be merged."
+          else
+            echo "❌ Build failed. Please fix the issues before merging."
+            exit 1
+          fi
