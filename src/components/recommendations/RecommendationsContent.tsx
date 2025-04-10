@@ -508,12 +508,6 @@ export default function RecommendationsContent({
                   key={recommendation.id || recommendation.company.id}
                   company={recommendation.company}
                   matchingPoints={recommendation.matching_points}
-                  valueMatchRatings={recommendation.value_match_ratings}
-                  strengthMatchRatings={recommendation.strength_match_ratings}
-                  valueMatchingDetails={recommendation.value_matching_details}
-                  strengthMatchingDetails={
-                    recommendation.strength_matching_details
-                  }
                   feedback={recommendation.feedback}
                   onFeedback={(feedbackType) =>
                     recommendation.id &&
