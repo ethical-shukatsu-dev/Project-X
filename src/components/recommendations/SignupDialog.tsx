@@ -14,7 +14,6 @@ import {
   trackGoogleSignupClick,
 } from '@/lib/analytics';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import GoogleSignUpButton from '../ui/GoogleSignUpButton';
 import { useRouter } from 'next/navigation';
 import { BASE_URL } from '@/lib/constants/domain';
 import { LOCALSTORAGE_KEYS } from '@/lib/constants/localStorage';
@@ -105,13 +104,13 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   };
 
   // Handle Google signup click
-  const handleGoogleSignupClick = async () => {
-    try {
-      await trackGoogleSignupClick();
-    } catch (error) {
-      console.error('Error tracking Google signup click:', error);
-    }
-  };
+  // const handleGoogleSignupClick = async () => {
+  //   try {
+  //     await trackGoogleSignupClick();
+  //   } catch (error) {
+  //     console.error("Error tracking Google signup click:", error);
+  //   }
+  // };
 
   // Handle dialog close with tracking
   const handleDialogClose = () => {
@@ -133,7 +132,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   // The content to be displayed both in dialog and in-page mode
   const content = (
     <>
-      <div className="px-6 text-xl font-bold text-center text-white whitespace-pre-line md:text-2xl">
+      <div className="px-6 text-lg font-bold text-center text-white whitespace-pre-line md:text-2xl">
         {t('cta.title') || 'Ready to unlock your perfect career match?'}
       </div>
 
@@ -183,7 +182,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
           {t('cta.primaryButton') || 'Sign up with Email'}
         </Button>
 
-        <GoogleSignUpButton t={t} onClick={handleGoogleSignupClick} />
+        {/* <GoogleSignUpButton t={t} onClick={handleGoogleSignupClick} /> */}
       </div>
 
       {/* Disclaimer */}
@@ -205,7 +204,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   // Otherwise render as modal dialog
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 py-6 px-0 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[50vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 py-6 px-0 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[55vw] max-h-[90vh] overflow-y-auto">
         <DialogTitle className="sr-only">
           {t('cta.title') || 'Ready to unlock your perfect career match?'}
         </DialogTitle>

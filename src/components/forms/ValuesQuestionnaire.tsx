@@ -20,6 +20,7 @@ import {
   trackSurveyStepCompleted,
   trackSurveyCompleted,
   trackSurveyStepAbandoned,
+  trackSurveyStartClick,
 } from '@/lib/analytics';
 import { createUrlWithParams } from '@/lib/utils';
 
@@ -826,37 +827,45 @@ export default function ValuesQuestionnaire({
     QUESTIONS.length
   );
 
-  useEffect(() => {
-    // Scroll to top of page
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  useEffect(function logSurveyStart() {
+    trackSurveyStartClick();
+  }, []);
 
-    // Set survey start time
-    setSurveyStartTime(Date.now());
+  // Scroll to top of page
+  useEffect(
+    function setUpSurvey() {
+      // Scroll to top of page
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Set up the questions
-    setRandomQuestions(QUESTIONS);
+      // Set survey start time
+      setSurveyStartTime(Date.now());
 
-    // Set up the image questions
-    const selectedCategories = QUESTIONS.map((q) => q.id);
-    const selectedImageQuestions = ALL_IMAGE_QUESTIONS.filter((q) =>
-      selectedCategories.includes(q.category)
-    );
-    setRandomImageQuestions(selectedImageQuestions);
+      // Set up the questions
+      setRandomQuestions(QUESTIONS);
 
-    // Track the first question on component mount, but only once
-    if (QUESTIONS.length > 0 && !firstStepTrackedRef.current) {
-      const firstQuestionId =
-        useOnlyImageQuestions && ALL_IMAGE_QUESTIONS.length > 0
-          ? ALL_IMAGE_QUESTIONS[0].id
-          : QUESTIONS[0].id;
+      // Set up the image questions
+      const selectedCategories = QUESTIONS.map((q) => q.id);
+      const selectedImageQuestions = ALL_IMAGE_QUESTIONS.filter((q) =>
+        selectedCategories.includes(q.category)
+      );
+      setRandomImageQuestions(selectedImageQuestions);
 
-      // Initialize the first step without tracking completion
-      initializeFirstStep(firstQuestionId);
-      firstStepTrackedRef.current = true;
-    }
+      // Track the first question on component mount, but only once
+      if (QUESTIONS.length > 0 && !firstStepTrackedRef.current) {
+        const firstQuestionId =
+          useOnlyImageQuestions && ALL_IMAGE_QUESTIONS.length > 0
+            ? ALL_IMAGE_QUESTIONS[0].id
+            : QUESTIONS[0].id;
 
-    setIsInitialized(true);
-  }, [useOnlyImageQuestions]);
+        // Initialize the first step without tracking completion
+        initializeFirstStep(firstQuestionId);
+        firstStepTrackedRef.current = true;
+      }
+
+      setIsInitialized(true);
+    },
+    [useOnlyImageQuestions]
+  );
 
   // Calculate total questions based on questionnaire type
   const totalTextQuestions = randomQuestions.length;
@@ -864,7 +873,7 @@ export default function ValuesQuestionnaire({
   const totalQuestions = useOnlyImageQuestions ? totalImageQuestions : totalTextQuestions;
 
   // Load the hardcoded image data instead of fetching from the database
-  useEffect(() => {
+  useEffect(function setUpImages() {
     // Convert hardcoded image data to match ValueImage type
     const processedImageData: Record<string, ValueImage[]> = {};
 
