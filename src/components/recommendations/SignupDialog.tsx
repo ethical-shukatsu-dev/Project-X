@@ -142,7 +142,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   // The content to be displayed both in dialog and in-page mode
   const content = (
     <>
-      <div className="px-6 text-xl font-bold text-center text-white whitespace-pre-line md:text-2xl">
+      <div className="px-6 text-lg font-bold text-center text-white whitespace-pre-line md:text-2xl">
         {t("cta.title") || "Ready to unlock your perfect career match?"}
       </div>
 
