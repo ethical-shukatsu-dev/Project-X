@@ -225,7 +225,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   // Otherwise render as modal dialog
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 py-6 px-0 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[50vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 py-6 px-0 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[55vw] max-h-[90vh] overflow-y-auto">
         <DialogTitle className="sr-only">
           {t("cta.title") || "Ready to unlock your perfect career match?"}
         </DialogTitle>
