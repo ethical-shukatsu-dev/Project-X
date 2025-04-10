@@ -17,18 +17,30 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Print Node and Bun versions
+        run: |
+          echo "Node version: $(node -v)"
+          echo "Bun version: $(bun -v)"
+
       - name: Install dependencies
-        run: bun install
+        run: |
+          echo "Installing dependencies..."
+          bun install
 
       - name: Create dummy env file
         run: |
           touch .env.local
-          echo "NEXT_PUBLIC_SUPABASE_URL=dummy_url" >> .env.local
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy_key" >> .env.local
-          echo "OPENAI_API_KEY=dummy_key" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_URL=https://dummy-project.supabase.co" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1bW15IiwiZHVtbXkiOnRydWV9.dummy" >> .env.local
+          echo "OPENAI_API_KEY=sk-dummy-key-for-build-test" >> .env.local
 
-      - name: Build project
-        run: bun run build
+      - name: Build project with debug
+        run: |
+          echo "Starting build..."
+          export NODE_ENV=production
+          bun --bun next build --debug
+        env:
+          CI: true
 
       - name: Report status
         if: always()
@@ -37,5 +49,10 @@ jobs:
             echo "✅ Build successful! PR can be merged."
           else
             echo "❌ Build failed. Please fix the issues before merging."
+            echo "Debug information:"
+            echo "Node modules contents:"
+            ls -la node_modules
+            echo "Package versions:"
+            bun pm ls
             exit 1
           fi
