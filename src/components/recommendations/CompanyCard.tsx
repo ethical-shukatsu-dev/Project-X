@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Company} from "@/lib/supabase/client";
 import {useTranslation} from "@/i18n-client";
-import {EyeOff, PartyPopper, ThumbsDown} from "lucide-react";
+import {EyeOff, Loader2, PartyPopper, ThumbsDown} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -34,6 +34,7 @@ export default function CompanyCard({
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [isRevealing, setIsRevealing] = useState<boolean>(false);
   const [wasAnonymous, setWasAnonymous] = useState<boolean>(false);
+  const [isSendingFeedback, setIsSendingFeedback] = useState(false);
 
   // Check if we're in a browser environment before accessing localStorage
   useEffect(() => {
@@ -63,6 +64,7 @@ export default function CompanyCard({
 
   // Handle providing feedback with animations
   const handleFeedback = (type: "interested" | "not_interested") => {
+    setIsSendingFeedback(true);
     // If in anonymous mode, add a small delay to make the reveal more dramatic
     if (isAnonymous) {
       setTimeout(() => {
@@ -71,6 +73,9 @@ export default function CompanyCard({
     } else {
       onFeedback(type);
     }
+    setTimeout(() => {
+      setIsSendingFeedback(false);
+    }, 500);
   };
 
   // Get company initials for avatar fallback
@@ -336,9 +341,14 @@ export default function CompanyCard({
 
               <Button
                 onClick={() => handleFeedback("interested")}
+                disabled={isSendingFeedback}
                 className="w-full font-bold transition-all sm:w-fit bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
               >
-                <PartyPopper className="w-4 h-4 mr-2 text-white" />
+                {isSendingFeedback ? (
+                  <Loader2 className="w-4 h-4 mr-2 text-white animate-spin" />
+                ) : (
+                  <PartyPopper className="w-4 h-4 mr-2 text-white" />
+                )}
                 {isAnonymous
                   ? t("recommendations.viewDetails")
                   : t("recommendations.feedback.interested")}
