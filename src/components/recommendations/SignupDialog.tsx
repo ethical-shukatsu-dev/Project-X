@@ -16,10 +16,8 @@ import {
   trackSignupClick,
   trackEvent,
   trackEmailSignupClick,
-  trackGoogleSignupClick,
 } from "@/lib/analytics";
 import {useIsMobile} from "../../hooks/useIsMobile";
-import GoogleSignUpButton from "../ui/GoogleSignUpButton";
 import {useRouter} from "next/navigation";
 import {BASE_URL} from "@/lib/constants/domain";
 import { LOCALSTORAGE_KEYS } from "@/lib/constants/localStorage";
@@ -114,13 +112,13 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   };
 
   // Handle Google signup click
-  const handleGoogleSignupClick = async () => {
-    try {
-      await trackGoogleSignupClick();
-    } catch (error) {
-      console.error("Error tracking Google signup click:", error);
-    }
-  };
+  // const handleGoogleSignupClick = async () => {
+  //   try {
+  //     await trackGoogleSignupClick();
+  //   } catch (error) {
+  //     console.error("Error tracking Google signup click:", error);
+  //   }
+  // };
 
   // Handle dialog close with tracking
   const handleDialogClose = () => {
@@ -202,7 +200,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
           {t("cta.primaryButton") || "Sign up with Email"}
         </Button>
 
-        <GoogleSignUpButton t={t} onClick={handleGoogleSignupClick} />
+        {/* <GoogleSignUpButton t={t} onClick={handleGoogleSignupClick} /> */}
       </div>
 
       {/* Disclaimer */}
