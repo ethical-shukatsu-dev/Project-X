@@ -8,7 +8,6 @@ import {
 import {Suspense} from "react";
 import {Skeleton} from "@/components/ui/skeleton";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import BackgroundEffects from "@/components/ui/BackgroundEffects/BackgroundEffects";
 import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
 import Image from "next/image";
 import QuestionnaireTracker from "@/components/analytics/QuestionnaireTracker";
@@ -76,7 +75,6 @@ export default function QuestionnairePage({
 
     return (
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
-        <BackgroundEffects />
         <FloatingDecorations />
         
         <QuestionnaireTracker questionnaireType={questionnaireType} />

@@ -3,7 +3,6 @@ import {Skeleton} from "@/components/ui/skeleton";
 import RecommendationsContent from "@/components/recommendations/RecommendationsContent";
 import {getTranslation} from "@/i18n-server";
 import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import BackgroundEffects from "@/components/ui/BackgroundEffects/BackgroundEffects";
 import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
 import RecommendationsTracker from "@/components/analytics/RecommendationsTracker";
 
@@ -50,7 +49,6 @@ export default function RecommendationsPage({
 
     return (
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
-        <BackgroundEffects />
         <FloatingDecorations />
         
         <RecommendationsTracker />
