@@ -1,13 +1,13 @@
-import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import FeatureCard from "@/components/ui/FeatureCard/FeatureCard";
-import QuestionnaireOptions from "@/components/ui/QuestionnaireOptions/QuestionnaireOptions";
+import AnimatedContent from '@/components/ui/Animations/AnimatedContent/AnimatedContent';
+import FeatureCard from '@/components/ui/FeatureCard/FeatureCard';
+import QuestionnaireOptions from '@/components/ui/QuestionnaireOptions/QuestionnaireOptions';
 
 interface FeaturesSectionProps {
   title: string;
   features: {
     title: string;
     description: string;
-    color: "blue" | "purple" | "pink";
+    color: 'blue' | 'purple' | 'pink';
   }[];
   showQuestionnaireOptions?: boolean;
   lng?: string;
@@ -17,7 +17,7 @@ export default function FeaturesSection({
   title,
   features,
   showQuestionnaireOptions = false,
-  lng = "",
+  lng = '',
 }: FeaturesSectionProps) {
   const icons = {
     blue: (
@@ -81,12 +81,7 @@ export default function FeaturesSection({
 
         <div className="grid gap-6 px-2 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 sm:px-0">
           {features.map((feature) => (
-            <AnimatedContent
-              key={feature.title}
-              direction="vertical"
-              distance={40}
-              delay={200}
-            >
+            <AnimatedContent key={feature.title} direction="vertical" distance={40} delay={200}>
               <FeatureCard
                 title={feature.title}
                 description={feature.description}

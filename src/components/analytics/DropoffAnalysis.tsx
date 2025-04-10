@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { RefreshButton } from "./DashboardCards";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { RefreshButton } from './DashboardCards';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
-  Legend
+  Legend,
 } from 'recharts';
 
 interface StepDropoffData {
@@ -32,23 +32,23 @@ interface DropoffAnalysisProps {
 
 export function DropoffAnalysis({ title, description, data, onRefresh }: DropoffAnalysisProps) {
   // Prepare chart data
-  const completionChart = data.map(step => ({
+  const completionChart = data.map((step) => ({
     step: step.label,
-    Completed: step.completed  }));
+    Completed: step.completed,
+  }));
 
-  const timeSpentChart = data.map(step => ({
+  const timeSpentChart = data.map((step) => ({
     step: step.label,
     'Avg Time (seconds)': step.avgTimeSpentSeconds,
   }));
 
   // Calculate drop-off between steps
   const dropOffData = data.map((step, index) => {
-    const previousCompleted = index > 0 ? data[index - 1].completed : step.completed + step.abandoned;
+    const previousCompleted =
+      index > 0 ? data[index - 1].completed : step.completed + step.abandoned;
     const dropOff = previousCompleted - step.completed;
-    const dropOffRate = previousCompleted > 0 
-      ? Math.round((dropOff / previousCompleted) * 100) 
-      : 0;
-    
+    const dropOffRate = previousCompleted > 0 ? Math.round((dropOff / previousCompleted) * 100) : 0;
+
     return {
       step: step.label,
       'Drop-offs': dropOff,
@@ -81,8 +81,8 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
                 <BarChart data={completionChart} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
-                  <YAxis dataKey="step" type="category" className="text-xs w-fit"/>
-                  <Tooltip 
+                  <YAxis dataKey="step" type="category" className="text-xs w-fit" />
+                  <Tooltip
                     formatter={(value: number, name: string) => [`${value} users`, name]}
                     labelFormatter={(value: string) => `Step: ${value}`}
                   />
@@ -91,22 +91,22 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            
+
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
               {data.map((step, index) => (
                 <Card key={index} className="bg-muted/50">
                   <CardHeader className="p-3 pb-0">
-                    <CardTitle className="text-sm font-medium">
-                      {step.label}
-                    </CardTitle>
+                    <CardTitle className="text-sm font-medium">{step.label}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 pt-0">
                     <div className="grid grid-cols-2 gap-1 text-sm">
                       <div className="text-muted-foreground">Completed:</div>
                       <div className="font-medium text-right">{step.completed}</div>
-                      
+
                       <div className="text-muted-foreground">Completion:</div>
-                      <div className="font-medium text-right text-green-500">{step.completionRate}</div>
+                      <div className="font-medium text-right text-green-500">
+                        {step.completionRate}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -121,7 +121,7 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="step" />
                   <YAxis />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: number | string, name: string) => [value, name]}
                     labelFormatter={(value: string) => `Step: ${value}`}
                   />
@@ -129,22 +129,22 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            
+
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
               {dropOffData.map((item, index) => (
                 <Card key={index} className="bg-muted/50">
                   <CardHeader className="p-3 pb-0">
-                    <CardTitle className="text-sm font-medium">
-                      {item.step}
-                    </CardTitle>
+                    <CardTitle className="text-sm font-medium">{item.step}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 pt-0">
                     <div className="grid grid-cols-2 gap-1 text-sm">
                       <div className="text-muted-foreground">Drop-offs:</div>
                       <div className="font-medium text-right">{item['Drop-offs']}</div>
-                      
+
                       <div className="text-muted-foreground">Drop-off Rate:</div>
-                      <div className="font-medium text-right text-orange-500">{item['Drop-off Rate']}</div>
+                      <div className="font-medium text-right text-orange-500">
+                        {item['Drop-off Rate']}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -159,7 +159,7 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="step" />
                   <YAxis />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: number, name: string) => [`${value} seconds`, name]}
                     labelFormatter={(value: string) => `Step: ${value}`}
                   />
@@ -167,14 +167,12 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            
+
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
               {data.map((step, index) => (
                 <Card key={index} className="bg-muted/50">
                   <CardHeader className="p-3 pb-0">
-                    <CardTitle className="text-sm font-medium">
-                      {step.label}
-                    </CardTitle>
+                    <CardTitle className="text-sm font-medium">{step.label}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 pt-0">
                     <div className="grid grid-cols-2 gap-1 text-sm">
@@ -182,7 +180,7 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
                       <div className="font-medium text-right">
                         {step.avgTimeSpentSeconds.toFixed(1)} seconds
                       </div>
-                      
+
                       <div className="text-muted-foreground">Completion:</div>
                       <div className="font-medium text-right">{step.completionRate}</div>
                     </div>
@@ -195,4 +193,4 @@ export function DropoffAnalysis({ title, description, data, onRefresh }: Dropoff
       </CardContent>
     </Card>
   );
-} 
+}

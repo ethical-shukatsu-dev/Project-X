@@ -1,5 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
-import { getSupabaseConfig, getEnvironmentName } from "./config";
+import { createClient } from '@supabase/supabase-js';
+import { getSupabaseConfig, getEnvironmentName } from './config';
 
 // Get the appropriate Supabase configuration based on environment
 const config = getSupabaseConfig();
@@ -11,4 +11,4 @@ export const supabaseAdmin = createClient(config.url, config.serviceRoleKey);
 // Log which environment we're using (only in development)
 if (process.env.NODE_ENV !== 'production') {
   console.log(`[Supabase Admin Client] Using ${getEnvironmentName()} environment`);
-} 
+}

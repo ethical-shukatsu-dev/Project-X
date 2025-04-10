@@ -1,5 +1,5 @@
-import {createClient} from "@supabase/supabase-js";
-import { getSupabaseConfig, getEnvironmentName } from "./config";
+import { createClient } from '@supabase/supabase-js';
+import { getSupabaseConfig, getEnvironmentName } from './config';
 
 // Get the appropriate Supabase configuration based on environment
 const config = getSupabaseConfig();
@@ -43,7 +43,7 @@ export type Recommendation = {
   company_id: string;
   created_at: string;
   matching_points: string[]; // Array of matching value points
-  feedback?: "interested" | "not_interested"; // User feedback
+  feedback?: 'interested' | 'not_interested'; // User feedback
   value_match_ratings?: Record<string, number>; // Ratings (1-10) for value matches
   strength_match_ratings?: Record<string, number>; // Ratings (1-10) for strength matches
   value_matching_details?: Record<string, string>; // Detailed explanations for value matches

@@ -3,7 +3,7 @@
  */
 
 // Define allowed time ranges
-export type TimeRange = "24h" | "7d" | "30d" | "all" | "custom";
+export type TimeRange = '24h' | '7d' | '30d' | 'all' | 'custom';
 
 // Custom date range for analytics
 export interface DateRange {
@@ -177,4 +177,4 @@ export type PartialAnalyticsData = {
 // Define error response type
 export type ErrorResponse = {
   error: string;
-}; 
+};

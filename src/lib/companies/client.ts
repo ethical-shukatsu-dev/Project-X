@@ -1,6 +1,5 @@
 import { supabase, Company } from '../supabase/client';
-import { fetchCompanyData } from '../openai/client';
-import { fetchCompanyLogo } from '../openai/client';
+import { fetchCompanyData, fetchCompanyLogo } from '../openai/client';
 
 /**
  * Updates existing companies in the database with logos if they don't have one
@@ -29,18 +28,18 @@ export async function updateCompanyLogos(): Promise<void> {
     for (const company of companies) {
       // Fetch just the logo instead of all company data
       const logoUrl = await fetchCompanyLogo(company.name, company.site_url);
-      
+
       if (!logoUrl) {
         console.log(`Could not find logo for company ${company.name}`);
         continue;
       }
-      
+
       // Update the company in the database
       const { error: updateError } = await supabase
         .from('companies')
         .update({ logo_url: logoUrl })
         .eq('id', company.id);
-      
+
       if (updateError) {
         console.error(`Error updating logo for company ${company.name}:`, updateError);
       } else {
@@ -54,7 +53,11 @@ export async function updateCompanyLogos(): Promise<void> {
   }
 }
 
-export async function getOrCreateCompany(companyName: string, industry?: string, locale: string = 'en'): Promise<Company> {
+export async function getOrCreateCompany(
+  companyName: string,
+  industry?: string,
+  locale: string = 'en'
+): Promise<Company> {
   try {
     // Check if company exists in database
     const { data: existingCompany, error } = await supabase
@@ -69,16 +72,16 @@ export async function getOrCreateCompany(companyName: string, industry?: string,
 
     // If company doesn't exist, fetch from OpenAI
     const companyData = await fetchCompanyData(companyName, industry, locale);
-    
+
     // Extract the company_values field if present
     const { company_values, ...standardCompanyData } = companyData;
-    
+
     // Prepare the company data for insertion
     const companyToInsert = {
       ...standardCompanyData,
       company_values: company_values || null,
     };
-    
+
     // Insert into database
     const { data: newCompany, error: insertError } = await supabase
       .from('companies')

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import {useRef, useEffect, useState, ReactNode} from "react";
-import {useSpring, animated, SpringConfig} from "@react-spring/web";
+import { useRef, useEffect, useState, ReactNode } from 'react';
+import { useSpring, animated, SpringConfig } from '@react-spring/web';
 
 interface AnimatedContentProps {
   children: ReactNode;
   distance?: number;
-  direction?: "vertical" | "horizontal";
+  direction?: 'vertical' | 'horizontal';
   reverse?: boolean;
   config?: SpringConfig;
   initialOpacity?: number;
@@ -16,14 +16,14 @@ interface AnimatedContentProps {
   delay?: number;
 }
 
-const AnimatedDiv = animated("div");
+const AnimatedDiv = animated('div');
 
 const AnimatedContent: React.FC<AnimatedContentProps> = ({
   children,
   distance = 100,
-  direction = "vertical",
+  direction = 'vertical',
   reverse = false,
-  config = {tension: 50, friction: 25},
+  config = { tension: 50, friction: 25 },
   initialOpacity = 0,
   animateOpacity = true,
   scale = 1,
@@ -46,7 +46,7 @@ const AnimatedContent: React.FC<AnimatedContentProps> = ({
           }, delay);
         }
       },
-      {threshold}
+      { threshold }
     );
 
     observer.observe(element);
@@ -54,9 +54,9 @@ const AnimatedContent: React.FC<AnimatedContentProps> = ({
     return () => observer.disconnect();
   }, [threshold, delay]);
 
-  const directions: Record<"vertical" | "horizontal", string> = {
-    vertical: "Y",
-    horizontal: "X",
+  const directions: Record<'vertical' | 'horizontal', string> = {
+    vertical: 'Y',
+    horizontal: 'X',
   };
 
   const springProps = useSpring({

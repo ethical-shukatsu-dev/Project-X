@@ -1,16 +1,11 @@
-import ValuesQuestionnaire from "@/components/forms/ValuesQuestionnaire";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import {Suspense} from "react";
-import {Skeleton} from "@/components/ui/skeleton";
-import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
-import Image from "next/image";
-import QuestionnaireTracker from "@/components/analytics/QuestionnaireTracker";
+import ValuesQuestionnaire from '@/components/forms/ValuesQuestionnaire';
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import AnimatedContent from '@/components/ui/Animations/AnimatedContent/AnimatedContent';
+import FloatingDecorations from '@/components/ui/FloatingDecorations/FloatingDecorations';
+import Image from 'next/image';
+import QuestionnaireTracker from '@/components/analytics/QuestionnaireTracker';
 
 // Loading skeleton component for the questionnaire
 function QuestionnaireLoadingSkeleton() {
@@ -28,27 +23,27 @@ function QuestionnaireLoadingSkeleton() {
         {/* Skeleton for questionnaire form */}
         <Card className="w-full max-w-md mx-auto bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10">
           <CardHeader>
-            <Skeleton className="w-40 h-6 mb-2 border bg-white/10 border-white/10 backdrop-blur-sm" />{" "}
+            <Skeleton className="w-40 h-6 mb-2 border bg-white/10 border-white/10 backdrop-blur-sm" />{' '}
             {/* Question X of Y */}
-            <Skeleton className="w-full h-5 border bg-white/10 border-white/10 backdrop-blur-sm" />{" "}
+            <Skeleton className="w-full h-5 border bg-white/10 border-white/10 backdrop-blur-sm" />{' '}
             {/* Question text */}
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex items-center space-x-2">
-                  <Skeleton className="w-4 h-4 border rounded-full bg-white/10 border-white/10 backdrop-blur-sm" />{" "}
+                  <Skeleton className="w-4 h-4 border rounded-full bg-white/10 border-white/10 backdrop-blur-sm" />{' '}
                   {/* Radio button */}
-                  <Skeleton className="h-5 w-full max-w-[250px] bg-white/10 border border-white/10 backdrop-blur-sm" />{" "}
+                  <Skeleton className="h-5 w-full max-w-[250px] bg-white/10 border border-white/10 backdrop-blur-sm" />{' '}
                   {/* Option label */}
                 </div>
               ))}
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Skeleton className="w-24 h-10 border bg-white/10 border-white/10 backdrop-blur-sm" />{" "}
+            <Skeleton className="w-24 h-10 border bg-white/10 border-white/10 backdrop-blur-sm" />{' '}
             {/* Previous button */}
-            <Skeleton className="w-20 h-10 border bg-white/10 border-white/10 backdrop-blur-sm" />{" "}
+            <Skeleton className="w-20 h-10 border bg-white/10 border-white/10 backdrop-blur-sm" />{' '}
             {/* Next button */}
           </CardFooter>
         </Card>
@@ -61,8 +56,8 @@ export default function QuestionnairePage({
   params,
   searchParams,
 }: {
-  params: Promise<{lng: string}>;
-  searchParams: Promise<{type?: string}>;
+  params: Promise<{ lng: string }>;
+  searchParams: Promise<{ type?: string }>;
 }) {
   // Use an async IIFE to handle the Promise
   const QuestionnairePageContent = async () => {
@@ -71,12 +66,12 @@ export default function QuestionnairePage({
     const lng = resolvedParams.lng;
 
     // Get the questionnaire type from the URL query parameters
-    const questionnaireType = resolvedSearchParams.type || "text"; // Default to text if not specified
+    const questionnaireType = resolvedSearchParams.type || 'text'; // Default to text if not specified
 
     return (
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
         <FloatingDecorations />
-        
+
         <QuestionnaireTracker questionnaireType={questionnaireType} />
 
         <Suspense fallback={<QuestionnaireLoadingSkeleton />}>
@@ -94,10 +89,7 @@ export default function QuestionnairePage({
                 </AnimatedContent>
 
                 <AnimatedContent direction="vertical" distance={30} delay={600}>
-                  <ValuesQuestionnaire
-                    lng={lng}
-                    questionnaireType={questionnaireType}
-                  />
+                  <ValuesQuestionnaire lng={lng} questionnaireType={questionnaireType} />
                 </AnimatedContent>
               </div>
             </div>

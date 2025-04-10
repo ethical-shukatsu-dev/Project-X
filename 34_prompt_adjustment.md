@@ -5,6 +5,7 @@ This document outlines the steps to migrate the database schema to add support f
 ## Overview of Changes
 
 This migration:
+
 1. Adds a `company_values` column to the `companies` table
 2. Adds multiple JSONB columns to the `recommendations` table:
    - `value_match_ratings`
@@ -50,15 +51,15 @@ After running the migration, verify that the columns were added correctly:
 
 ```sql
 -- Verify companies table
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'companies' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'companies'
 AND column_name = 'company_values';
 
 -- Verify recommendations table
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'recommendations' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'recommendations'
 AND column_name IN ('value_match_ratings', 'strength_match_ratings', 'value_matching_details', 'strength_matching_details');
 ```
 
@@ -76,17 +77,18 @@ Deploy the following code changes to support the new schema:
 Existing records will have NULL values for the new columns. If you need to backfill this data:
 
 1. For existing companies, you can run an update job to generate company values:
+
    ```typescript
    // Example backfill script
    import { supabase } from '../src/lib/supabase/client';
    import { fetchCompanyData } from '../src/lib/openai/client';
-   
+
    async function backfillCompanyValues() {
      const { data: companies } = await supabase
        .from('companies')
        .select('*')
        .is('company_values', null);
-       
+
      for (const company of companies) {
        try {
          const companyData = await fetchCompanyData(company.name, company.industry);
@@ -112,7 +114,7 @@ If issues are encountered after migration, use this rollback plan:
 -- Rollback SQL
 ALTER TABLE companies DROP COLUMN IF EXISTS company_values;
 
-ALTER TABLE recommendations 
+ALTER TABLE recommendations
 DROP COLUMN IF EXISTS value_match_ratings,
 DROP COLUMN IF EXISTS strength_match_ratings,
 DROP COLUMN IF EXISTS value_matching_details,
@@ -126,4 +128,4 @@ DROP COLUMN IF EXISTS strength_matching_details;
 - [x] Verify the migration
 - [ ] Deploy code changes
 - [ ] Monitor for any errors
-- [ ] Run backfill scripts if needed 
+- [ ] Run backfill scripts if needed

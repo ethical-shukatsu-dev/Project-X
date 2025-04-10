@@ -1,9 +1,6 @@
-"use client";
+'use client';
 
-import { ReactNode } from "react";
-
-import {useEffect} from "react";
-import {useRef, useState} from "react";
+import { ReactNode, useEffect, useRef, useState } from 'react';
 
 // 3D floating element component
 interface FloatingElementProps {
@@ -15,18 +12,18 @@ interface FloatingElementProps {
 
 const FloatingElement = ({
   children,
-  className = "",
+  className = '',
   baseSpeed = 4,
   intensity = 1,
 }: FloatingElementProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({x: 0, y: 0});
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const interval = setInterval(() => {
       const x = Math.sin(Date.now() / 1000 / baseSpeed) * 15 * intensity;
       const y = Math.cos(Date.now() / 1500 / baseSpeed) * 15 * intensity;
-      setPosition({x, y});
+      setPosition({ x, y });
     }, 50);
 
     return () => clearInterval(interval);

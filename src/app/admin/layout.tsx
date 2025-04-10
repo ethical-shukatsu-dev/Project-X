@@ -5,13 +5,7 @@ export const metadata = {
   description: 'Project X Admin Dashboard',
 };
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   // This layout is only for redirects to localized routes
-  return (
-    <>{children}</>
-  );
-} 
+  return <>{children}</>;
+}

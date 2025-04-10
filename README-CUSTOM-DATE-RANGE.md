@@ -34,6 +34,7 @@ The database functions need to be updated to support custom date ranges. Execute
 5. Run the query to update the functions
 
 This will update the following functions:
+
 - `get_event_counts` - To accept an end_date parameter
 - `get_daily_event_counts` - To support custom date ranges
 - `get_multiple_event_counts` - To accept an end_date parameter
@@ -50,7 +51,7 @@ These changes will be deployed automatically when the application is deployed.
 ## Usage
 
 1. Go to the Analytics Dashboard
-2. Click on the "Custom Range" tab 
+2. Click on the "Custom Range" tab
 3. Select start and end dates in the date picker dialog
 4. Click "Apply Range" to filter the analytics data
 
@@ -60,4 +61,4 @@ The dashboard will update to show data only from the selected date range.
 
 - The date range must be valid (start date must be before end date)
 - For performance reasons, extremely large date ranges (multiple years) may be slow to load
-- Historical data availability depends on your data retention policy 
+- Historical data availability depends on your data retention policy

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {RefreshButton} from "./DashboardCards";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RefreshButton } from './DashboardCards';
 
 interface SurveyStep {
   id: string;
@@ -37,9 +37,7 @@ export function SurveyStepsFunnel({
             // Calculate percentage if not provided
             const displayPercentage =
               step.percentage ||
-              (totalStarts > 0
-                ? `${Math.round((step.count / totalStarts) * 100)}%`
-                : "0%");
+              (totalStarts > 0 ? `${Math.round((step.count / totalStarts) * 100)}%` : '0%');
 
             return (
               <div key={index} className="space-y-2">
@@ -57,7 +55,7 @@ export function SurveyStepsFunnel({
                 <div className="relative h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="absolute h-full bg-primary rounded-full"
-                    style={{width: displayPercentage}}
+                    style={{ width: displayPercentage }}
                   />
                 </div>
               </div>

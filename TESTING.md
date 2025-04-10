@@ -14,6 +14,7 @@ Before testing, make sure you have:
 ## Testing the Questionnaire
 
 1. Start the development server:
+
    ```bash
    bun run dev
    ```
@@ -38,6 +39,7 @@ Before testing, make sure you have:
 2. The page should display company recommendations based on your values
 
 3. Check your Supabase dashboard:
+
    - Go to the "Table Editor" in your Supabase dashboard
    - Select the `recommendations` table
    - You should see new entries with recommendations for the user
@@ -52,11 +54,13 @@ Before testing, make sure you have:
 If you encounter issues:
 
 1. **No recommendations appear**:
+
    - Check the browser console for errors
    - Verify that your OpenAI API key is correct
    - Check that your Supabase tables have sample company data
 
 2. **Form submission fails**:
+
    - Check that your Supabase URL and key are correct
    - Verify that the `user_values` table exists and has the correct schema
 
@@ -71,4 +75,4 @@ For more advanced testing:
 
 1. Use the Supabase SQL Editor to query your tables directly
 2. Check the Network tab in your browser's developer tools to see the API requests
-3. Add `console.log` statements to your API routes to debug server-side issues 
+3. Add `console.log` statements to your API routes to debug server-side issues

@@ -2,26 +2,25 @@
 	Installed from https://reactbits.dev/ts/tailwind/
 */
 
-import React from "react";
+import React from 'react';
 
-type StarBorderProps<T extends React.ElementType> =
-  React.ComponentPropsWithoutRef<T> & {
-    as?: T;
-    className?: string;
-    children?: React.ReactNode;
-    color?: string;
-    speed?: React.CSSProperties["animationDuration"];
-  };
+type StarBorderProps<T extends React.ElementType> = React.ComponentPropsWithoutRef<T> & {
+  as?: T;
+  className?: string;
+  children?: React.ReactNode;
+  color?: string;
+  speed?: React.CSSProperties['animationDuration'];
+};
 
-const StarBorder = <T extends React.ElementType = "button">({
+const StarBorder = <T extends React.ElementType = 'button'>({
   as,
-  className = "",
-  color = "#ffd129",
-  speed = "6s",
+  className = '',
+  color = '#ffd129',
+  speed = '6s',
   children,
   ...rest
 }: StarBorderProps<T>) => {
-  const Component = as || "button";
+  const Component = as || 'button';
 
   return (
     <Component
@@ -44,7 +43,7 @@ const StarBorder = <T extends React.ElementType = "button">({
       ></div>
       <div
         className="relative z-1 bg-[#ffd129] bg-opacity-100 backdrop-blur-none border border-gray-800 text-gray-900 text-center text-[16px] py-[16px] px-[26px] rounded-[20px]"
-        style={{backgroundColor: "#ffd129"}}
+        style={{ backgroundColor: '#ffd129' }}
       >
         {children}
       </div>

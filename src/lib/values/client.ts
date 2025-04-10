@@ -1,5 +1,4 @@
-import { supabase } from '../supabase/client';
-import type { ValueImage } from '../supabase/client';
+import { supabase, type ValueImage } from '../supabase/client';
 
 /**
  * Fetch random value images by category using a database function
@@ -7,12 +6,14 @@ import type { ValueImage } from '../supabase/client';
  * @param limit The number of random images to fetch (default: 4)
  * @returns An array of random value images for the specified category
  */
-export async function getRandomValueImagesByCategory(category: string, limit: number = 4): Promise<ValueImage[]> {
-  const { data, error } = await supabase
-    .rpc('get_random_value_images_by_category', {
-      category_param: category,
-      limit_param: limit
-    });
+export async function getRandomValueImagesByCategory(
+  category: string,
+  limit: number = 4
+): Promise<ValueImage[]> {
+  const { data, error } = await supabase.rpc('get_random_value_images_by_category', {
+    category_param: category,
+    limit_param: limit,
+  });
 
   if (error) {
     console.error('Error fetching random value images:', error);
@@ -28,10 +29,9 @@ export async function getRandomValueImagesByCategory(category: string, limit: nu
  * @returns An array of random value images
  */
 export async function getRandomValueImages(limit: number = 4): Promise<ValueImage[]> {
-  const { data, error } = await supabase
-    .rpc('get_random_value_images', {
-      limit_param: limit
-    });
+  const { data, error } = await supabase.rpc('get_random_value_images', {
+    limit_param: limit,
+  });
 
   if (error) {
     console.error('Error fetching random value images:', error);
@@ -57,7 +57,7 @@ export async function getImageQuestions(): Promise<Record<string, ValueImage[]>>
   }
 
   // Extract unique categories
-  const categories = [...new Set(categoriesData.map(item => item.category))];
+  const categories = [...new Set(categoriesData.map((item) => item.category))];
 
   // Initialize the result object
   const imagesByCategory: Record<string, ValueImage[]> = {};
@@ -66,11 +66,13 @@ export async function getImageQuestions(): Promise<Record<string, ValueImage[]>>
   await Promise.all(
     categories.map(async (category: string) => {
       // Use the RPC function to get random images for this category
-      const { data: randomImages, error: imagesError } = await supabase
-        .rpc('get_random_value_images_by_category', {
+      const { data: randomImages, error: imagesError } = await supabase.rpc(
+        'get_random_value_images_by_category',
+        {
           category_param: category,
-          limit_param: 4
-        });
+          limit_param: 4,
+        }
+      );
 
       if (imagesError) {
         console.error(`Error fetching random images for category ${category}:`, imagesError);
@@ -104,22 +106,20 @@ export async function uploadValueImage(
   // Generate a unique file name
   const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
   const filePath = `value_images/${fileName}`;
-  
+
   // Upload the file to Supabase Storage
-  const { error: uploadError } = await supabase.storage
-    .from('images')
-    .upload(filePath, file);
-    
+  const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file);
+
   if (uploadError) {
     console.error('Error uploading image:', uploadError);
     throw new Error('Failed to upload image');
   }
-  
+
   // Get the public URL for the uploaded file
-  const { data: { publicUrl } } = supabase.storage
-    .from('images')
-    .getPublicUrl(filePath);
-    
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from('images').getPublicUrl(filePath);
+
   // Insert the image data into the value_images table using the admin client
   // This bypasses RLS policies
   const { data, error } = await supabase
@@ -129,15 +129,15 @@ export async function uploadValueImage(
       value_name: valueName,
       image_url: publicUrl,
       description,
-      tags
+      tags,
     })
     .select()
     .single();
-    
+
   if (error) {
     console.error('Error inserting image data:', error);
     throw new Error('Failed to save image data');
   }
-  
+
   return data;
-} 
+}

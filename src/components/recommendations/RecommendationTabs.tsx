@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+'use client';
 
-import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {useTranslation} from "@/i18n-client";
-import {RecommendationResult} from "@/lib/openai/client";
-import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import {useMemo} from "react";
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslation } from '@/i18n-client';
+import { RecommendationResult } from '@/lib/openai/client';
+import AnimatedContent from '@/components/ui/Animations/AnimatedContent/AnimatedContent';
+import { useMemo } from 'react';
 
 interface RecommendationTabsProps {
   lng: string;
   recommendations: (RecommendationResult & {
-    feedback?: "interested" | "not_interested";
+    feedback?: 'interested' | 'not_interested';
   })[];
   activeTab: string;
   setActiveTab: (value: string) => void;
@@ -26,7 +26,7 @@ export default function RecommendationTabs({
   activeSizeTab,
   setActiveSizeTab,
 }: RecommendationTabsProps) {
-  const {t} = useTranslation(lng, "ai");
+  const { t } = useTranslation(lng, 'ai');
 
   // Memoized filtered recommendations
   const {
@@ -39,53 +39,47 @@ export default function RecommendationTabs({
     largeRecommendations,
   } = useMemo(() => {
     // Filter by feedback status
-    const interested = recommendations.filter(
-      (rec) => rec.feedback === "interested"
-    );
-    const notInterested = recommendations.filter(
-      (rec) => rec.feedback === "not_interested"
-    );
+    const interested = recommendations.filter((rec) => rec.feedback === 'interested');
+    const notInterested = recommendations.filter((rec) => rec.feedback === 'not_interested');
     const pending = recommendations.filter((rec) => !rec.feedback);
 
     // Helper function to determine company size category
     const getSizeCategory = (sizeText: string, industry?: string): string => {
       const normalizedSize = sizeText.toLowerCase();
-      const normalizedIndustry = industry?.toLowerCase() || "";
+      const normalizedIndustry = industry?.toLowerCase() || '';
 
       if (
-        normalizedSize.includes("startup") ||
-        normalizedSize.includes("スタートアップ") ||
-        normalizedIndustry.includes("startup") ||
-        normalizedIndustry.includes("スタートアップ")
+        normalizedSize.includes('startup') ||
+        normalizedSize.includes('スタートアップ') ||
+        normalizedIndustry.includes('startup') ||
+        normalizedIndustry.includes('スタートアップ')
       ) {
-        return "startup";
+        return 'startup';
       }
-      if (normalizedSize.includes("small") || normalizedSize.includes("小")) {
-        return "small";
+      if (normalizedSize.includes('small') || normalizedSize.includes('小')) {
+        return 'small';
       }
-      if (normalizedSize.includes("medium") || normalizedSize.includes("中")) {
-        return "medium";
+      if (normalizedSize.includes('medium') || normalizedSize.includes('中')) {
+        return 'medium';
       }
-      if (normalizedSize.includes("large") || normalizedSize.includes("大")) {
-        return "large";
+      if (normalizedSize.includes('large') || normalizedSize.includes('大')) {
+        return 'large';
       }
-      return "unknown";
+      return 'unknown';
     };
 
     // Filter by company size
     const startup = recommendations.filter(
-      (rec) =>
-        getSizeCategory(rec.company.size, rec.company.industry) === "startup"
+      (rec) => getSizeCategory(rec.company.size, rec.company.industry) === 'startup'
     );
     const small = recommendations.filter(
-      (rec) => getSizeCategory(rec.company.size, rec.company.industry) === "small"
+      (rec) => getSizeCategory(rec.company.size, rec.company.industry) === 'small'
     );
     const medium = recommendations.filter(
-      (rec) =>
-        getSizeCategory(rec.company.size, rec.company.industry) === "medium"
+      (rec) => getSizeCategory(rec.company.size, rec.company.industry) === 'medium'
     );
     const large = recommendations.filter(
-      (rec) => getSizeCategory(rec.company.size, rec.company.industry) === "large"
+      (rec) => getSizeCategory(rec.company.size, rec.company.industry) === 'large'
     );
 
     return {
@@ -153,37 +147,35 @@ export default function RecommendationTabs({
               value="all-sizes"
               className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
             >
-              {t("recommendations.size_tabs.all")} ({recommendations.length})
+              {t('recommendations.size_tabs.all')} ({recommendations.length})
             </TabsTrigger>
             <TabsTrigger
               value="startup"
               className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
             >
-              {t("recommendations.size_tabs.startup")} (
-              {startupRecommendations.length})
+              {t('recommendations.size_tabs.startup')} ({startupRecommendations.length})
             </TabsTrigger>
             <TabsTrigger
               value="small"
               className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
             >
-              {t("recommendations.size_tabs.small")} ({smallRecommendations.length})
+              {t('recommendations.size_tabs.small')} ({smallRecommendations.length})
             </TabsTrigger>
             <TabsTrigger
               value="medium"
               className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
             >
-              {t("recommendations.size_tabs.medium")} (
-              {mediumRecommendations.length})
+              {t('recommendations.size_tabs.medium')} ({mediumRecommendations.length})
             </TabsTrigger>
             <TabsTrigger
               value="large"
               className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(59,130,246,0.3)]"
             >
-              {t("recommendations.size_tabs.large")} ({largeRecommendations.length})
+              {t('recommendations.size_tabs.large')} ({largeRecommendations.length})
             </TabsTrigger>
           </TabsList>
         </Tabs>
       </AnimatedContent>
     </>
   );
-} 
+}

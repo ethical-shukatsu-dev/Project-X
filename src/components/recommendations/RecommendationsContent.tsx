@@ -1,45 +1,34 @@
-"use client";
+'use client';
 
-import {useEffect, useState} from "react";
-import {useSearchParams} from "next/navigation";
-import CompanyCard from "@/components/recommendations/CompanyCard";
-import {Button} from "@/components/ui/button";
-import {Skeleton} from "@/components/ui/skeleton";
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {RecommendationResult} from "@/lib/openai/client";
-import {Company} from "@/lib/supabase/client";
-import {useTranslation} from "@/i18n-client";
-import SignupDialog from "@/components/recommendations/SignupDialog";
-import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import {useIsMobile} from "@/hooks/useIsMobile";
-import {
-  trackRecommendationsPageVisit,
-  trackCompanyInterestedClick,
-} from "@/lib/analytics";
-import {createUrlWithParams} from "@/lib/utils";
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import CompanyCard from '@/components/recommendations/CompanyCard';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { RecommendationResult } from '@/lib/openai/client';
+import { Company } from '@/lib/supabase/client';
+import { useTranslation } from '@/i18n-client';
+import SignupDialog from '@/components/recommendations/SignupDialog';
+import AnimatedContent from '@/components/ui/Animations/AnimatedContent/AnimatedContent';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { trackRecommendationsPageVisit, trackCompanyInterestedClick } from '@/lib/analytics';
+import { createUrlWithParams } from '@/lib/utils';
 
 interface RecommendationsContentProps {
   lng: string;
 }
 
-export default function RecommendationsContent({
-  lng,
-}: RecommendationsContentProps) {
+export default function RecommendationsContent({ lng }: RecommendationsContentProps) {
   const searchParams = useSearchParams();
-  const userId = searchParams?.get("userId") || "";
-  const {t, loaded} = useTranslation(lng, "ai");
+  const userId = searchParams?.get('userId') || '';
+  const { t, loaded } = useTranslation(lng, 'ai');
   const isMobile = useIsMobile();
   const CARD_TO_SHOW_SIGNUP_DIALOG = 1;
 
   const [recommendations, setRecommendations] = useState<
     (RecommendationResult & {
-      feedback?: "interested" | "not_interested";
+      feedback?: 'interested' | 'not_interested';
     })[]
   >([]);
   const [loading, setLoading] = useState(true);
@@ -52,16 +41,16 @@ export default function RecommendationsContent({
 
   useEffect(() => {
     // Scroll to top of page
-    window.scrollTo({top: 0, behavior: "smooth"});
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Track recommendations page visit
     trackRecommendationsPageVisit().catch((error) => {
-      console.error("Error tracking recommendations page visit:", error);
+      console.error('Error tracking recommendations page visit:', error);
     });
 
     const fetchRecommendations = async (refresh = false) => {
       if (!userId) {
-        setError(t("recommendations.errors.missing_user_id"));
+        setError(t('recommendations.errors.missing_user_id'));
         setLoading(false);
         return;
       }
@@ -85,16 +74,16 @@ export default function RecommendationsContent({
           // Set up fetch for streaming response
           const response = await fetch(
             `/api/recommendations/stream?userId=${userId}&locale=${lng}${
-              refresh ? "&refresh=true" : ""
+              refresh ? '&refresh=true' : ''
             }`
           );
 
           if (!response.ok) {
-            throw new Error(t("recommendations.errors.fetch_failed"));
+            throw new Error(t('recommendations.errors.fetch_failed'));
           }
 
           if (!response.body) {
-            throw new Error("ReadableStream not supported");
+            throw new Error('ReadableStream not supported');
           }
 
           const reader = response.body.getReader();
@@ -102,7 +91,7 @@ export default function RecommendationsContent({
 
           let done = false;
           while (!done) {
-            const {value, done: readerDone} = await reader.read();
+            const { value, done: readerDone } = await reader.read();
             done = readerDone;
 
             if (done) {
@@ -113,85 +102,67 @@ export default function RecommendationsContent({
               break;
             }
 
-            const chunk = decoder.decode(value, {stream: true});
+            const chunk = decoder.decode(value, { stream: true });
             // Split the chunk into lines (each line is a JSON object)
-            const lines = chunk
-              .split("\n")
-              .filter((line) => line.trim() !== "");
+            const lines = chunk.split('\n').filter((line) => line.trim() !== '');
 
-            console.log("Stream received:", {chunk, lineCount: lines.length});
+            console.log('Stream received:', { chunk, lineCount: lines.length });
 
             for (const line of lines) {
               try {
                 console.log(
-                  "Processing line:",
-                  line.substring(0, 100) + (line.length > 100 ? "..." : "")
+                  'Processing line:',
+                  line.substring(0, 100) + (line.length > 100 ? '...' : '')
                 );
 
                 // Make sure the line is valid JSON
-                if (
-                  !line.trim().startsWith("{") ||
-                  !line.trim().endsWith("}")
-                ) {
+                if (!line.trim().startsWith('{') || !line.trim().endsWith('}')) {
                   console.warn("Line doesn't appear to be valid JSON:", line);
                   continue;
                 }
 
                 const data = JSON.parse(line);
-                console.log("Parsed data:", data);
+                console.log('Parsed data:', data);
 
                 if (data.recommendation) {
                   console.log(
-                    "Found recommendation for:",
-                    data.recommendation.company?.name || "Unknown company"
+                    'Found recommendation for:',
+                    data.recommendation.company?.name || 'Unknown company'
                   );
-                  console.log("Recommendation details:", {
+                  console.log('Recommendation details:', {
                     id: data.recommendation.id,
                     companyId: data.recommendation.company?.id,
-                    matchingPoints:
-                      data.recommendation.matching_points?.length || 0,
+                    matchingPoints: data.recommendation.matching_points?.length || 0,
                   });
 
                   // Add the new recommendation to the state
                   setRecommendations((prev) => {
                     // Check if we already have this recommendation
-                    const exists = prev.some(
-                      (r) => r.id === data.recommendation.id
-                    );
+                    const exists = prev.some((r) => r.id === data.recommendation.id);
                     if (exists) {
-                      console.log("Recommendation already exists, skipping");
+                      console.log('Recommendation already exists, skipping');
                       return prev;
                     }
 
-                    console.log("Adding new recommendation to state");
+                    console.log('Adding new recommendation to state');
                     return [...prev, data.recommendation];
                   });
                 } else {
-                  console.warn(
-                    "Parsed JSON does not contain a recommendation property:",
-                    data
-                  );
+                  console.warn('Parsed JSON does not contain a recommendation property:', data);
                 }
               } catch (e) {
-                console.error(
-                  "Error parsing JSON from stream:",
-                  e,
-                  "Line:",
-                  line
-                );
+                console.error('Error parsing JSON from stream:', e, 'Line:', line);
               }
             }
           }
         } else {
           // Use regular API
           const response = await fetch(
-            `/api/recommendations?userId=${userId}&locale=${lng}${
-              refresh ? "&refresh=true" : ""
-            }`
+            `/api/recommendations?userId=${userId}&locale=${lng}${refresh ? '&refresh=true' : ''}`
           );
 
           if (!response.ok) {
-            throw new Error(t("recommendations.errors.fetch_failed"));
+            throw new Error(t('recommendations.errors.fetch_failed'));
           }
 
           const data = await response.json();
@@ -200,8 +171,8 @@ export default function RecommendationsContent({
           setRefreshing(false);
         }
       } catch (err) {
-        console.error("Error fetching recommendations:", err);
-        setError(t("recommendations.errors.general"));
+        console.error('Error fetching recommendations:', err);
+        setError(t('recommendations.errors.general'));
         setLoading(false);
         setRefreshing(false);
         setIsStreaming(false);
@@ -217,7 +188,7 @@ export default function RecommendationsContent({
     setRefreshing(true);
     const fetchRecommendations = async () => {
       if (!userId) {
-        setError(t("recommendations.errors.missing_user_id"));
+        setError(t('recommendations.errors.missing_user_id'));
         setRefreshing(false);
         return;
       }
@@ -233,11 +204,11 @@ export default function RecommendationsContent({
         );
 
         if (!response.ok) {
-          throw new Error(t("recommendations.errors.fetch_failed"));
+          throw new Error(t('recommendations.errors.fetch_failed'));
         }
 
         if (!response.body) {
-          throw new Error("ReadableStream not supported");
+          throw new Error('ReadableStream not supported');
         }
 
         const reader = response.body.getReader();
@@ -245,7 +216,7 @@ export default function RecommendationsContent({
 
         let done = false;
         while (!done) {
-          const {value, done: readerDone} = await reader.read();
+          const { value, done: readerDone } = await reader.read();
           done = readerDone;
 
           if (done) {
@@ -255,73 +226,62 @@ export default function RecommendationsContent({
             break;
           }
 
-          const chunk = decoder.decode(value, {stream: true});
+          const chunk = decoder.decode(value, { stream: true });
           // Split the chunk into lines (each line is a JSON object)
-          const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+          const lines = chunk.split('\n').filter((line) => line.trim() !== '');
 
-          console.log("Stream received:", {chunk, lineCount: lines.length});
+          console.log('Stream received:', { chunk, lineCount: lines.length });
 
           for (const line of lines) {
             try {
               console.log(
-                "Processing line:",
-                line.substring(0, 100) + (line.length > 100 ? "..." : "")
+                'Processing line:',
+                line.substring(0, 100) + (line.length > 100 ? '...' : '')
               );
 
               // Make sure the line is valid JSON
-              if (!line.trim().startsWith("{") || !line.trim().endsWith("}")) {
+              if (!line.trim().startsWith('{') || !line.trim().endsWith('}')) {
                 console.warn("Line doesn't appear to be valid JSON:", line);
                 continue;
               }
 
               const data = JSON.parse(line);
-              console.log("Parsed data:", data);
+              console.log('Parsed data:', data);
 
               if (data.recommendation) {
                 console.log(
-                  "Found recommendation for:",
-                  data.recommendation.company?.name || "Unknown company"
+                  'Found recommendation for:',
+                  data.recommendation.company?.name || 'Unknown company'
                 );
-                console.log("Recommendation details:", {
+                console.log('Recommendation details:', {
                   id: data.recommendation.id,
                   companyId: data.recommendation.company?.id,
-                  matchingPoints:
-                    data.recommendation.matching_points?.length || 0,
+                  matchingPoints: data.recommendation.matching_points?.length || 0,
                 });
 
                 // Add the new recommendation to the state
                 setRecommendations((prev) => {
                   // Check if we already have this recommendation
-                  const exists = prev.some(
-                    (r) => r.id === data.recommendation.id
-                  );
+                  const exists = prev.some((r) => r.id === data.recommendation.id);
                   if (exists) {
-                    console.log("Recommendation already exists, skipping");
+                    console.log('Recommendation already exists, skipping');
                     return prev;
                   }
 
-                  console.log("Adding new recommendation to state");
+                  console.log('Adding new recommendation to state');
                   return [...prev, data.recommendation];
                 });
               } else {
-                console.warn(
-                  "Parsed JSON does not contain a recommendation property:",
-                  data
-                );
+                console.warn('Parsed JSON does not contain a recommendation property:', data);
               }
             } catch (e) {
-              console.error(
-                "Error parsing JSON from stream:",
-                e,
-                "Line:",
-                line
-              );
+              console.error('Error parsing JSON from stream:', e, 'Line:', line);
             }
           }
         }
       } catch (err) {
-        console.error("Error fetching recommendations:", err);
-        setError(t("recommendations.errors.general"));
+        console.error('Error fetching recommendations:', err);
+        setError(t('recommendations.errors.general'));
         setRefreshing(false);
         setIsStreaming(false);
       }
@@ -332,19 +292,19 @@ export default function RecommendationsContent({
 
   const handleFeedback = async (
     recommendationId: string,
-    feedback: "interested" | "not_interested",
+    feedback: 'interested' | 'not_interested',
     company: Company
   ) => {
     try {
       // Only track interested clicks
-      if (feedback === "interested") {
+      if (feedback === 'interested') {
         await trackCompanyInterestedClick(company.id, company.name);
       }
 
-      const response = await fetch("/api/recommendations/feedback", {
-        method: "POST",
+      const response = await fetch('/api/recommendations/feedback', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           recommendationId,
@@ -353,14 +313,12 @@ export default function RecommendationsContent({
       });
 
       if (!response.ok) {
-        throw new Error(t("recommendations.errors.feedback_failed"));
+        throw new Error(t('recommendations.errors.feedback_failed'));
       }
 
       // Update local state
       setRecommendations((prev) =>
-        prev.map((rec) =>
-          rec.id === recommendationId ? {...rec, feedback} : rec
-        )
+        prev.map((rec) => (rec.id === recommendationId ? { ...rec, feedback } : rec))
       );
 
       // Increment feedback count
@@ -379,7 +337,7 @@ export default function RecommendationsContent({
         return newCount;
       });
     } catch (err) {
-      console.error("Error submitting feedback:", err);
+      console.error('Error submitting feedback:', err);
       // Show error message to user
     }
   };
@@ -407,11 +365,9 @@ export default function RecommendationsContent({
       <div className="container px-4 py-8 mx-auto">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="mb-8 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
-            {t("recommendations.loading.title")}
+            {t('recommendations.loading.title')}
           </h1>
-          <p className="mb-8 text-lg text-gray-300">
-            {t("recommendations.loading.description")}
-          </p>
+          <p className="mb-8 text-lg text-gray-300">{t('recommendations.loading.description')}</p>
           <div className="max-w-4xl mx-auto">
             <AnimatedContent direction="vertical" distance={20} delay={500}>
               <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
@@ -438,28 +394,21 @@ export default function RecommendationsContent({
           <Card className="max-w-md mx-auto bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10">
             <CardHeader>
               <CardTitle className="text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
-                {t("recommendations.errors.title")}
+                {t('recommendations.errors.title')}
               </CardTitle>
-              <CardDescription className="text-center text-gray-300">
-                {error}
-              </CardDescription>
+              <CardDescription className="text-center text-gray-300">{error}</CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-center">
               <Button
                 onClick={() => {
                   // Create URL with preserved query parameters
-                  const currentParams = new URLSearchParams(
-                    window.location.search
-                  );
-                  const url = createUrlWithParams(
-                    `/${lng}/questionnaire`,
-                    currentParams
-                  );
+                  const currentParams = new URLSearchParams(window.location.search);
+                  const url = createUrlWithParams(`/${lng}/questionnaire`, currentParams);
                   window.location.href = url;
                 }}
                 className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
               >
-                {t("recommendations.errors.try_again")}
+                {t('recommendations.errors.try_again')}
               </Button>
             </CardFooter>
           </Card>
@@ -473,13 +422,13 @@ export default function RecommendationsContent({
       <div className="max-w-4xl mx-auto">
         <AnimatedContent direction="vertical" distance={40} delay={300}>
           <h1 className="mb-4 text-2xl font-bold text-center text-transparent sm:text-3xl md:text-4xl sm:mb-8 bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
-            {t("recommendations.title")}
+            {t('recommendations.title')}
           </h1>
         </AnimatedContent>
 
         <AnimatedContent direction="vertical" distance={30} delay={450}>
           <p className="mb-4 text-base text-center text-gray-300 sm:text-lg sm:mb-8">
-            {t("recommendations.description")}
+            {t('recommendations.description')}
           </p>
         </AnimatedContent>
 
@@ -487,9 +436,7 @@ export default function RecommendationsContent({
         <div className="mt-3 space-y-4 sm:mt-6 sm:space-y-6">
           {isStreaming && recommendations.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-gray-300">
-                {t("recommendations.loading.streaming")}
-              </p>
+              <p className="text-gray-300">{t('recommendations.loading.streaming')}</p>
               <div className="flex justify-center mt-4">
                 <div className="w-6 h-6 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
               </div>
@@ -500,9 +447,7 @@ export default function RecommendationsContent({
                 key={recommendation.id || recommendation.company.id}
                 direction="vertical"
                 distance={20}
-                delay={
-                  isMobile ? (index === 0 ? 900 : 100) : index === 0 ? 900 : 400
-                }
+                delay={isMobile ? (index === 0 ? 900 : 100) : index === 0 ? 900 : 400}
               >
                 <CompanyCard
                   key={recommendation.id || recommendation.company.id}
@@ -511,11 +456,7 @@ export default function RecommendationsContent({
                   feedback={recommendation.feedback}
                   onFeedback={(feedbackType) =>
                     recommendation.id &&
-                    handleFeedback(
-                      recommendation.id,
-                      feedbackType,
-                      recommendation.company
-                    )
+                    handleFeedback(recommendation.id, feedbackType, recommendation.company)
                   }
                   lng={lng}
                 />
@@ -523,7 +464,7 @@ export default function RecommendationsContent({
             ))
           ) : (
             <div className="py-8 text-center">
-              <p className="text-gray-300">{t("recommendations.no_matches")}</p>
+              <p className="text-gray-300">{t('recommendations.no_matches')}</p>
             </div>
           )}
 
@@ -531,29 +472,27 @@ export default function RecommendationsContent({
           {isStreaming && recommendations.length > 0 && (
             <div className="flex items-center justify-center py-4 mt-4 text-gray-300">
               <div className="w-5 h-5 mr-3 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
-              <span>{t("recommendations.loading.more_coming")}</span>
+              <span>{t('recommendations.loading.more_coming')}</span>
             </div>
           )}
 
           {/* Show partial success message if we got fewer recommendations than expected */}
-          {!isStreaming &&
-            recommendations.length > 0 &&
-            recommendations.length < 5 && (
-              <div className="flex flex-col items-center justify-center py-4 mt-4 text-gray-300">
-                <p className="mb-2">
-                  {t("recommendations.partial_success", {
-                    count: recommendations.length,
-                  })}
-                </p>
-                <Button
-                  onClick={handleRefresh}
-                  variant="outline"
-                  className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
-                >
-                  {t("recommendations.get_more")}
-                </Button>
-              </div>
-            )}
+          {!isStreaming && recommendations.length > 0 && recommendations.length < 5 && (
+            <div className="flex flex-col items-center justify-center py-4 mt-4 text-gray-300">
+              <p className="mb-2">
+                {t('recommendations.partial_success', {
+                  count: recommendations.length,
+                })}
+              </p>
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-blue-500/10"
+              >
+                {t('recommendations.get_more')}
+              </Button>
+            </div>
+          )}
         </div>
 
         <AnimatedContent direction="vertical" distance={20} delay={100}>
@@ -586,7 +525,7 @@ export default function RecommendationsContent({
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  {t("recommendations.refreshing")}
+                  {t('recommendations.refreshing')}
                 </>
               ) : (
                 <>
@@ -604,7 +543,7 @@ export default function RecommendationsContent({
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
-                  {t("recommendations.refresh")}
+                  {t('recommendations.refresh')}
                 </>
               )}
             </Button>

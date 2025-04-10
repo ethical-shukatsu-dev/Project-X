@@ -1,28 +1,23 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { useTranslation } from "@/i18n-client";
-import useABTesting from "@/hooks/useABTesting";
-import { Info } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useState, useEffect } from 'react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { useTranslation } from '@/i18n-client';
+import useABTesting from '@/hooks/useABTesting';
+import { Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface AnonymousModeToggleProps {
   lng: string;
 }
 
 export default function AnonymousModeToggle({ lng }: AnonymousModeToggleProps) {
-  const { t, loaded: translationsLoaded } = useTranslation(lng, "common");
+  const { t, loaded: translationsLoaded } = useTranslation(lng, 'common');
   const { isAnonymous, isLoaded } = useABTesting();
   const [isMounted, setIsMounted] = useState(false);
-  
+
   // Prevent hydration mismatch
   useEffect(() => {
     setIsMounted(true);
@@ -42,7 +37,7 @@ export default function AnonymousModeToggle({ lng }: AnonymousModeToggleProps) {
             disabled={true} // Disable manual toggling since it's controlled by A/B testing
           />
           <Label htmlFor="anonymous-mode" className="text-sm cursor-pointer sm:text-base">
-            {t("homepage.anonymousMode")}
+            {t('homepage.anonymousMode')}
           </Label>
         </div>
         <TooltipProvider>
@@ -51,11 +46,11 @@ export default function AnonymousModeToggle({ lng }: AnonymousModeToggleProps) {
               <Info size={16} className="text-muted-foreground cursor-help" />
             </TooltipTrigger>
             <TooltipContent>
-              <p className="max-w-xs">{t("homepage.anonymousModeDescription")}</p>
+              <p className="max-w-xs">{t('homepage.anonymousModeDescription')}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </Card>
     </div>
   );
-} 
+}

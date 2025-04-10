@@ -115,6 +115,7 @@ This helps you confirm that you're connected to the correct database.
 2. **For Production**: Get credentials from your "Project X Production" Supabase project
 
 For both projects, you can find the credentials in the Supabase dashboard under:
+
 - Project Settings > API > Project URL (for the URL)
 - Project Settings > API > Project API Keys > anon public (for the anon key)
-- Project Settings > API > Project API Keys > service_role (for the service role key) 
+- Project Settings > API > Project API Keys > service_role (for the service role key)

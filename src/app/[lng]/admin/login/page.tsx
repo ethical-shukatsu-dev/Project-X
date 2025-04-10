@@ -1,10 +1,10 @@
-import React, { Suspense } from "react";
-import { Metadata } from "next";
-import AdminLoginForm from "@/components/admin/AdminLoginForm";
+import React, { Suspense } from 'react';
+import { Metadata } from 'next';
+import AdminLoginForm from '@/components/admin/AdminLoginForm';
 
 export const metadata: Metadata = {
-  title: "Admin Login",
-  description: "Login to access admin features",
+  title: 'Admin Login',
+  description: 'Login to access admin features',
 };
 
 // Loading component to show while AdminLoginForm is loading
@@ -27,4 +27,4 @@ export default function AdminLoginPage() {
       </div>
     </div>
   );
-} 
+}

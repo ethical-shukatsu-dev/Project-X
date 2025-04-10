@@ -1,20 +1,20 @@
-import Image from "next/image";
-import {Avatar} from "@/components/ui/avatar";
+import Image from 'next/image';
+import { Avatar } from '@/components/ui/avatar';
 
 interface CompanyLogosProps {
   className?: string;
 }
 
-export default function CompanyLogos({className = ""}: CompanyLogosProps) {
+export default function CompanyLogos({ className = '' }: CompanyLogosProps) {
   const companies = [
-    {name: "Toyota", logo: "/images/companies/toyota.png"},
-    {name: "SEGA", logo: "/images/companies/sega.png"},
-    {name: "Softbank", logo: "/images/companies/softbank.png"},
-    {name: "Mizuho", logo: "/images/companies/mizuho.png"},
-    {name: "Deloitte", logo: "/images/companies/deloitte.png"},
-    {name: "NRI", logo: "/images/companies/nri.png"},
-    {name: "Nestle", logo: "/images/companies/nestle.png"},
-    {name: "Asahi", logo: "/images/companies/asahi.png"},
+    { name: 'Toyota', logo: '/images/companies/toyota.png' },
+    { name: 'SEGA', logo: '/images/companies/sega.png' },
+    { name: 'Softbank', logo: '/images/companies/softbank.png' },
+    { name: 'Mizuho', logo: '/images/companies/mizuho.png' },
+    { name: 'Deloitte', logo: '/images/companies/deloitte.png' },
+    { name: 'NRI', logo: '/images/companies/nri.png' },
+    { name: 'Nestle', logo: '/images/companies/nestle.png' },
+    { name: 'Asahi', logo: '/images/companies/asahi.png' },
   ];
 
   return (

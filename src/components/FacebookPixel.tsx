@@ -6,11 +6,11 @@ import { useEffect } from 'react';
 type Props = {
   pixelId?: string;
   trackable?: boolean;
-}
+};
 
-const FacebookPixel = ({ 
+const FacebookPixel = ({
   pixelId = process.env.NEXT_PUBLIC_FB_PIXEL_ID,
-  trackable = true 
+  trackable = true,
 }: Props) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -18,7 +18,7 @@ const FacebookPixel = ({
   useEffect(() => {
     // Only initialize in production
     if (process.env.NODE_ENV !== 'production') return;
-    
+
     if (!pixelId || !trackable) return;
 
     // Dynamically import react-facebook-pixel
@@ -29,7 +29,7 @@ const FacebookPixel = ({
           autoConfig: true,
           debug: false, // Always false since we're only running in production
         };
-        
+
         ReactPixel.init(pixelId, undefined, options);
         ReactPixel.pageView();
       });
@@ -38,4 +38,4 @@ const FacebookPixel = ({
   return null;
 };
 
-export default FacebookPixel; 
+export default FacebookPixel;

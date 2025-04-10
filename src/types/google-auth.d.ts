@@ -7,7 +7,7 @@ declare global {
     gapi: {
       load: (api: string, callback: () => void) => void;
       auth2: {
-        init: (params: {client_id: string; scope: string}) => unknown;
+        init: (params: { client_id: string; scope: string }) => unknown;
         getAuthInstance: () => {
           signIn: () => Promise<GoogleUser>;
         };
@@ -30,4 +30,4 @@ export interface GoogleUser {
   };
 }
 
-export {}; 
+export {};

@@ -1,9 +1,9 @@
-import {AnalyticsDashboard} from "@/components/analytics/AnalyticsDashboard";
-import {Metadata} from "next";
+import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
+import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "Analytics Dashboard",
-  description: "View website analytics and metrics",
+  title: 'Analytics Dashboard',
+  description: 'View website analytics and metrics',
 };
 
 export default function AnalyticsPage() {

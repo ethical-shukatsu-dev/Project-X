@@ -1,9 +1,9 @@
-import {TFunction} from "i18next";
-import {Button} from "./button";
-import {initiateGoogleSignIn} from "@/lib/auth/googleAuth";
-import {trackEvent} from "@/lib/analytics";
-import {useState} from "react";
-import GoogleSignInLoading from "./GoogleSignInLoading";
+import { TFunction } from 'i18next';
+import { Button } from './button';
+import { initiateGoogleSignIn } from '@/lib/auth/googleAuth';
+import { trackEvent } from '@/lib/analytics';
+import { useState } from 'react';
+import GoogleSignInLoading from './GoogleSignInLoading';
 
 export default function GoogleSignUpButton({
   t,
@@ -30,9 +30,9 @@ export default function GoogleSignUpButton({
         setIsLoading(false);
       } else {
         // If no custom onClick handler is provided, use default Google sign-in flow
-        await trackEvent("signup_click", {
-          method: "google",
-          source: "google_button",
+        await trackEvent('signup_click', {
+          method: 'google',
+          source: 'google_button',
         });
 
         // Initiate Google sign-in
@@ -41,7 +41,7 @@ export default function GoogleSignUpButton({
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Error with Google sign-in:", error);
+      console.error('Error with Google sign-in:', error);
       setIsLoading(false);
     }
   };
@@ -55,11 +55,7 @@ export default function GoogleSignUpButton({
         onClick={handleGoogleSignIn}
         disabled={isLoading}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          className="w-5 h-5 mr-2"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5 mr-2">
           <path
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
             fill="#4285F4"
@@ -77,7 +73,7 @@ export default function GoogleSignUpButton({
             fill="#EA4335"
           />
         </svg>
-        {t("cta.secondaryButton") || "Continue with Google"}
+        {t('cta.secondaryButton') || 'Continue with Google'}
       </Button>
       <GoogleSignInLoading visible={isLoading} />
     </>

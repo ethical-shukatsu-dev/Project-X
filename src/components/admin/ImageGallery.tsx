@@ -1,18 +1,13 @@
-"use client";
+'use client';
 
-import React from "react";
-import Image from "next/image";
-import {Loader2, Copy, Check} from "lucide-react";
-import {ValueImage} from "@/lib/supabase/client";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import React from 'react';
+import Image from 'next/image';
+import { Loader2, Copy, Check } from 'lucide-react';
+import { ValueImage } from '@/lib/supabase/client';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Image card as a memoized component to prevent unnecessary re-renders
-export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
+export const ImageCard = React.memo(({ image }: { image: ValueImage }) => {
   const [copied, setCopied] = React.useState(false);
 
   const copyToClipboard = async () => {
@@ -21,7 +16,7 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
     } catch (err) {
-      console.error("Failed to copy URL:", err);
+      console.error('Failed to copy URL:', err);
     }
   };
 
@@ -51,7 +46,7 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
         {/* Attribution for images */}
         {image.attribution && (
           <div className="mt-1 text-xs text-gray-500">
-            Photo by{" "}
+            Photo by{' '}
             <a
               href={image.attribution.photographer_url}
               target="_blank"
@@ -59,8 +54,8 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
               className="underline hover:text-gray-700"
             >
               {image.attribution.photographer_name}
-            </a>{" "}
-            on{" "}
+            </a>{' '}
+            on{' '}
             {image.unsplash_id ? (
               <a
                 href="https://unsplash.com/?utm_source=project_x&utm_medium=referral"
@@ -80,7 +75,7 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
                 Pexels
               </a>
             ) : (
-              "Stock"
+              'Stock'
             )}
           </div>
         )}
@@ -120,20 +115,17 @@ export const ImageCard = React.memo(({image}: {image: ValueImage}) => {
   );
 });
 
-ImageCard.displayName = "ImageCard";
+ImageCard.displayName = 'ImageCard';
 
 // Empty state component
 const EmptyState = React.memo(
-  ({message, resetAction}: {message: string; resetAction?: () => void}) => (
+  ({ message, resetAction }: { message: string; resetAction?: () => void }) => (
     <p>
       {message}
       {resetAction && (
         <>
-          {" "}
-          <button
-            onClick={resetAction}
-            className="underline text-primary hover:text-primary/80"
-          >
+          {' '}
+          <button onClick={resetAction} className="underline text-primary hover:text-primary/80">
             reset them
           </button>
         </>
@@ -143,7 +135,7 @@ const EmptyState = React.memo(
   )
 );
 
-EmptyState.displayName = "EmptyState";
+EmptyState.displayName = 'EmptyState';
 
 // Loading component
 const LoadingState = React.memo(() => (
@@ -153,7 +145,7 @@ const LoadingState = React.memo(() => (
   </div>
 ));
 
-LoadingState.displayName = "LoadingState";
+LoadingState.displayName = 'LoadingState';
 
 // Image Gallery component
 export const ImageGallery = React.memo(
@@ -196,7 +188,7 @@ export const ImageGallery = React.memo(
                 <ImageCard key={image.id} image={image} />
               </TooltipTrigger>
               <TooltipContent>
-                <p>{image.description || image.value_name || "Value image"}</p>
+                <p>{image.description || image.value_name || 'Value image'}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -206,4 +198,4 @@ export const ImageGallery = React.memo(
   }
 );
 
-ImageGallery.displayName = "ImageGallery";
+ImageGallery.displayName = 'ImageGallery';

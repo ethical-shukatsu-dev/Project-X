@@ -1,5 +1,5 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Combines class names using clsx and tailwind-merge
@@ -27,30 +27,30 @@ export function createUrlWithParams(
 ): string {
   // Create a copy of the current search params
   const params = new URLSearchParams(searchParams.toString());
-  
+
   // Remove excluded parameters
   if (options.exclude) {
-    options.exclude.forEach(param => params.delete(param));
+    options.exclude.forEach((param) => params.delete(param));
   }
-  
+
   // Add or override included parameters
   if (options.include) {
     Object.entries(options.include).forEach(([key, value]) => {
       params.set(key, value);
     });
   }
-  
+
   // Construct the final URL
   const queryString = params.toString();
   const hasQueryInBaseUrl = baseUrl.includes('?');
-  
+
   if (!queryString) {
     return baseUrl;
   }
-  
+
   if (hasQueryInBaseUrl) {
     return `${baseUrl}&${queryString}`;
   }
-  
+
   return `${baseUrl}?${queryString}`;
 }
