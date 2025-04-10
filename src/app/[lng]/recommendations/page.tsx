@@ -1,23 +1,21 @@
-import {Suspense} from "react";
-import {Skeleton} from "@/components/ui/skeleton";
-import RecommendationsContent from "@/components/recommendations/RecommendationsContent";
-import {getTranslation} from "@/i18n-server";
-import AnimatedContent from "@/components/ui/Animations/AnimatedContent/AnimatedContent";
-import FloatingDecorations from "@/components/ui/FloatingDecorations/FloatingDecorations";
-import RecommendationsTracker from "@/components/analytics/RecommendationsTracker";
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import RecommendationsContent from '@/components/recommendations/RecommendationsContent';
+import { getTranslation } from '@/i18n-server';
+import AnimatedContent from '@/components/ui/Animations/AnimatedContent/AnimatedContent';
+import FloatingDecorations from '@/components/ui/FloatingDecorations/FloatingDecorations';
+import RecommendationsTracker from '@/components/analytics/RecommendationsTracker';
 
 // Loading fallback component
-async function RecommendationsLoading({lng}: {lng: string}) {
-  const {t} = await getTranslation(lng, "ai");
+async function RecommendationsLoading({ lng }: { lng: string }) {
+  const { t } = await getTranslation(lng, 'ai');
 
   return (
     <div className="container px-4 py-8 mx-auto text-center">
       <h1 className="mb-4 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
-        {t("recommendations.loading.title")}
+        {t('recommendations.loading.title')}
       </h1>
-      <p className="mb-8 text-lg text-gray-300">
-        {t("recommendations.loading.description")}
-      </p>
+      <p className="mb-8 text-lg text-gray-300">{t('recommendations.loading.description')}</p>
       <div className="max-w-4xl mx-auto">
         <AnimatedContent direction="vertical" distance={20} delay={500}>
           <Skeleton className="h-[200px] w-full mb-4 bg-white/10 border border-white/10 backdrop-blur-sm" />
@@ -37,11 +35,7 @@ async function RecommendationsLoading({lng}: {lng: string}) {
 }
 
 // Main page component with Suspense boundary
-export default function RecommendationsPage({
-  params,
-}: {
-  params: Promise<{lng: string}>;
-}) {
+export default function RecommendationsPage({ params }: { params: Promise<{ lng: string }> }) {
   // Use an async IIFE to handle the Promise
   const RecommendationsPageContent = async () => {
     const resolvedParams = await params;
@@ -50,7 +44,7 @@ export default function RecommendationsPage({
     return (
       <div className="relative flex flex-col min-h-screen overflow-hidden text-white bg-black">
         <FloatingDecorations />
-        
+
         <RecommendationsTracker />
 
         <main className="relative z-20 flex-1">

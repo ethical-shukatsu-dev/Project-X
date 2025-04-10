@@ -53,6 +53,7 @@ This will check if your Supabase connection is working and if all required table
 ### Database Schema
 
 **user_values**
+
 ```sql
 CREATE TABLE user_values (
   id UUID PRIMARY KEY,
@@ -64,6 +65,7 @@ CREATE TABLE user_values (
 ```
 
 **companies**
+
 ```sql
 CREATE TABLE companies (
   id UUID PRIMARY KEY,
@@ -80,6 +82,7 @@ CREATE TABLE companies (
 ```
 
 **recommendations**
+
 ```sql
 CREATE TABLE recommendations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -92,6 +95,7 @@ CREATE TABLE recommendations (
 ```
 
 **value_images**
+
 ```sql
 CREATE TABLE value_images (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -136,7 +140,7 @@ begin
       and timestamp >= start_date
     )
   ) into result;
-  
+
   return result;
 end;
 $$;
@@ -187,11 +191,11 @@ BEGIN
   AND created_at <= end_date;
 
   -- Get unique survey starts with anonymous breakdown
-  SELECT 
+  SELECT
     count(distinct case when properties->>'isAnonymous' = 'true' then user_id end) as anon_starts,
     count(distinct case when properties->>'isAnonymous' = 'false' then user_id end) as non_anon_starts,
     count(distinct user_id) as total_starts
-  INTO 
+  INTO
     anon_survey_starts,
     non_anon_survey_starts,
     survey_start
@@ -240,13 +244,13 @@ BEGIN
   AND created_at <= end_date;
 
   -- Get signup counts
-  SELECT 
+  SELECT
     count(*) FILTER (WHERE event_type = 'signup_email'),
     count(*) FILTER (WHERE event_type = 'signup_google'),
     count(distinct user_id) FILTER (WHERE event_type = 'signup_email'),
     count(distinct user_id) FILTER (WHERE event_type = 'signup_google'),
     count(distinct user_id)
-  INTO 
+  INTO
     email_signups,
     google_signups,
     unique_email_users,
@@ -263,28 +267,28 @@ BEGIN
     'unique_email_users', unique_email_users,
     'unique_google_users', unique_google_users,
     'unique_users', total_signups,
-    'anonymous_email_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events 
-      WHERE event_type = 'signup_email' 
-      AND properties->>'isAnonymous' = 'true' 
-      AND user_id IS NOT NULL 
+    'anonymous_email_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events
+      WHERE event_type = 'signup_email'
+      AND properties->>'isAnonymous' = 'true'
+      AND user_id IS NOT NULL
       AND created_at >= start_date
       AND created_at <= end_date),
-    'non_anonymous_email_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events 
-      WHERE event_type = 'signup_email' 
-      AND (properties->>'isAnonymous' = 'false' OR properties->>'isAnonymous' IS NULL) 
-      AND user_id IS NOT NULL 
+    'non_anonymous_email_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events
+      WHERE event_type = 'signup_email'
+      AND (properties->>'isAnonymous' = 'false' OR properties->>'isAnonymous' IS NULL)
+      AND user_id IS NOT NULL
       AND created_at >= start_date
       AND created_at <= end_date),
-    'anonymous_google_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events 
-      WHERE event_type = 'signup_google' 
-      AND properties->>'isAnonymous' = 'true' 
-      AND user_id IS NOT NULL 
+    'anonymous_google_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events
+      WHERE event_type = 'signup_google'
+      AND properties->>'isAnonymous' = 'true'
+      AND user_id IS NOT NULL
       AND created_at >= start_date
       AND created_at <= end_date),
-    'non_anonymous_google_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events 
-      WHERE event_type = 'signup_google' 
-      AND (properties->>'isAnonymous' = 'false' OR properties->>'isAnonymous' IS NULL) 
-      AND user_id IS NOT NULL 
+    'non_anonymous_google_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events
+      WHERE event_type = 'signup_google'
+      AND (properties->>'isAnonymous' = 'false' OR properties->>'isAnonymous' IS NULL)
+      AND user_id IS NOT NULL
       AND created_at >= start_date
       AND created_at <= end_date)
   );
@@ -307,7 +311,7 @@ BEGIN
     GROUP BY lower(properties->>'surveyType')
   ) survey_types;
 
-  -- Get step stats - FIXED to use the correct event type 'survey_step_completed' 
+  -- Get step stats - FIXED to use the correct event type 'survey_step_completed'
   SELECT jsonb_agg(
     jsonb_build_object(
       'step_id', step,
@@ -394,21 +398,25 @@ BEGIN
   );
 END;
 $$;
+```
 
 ### Installation
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/project-x.git
 cd project-x
 ```
 
 2. Install dependencies
+
 ```bash
 bun install
 ```
 
 3. Run the development server
+
 ```bash
 bun run dev
 ```

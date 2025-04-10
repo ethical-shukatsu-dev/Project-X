@@ -8,12 +8,15 @@
     "build": "bun --bun next build",
     "start": "bun --bun next start",
     "lint": "bun --bun next lint",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "format": "prettier --write .",
     "verify-supabase": "bun verify-supabase.mjs",
     "verify-supabase:dev": "bun verify-supabase.mjs --development",
     "verify-supabase:prod": "bun verify-supabase.mjs --production",
     "deduplicate-companies": "bun --bun scripts/deduplicate-companies.ts",
     "deduplicate-companies-with-refs": "bun --bun scripts/deduplicate-companies-with-refs.ts",
-    "deduplicate-companies-interactive": "bun --bun scripts/deduplicate-companies-interactive.ts"
+    "deduplicate-companies-interactive": "bun --bun scripts/deduplicate-companies-interactive.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.4",
@@ -64,9 +67,16 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "8.29.1",
+    "@typescript-eslint/parser": "8.29.1",
     "bun-vercel": "^1.0.0-alpha.4",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
+    "eslint-config-prettier": "10.1.1",
+    "eslint-plugin-prettier": "5.2.6",
+    "husky": "9.1.7",
+    "lint-staged": "15.5.0",
+    "prettier": "3.5.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

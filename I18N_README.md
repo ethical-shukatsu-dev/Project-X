@@ -39,11 +39,7 @@ src/
 ```tsx
 import { getTranslation } from '@/i18n-server';
 
-export default async function MyServerComponent({
-  params: { lng }
-}: {
-  params: { lng: string }
-}) {
+export default async function MyServerComponent({ params: { lng } }: { params: { lng: string } }) {
   const { t } = await getTranslation(lng, 'common');
 
   return (
@@ -62,11 +58,7 @@ export default async function MyServerComponent({
 
 import { useTranslation } from '@/i18n-client';
 
-export default function MyClientComponent({
-  lng
-}: {
-  lng: string;
-}) {
+export default function MyClientComponent({ lng }: { lng: string }) {
   const { t, loaded } = useTranslation(lng, 'common');
 
   // Show loading state while translations are being loaded
@@ -88,12 +80,10 @@ import { NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
   const { locale = 'en' } = await req.json();
-  
+
   // Use locale to determine response language
-  const message = locale === 'ja' 
-    ? 'こんにちは、世界！' 
-    : 'Hello, world!';
-  
+  const message = locale === 'ja' ? 'こんにちは、世界！' : 'Hello, world!';
+
   return Response.json({ message });
 }
 ```
@@ -134,7 +124,7 @@ const response = await fetch('/api/ai', {
   body: JSON.stringify({
     prompt: userInput,
     locale: currentLanguage,
-    context: 'questionnaire' // or 'recommendations'
+    context: 'questionnaire', // or 'recommendations'
   }),
 });
 ```
@@ -153,4 +143,4 @@ The API will use the appropriate system prompt from the translations and generat
 
 - If translations aren't loading, check the network tab to ensure the JSON files are being fetched correctly.
 - If the middleware isn't redirecting correctly, check the matcher configuration in `middleware.ts`.
-- For client components, ensure you're passing the language code as a prop. 
+- For client components, ensure you're passing the language code as a prop.

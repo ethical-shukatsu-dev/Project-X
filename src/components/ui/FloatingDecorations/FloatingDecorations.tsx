@@ -1,4 +1,4 @@
-import FloatingElement from "@/components/ui/FloatingElement";
+import FloatingElement from '@/components/ui/FloatingElement';
 
 export default function FloatingDecorations() {
   return (
@@ -41,4 +41,4 @@ export default function FloatingDecorations() {
       <div className="absolute bottom-0 bg-blue-500 rounded-full left-1/4 w-80 h-80 opacity-10 blur-3xl -z-10"></div>
     </div>
   );
-} 
+}

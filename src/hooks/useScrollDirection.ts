@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 /**
  * A hook that tracks scroll direction to hide/show elements like headers
@@ -8,16 +8,16 @@ import { useState, useEffect } from "react";
  * @returns An object with scrollDirection ("up" or "down") and scrollY position
  */
 export function useScrollDirection(threshold = 10) {
-  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("up");
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     let lastScrollY = window.pageYOffset;
-    
+
     const updateScrollDirection = () => {
       const currentScrollY = window.pageYOffset;
-      const direction = currentScrollY > lastScrollY ? "down" : "up";
-      
+      const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+
       // Only update direction if the scroll difference exceeds the threshold
       if (Math.abs(currentScrollY - lastScrollY) > threshold) {
         setScrollDirection(direction);
@@ -31,12 +31,12 @@ export function useScrollDirection(threshold = 10) {
       window.requestAnimationFrame(updateScrollDirection);
     };
 
-    window.addEventListener("scroll", onScroll);
-    
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener('scroll', onScroll);
+
+    return () => window.removeEventListener('scroll', onScroll);
   }, [threshold]);
 
   return { scrollDirection, scrollY };
 }
 
-export default useScrollDirection; 
+export default useScrollDirection;

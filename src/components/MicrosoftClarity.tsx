@@ -21,4 +21,4 @@ export default function MicrosoftClarity({ clarityProjectId }: MicrosoftClarityP
   }, [clarityProjectId]);
 
   return null; // This component doesn't render anything
-} 
+}

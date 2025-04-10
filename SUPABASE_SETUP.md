@@ -23,6 +23,7 @@ Once your project is created, you'll need to set up the database tables:
 4. Click "Run" to execute the SQL script
 
 This will:
+
 - Create the necessary tables (`user_values`, `companies`, and `recommendations`)
 - Insert sample company data for testing
 
@@ -52,9 +53,11 @@ After setting up your Supabase project, you need to configure your environment v
 To verify that your setup is working correctly:
 
 1. Run the verification script:
+
    ```bash
    bun run verify-supabase
    ```
+
    This will check your Supabase connection and verify that all required tables exist.
 
 2. If successful, you should see confirmation messages for each table.
@@ -76,14 +79,15 @@ To verify that your setup is working correctly:
 Once your Supabase project is set up, you can:
 
 1. Run your Next.js application locally to test the connection:
+
    ```bash
    bun run dev
    ```
 
 2. Add more sample company data if needed
 
-3. Test the questionnaire and recommendation features 
+3. Test the questionnaire and recommendation features
 
 ## Multiple Environments
 
-For information on setting up and switching between development and production environments, see the [Environment Setup Guide](ENVIRONMENT_SETUP.md). 
+For information on setting up and switching between development and production environments, see the [Environment Setup Guide](ENVIRONMENT_SETUP.md).

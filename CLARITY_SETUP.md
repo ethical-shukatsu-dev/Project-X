@@ -33,10 +33,12 @@ By default, Clarity is only enabled in production environments. To enable it in 
 ### Core Components
 
 1. **ClarityProvider** (`src/components/ClarityProvider.tsx`)
+
    - Conditionally initializes Clarity based on environment settings
    - Wraps the application to ensure Clarity is available throughout
 
 2. **MicrosoftClarity** (`src/components/MicrosoftClarity.tsx`)
+
    - Handles the actual initialization of Clarity
    - Isolates Clarity-specific code for easier maintenance
 
@@ -87,15 +89,13 @@ import { useClarity } from '@/hooks/useClarity';
 
 function MyComponent() {
   const { setTag } = useClarity();
-  
+
   const handleAction = () => {
     // Track a user action
     setTag('user_action', 'button_clicked');
   };
-  
-  return (
-    <button onClick={handleAction}>Click Me</button>
-  );
+
+  return <button onClick={handleAction}>Click Me</button>;
 }
 ```
 
@@ -110,7 +110,7 @@ import { trackAuthenticatedUser } from '@/lib/clarityUtils';
 trackAuthenticatedUser(user.id, {
   name: user.name,
   email: user.email,
-  role: user.role
+  role: user.role,
 });
 ```
 
@@ -127,7 +127,7 @@ The Clarity implementation was integrated with the project's previous analytics 
 - `trackEvent` - Generic event tracking
 - `trackSignupClick` - Track signup button clicks
 - `trackSurveyStartClick` - Track survey start actions
-- `trackSurveyTypeSelection` - Track questionnaire type selection 
+- `trackSurveyTypeSelection` - Track questionnaire type selection
 - `trackSurveyStepCompleted` - Track completion of survey steps
 - `trackSurveyStepAbandoned` - Track abandoned survey steps
 - `trackSurveyCompleted` - Track survey completion
@@ -144,4 +144,4 @@ The existing analytics system (`src/lib/analytics/index.ts`) was combined with t
 2. Uses Clarity tracking for all events
 3. Maintains backward compatibility with the existing analytics backend
 
-This integration provides richer analytics data by tracking user behavior through both systems simultaneously. 
+This integration provides richer analytics data by tracking user behavior through both systems simultaneously.

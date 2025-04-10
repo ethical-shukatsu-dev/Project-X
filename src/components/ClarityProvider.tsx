@@ -15,4 +15,4 @@ export default function ClarityProvider({ children }: ClarityProviderProps) {
       {children}
     </>
   );
-} 
+}

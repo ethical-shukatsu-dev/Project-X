@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   MetricCard,
@@ -6,35 +6,39 @@ import {
   SplitMetric,
   RefreshButton,
   ABTestComparison,
-} from "./DashboardCards";
-import {SurveyStepsFunnel} from "./SurveyStepsFunnel";
-import {useAnalytics} from "@/hooks/useAnalytics";
-import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {Button} from "@/components/ui/button";
-import {RefreshCw} from "lucide-react";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Skeleton} from "@/components/ui/skeleton";
-import {useState} from "react";
-import {TimeRange, DateRange} from "@/types/analytics";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import {format} from "date-fns";
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+} from './DashboardCards';
+import { SurveyStepsFunnel } from './SurveyStepsFunnel';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useState } from 'react';
+import { TimeRange, DateRange } from '@/types/analytics';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { format } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 const timeRangeLabels: Record<TimeRange, string> = {
-  "24h": "Last 24 Hours",
-  "7d": "Last 7 Days",
-  "30d": "Last 30 Days",
-  all: "All Time",
-  custom: "Custom Range",
+  '24h': 'Last 24 Hours',
+  '7d': 'Last 7 Days',
+  '30d': 'Last 30 Days',
+  all: 'All Time',
+  custom: 'Custom Range',
 };
 
 export function AnalyticsDashboard() {
-  const {data, loading, error, timeRange, dateRange, changeTimeRange, refreshData} =
+  const { data, loading, error, timeRange, dateRange, changeTimeRange, refreshData } =
     useAnalytics();
-  const [refreshingStates, setRefreshingStates] = useState<
-    Record<string, boolean>
-  >({
+  const [refreshingStates, setRefreshingStates] = useState<Record<string, boolean>>({
     visitors: false,
     surveyStarted: false,
     surveyCompleted: false,
@@ -51,45 +55,47 @@ export function AnalyticsDashboard() {
     dialogCloses: false,
     all: false,
   });
-  
+
   // Date picker state
-  const [startDate, setStartDate] = useState<Date | null>(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+  const [startDate, setStartDate] = useState<Date | null>(
+    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  );
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const refreshMetric = async (metricKey: string) => {
     // Set the specific metric loading state
-    setRefreshingStates((prev) => ({...prev, [metricKey]: true}));
+    setRefreshingStates((prev) => ({ ...prev, [metricKey]: true }));
 
     // Refresh only the specific metric
     await refreshData(timeRange, metricKey);
 
     // Reset loading state after a short delay for visual feedback
     setTimeout(() => {
-      setRefreshingStates((prev) => ({...prev, [metricKey]: false}));
+      setRefreshingStates((prev) => ({ ...prev, [metricKey]: false }));
     }, 500);
   };
 
   const refreshAllMetrics = async () => {
-    setRefreshingStates((prev) => ({...prev, all: true}));
+    setRefreshingStates((prev) => ({ ...prev, all: true }));
     await refreshData();
     setTimeout(() => {
-      setRefreshingStates((prev) => ({...prev, all: false}));
+      setRefreshingStates((prev) => ({ ...prev, all: false }));
     }, 500);
   };
-  
+
   // Apply custom date range
   const applyDateRange = () => {
     if (startDate && endDate) {
       const customDateRange: DateRange = {
         startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
+        endDate: endDate.toISOString(),
       };
       changeTimeRange('custom', customDateRange);
       setDialogOpen(false);
     }
   };
-  
+
   // Format date for display
   const formatDateRange = () => {
     if (timeRange === 'custom' && dateRange) {
@@ -104,9 +110,7 @@ export function AnalyticsDashboard() {
     return (
       <Card className="border-red-300">
         <CardHeader>
-          <CardTitle className="text-red-500">
-            Error Loading Analytics
-          </CardTitle>
+          <CardTitle className="text-red-500">Error Loading Analytics</CardTitle>
         </CardHeader>
         <CardContent>
           <p>{error.message}</p>
@@ -132,16 +136,16 @@ export function AnalyticsDashboard() {
     signupClicks: 0,
     dialogCloses: 0,
     uniqueDialogCloses: 0,
-    dialogCloseConversionRate: "0%",
-    conversionRate: "0%",
+    dialogCloseConversionRate: '0%',
+    conversionRate: '0%',
     surveyFunnel: {
       visits: 0,
       uniqueUsers: 0,
       started: 0,
       completed: 0,
-      startRate: "0%",
-      completionRate: "0%",
-      overallConversionRate: "0%",
+      startRate: '0%',
+      completionRate: '0%',
+      overallConversionRate: '0%',
       anonymousStarts: 0,
       nonAnonymousStarts: 0,
     },
@@ -153,7 +157,7 @@ export function AnalyticsDashboard() {
     recommendations: {
       pageVisits: 0,
       companyInterestClicks: 0,
-      companyInterestRate: "0%",
+      companyInterestRate: '0%',
       averageCompaniesPerUser: 0,
       uniqueCompanyInterests: 0,
       anonymousInterests: 0,
@@ -177,26 +181,26 @@ export function AnalyticsDashboard() {
     dropoffAnalysis: [],
     anonymousUsers: {
       total: 0,
-      percentage: "0%",
-      conversionRate: "0%",
-      completionRate: "0%",
+      percentage: '0%',
+      conversionRate: '0%',
+      completionRate: '0%',
     },
     abTestComparison: {
       anonymous: {
         total: 0,
-        percentage: "0%",
-        completionRate: "0%",
-        conversionRate: "0%",
+        percentage: '0%',
+        completionRate: '0%',
+        conversionRate: '0%',
       },
       nonAnonymous: {
         total: 0,
-        percentage: "0%",
-        completionRate: "0%",
-        conversionRate: "0%",
+        percentage: '0%',
+        completionRate: '0%',
+        conversionRate: '0%',
       },
       difference: {
-        completionRate: "0%",
-        conversionRate: "0%",
+        completionRate: '0%',
+        conversionRate: '0%',
       },
     },
   };
@@ -209,16 +213,16 @@ export function AnalyticsDashboard() {
 
   // Define the question order to match the order in ValuesQuestionnaire.tsx
   const questionOrder = [
-    "work_values",
-    "corporate_culture",
-    "leadership",
-    "workplace_environment",
-    "humanity",
-    "interpersonal_skills",
-    "cognitive_abilities",
-    "self_growth",
-    "job_performance",
-    "mental_strength",
+    'work_values',
+    'corporate_culture',
+    'leadership',
+    'workplace_environment',
+    'humanity',
+    'interpersonal_skills',
+    'cognitive_abilities',
+    'self_growth',
+    'job_performance',
+    'mental_strength',
   ];
 
   // Map and sort the steps based on the defined order
@@ -226,9 +230,9 @@ export function AnalyticsDashboard() {
     .map((step) => {
       // Parse the step ID to create a readable label
       const stepName = step.id
-        .split("_")
+        .split('_')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
+        .join(' ');
 
       // Find the index in the question order array (or default to a high number if not found)
       const orderIndex = questionOrder.indexOf(step.id);
@@ -281,11 +285,7 @@ export function AnalyticsDashboard() {
             onClick={refreshAllMetrics}
             disabled={refreshingStates.all}
           >
-            <RefreshCw
-              className={`h-4 w-4 ${
-                refreshingStates.all ? "animate-spin" : ""
-              }`}
-            />
+            <RefreshCw className={`h-4 w-4 ${refreshingStates.all ? 'animate-spin' : ''}`} />
             Refresh All
           </Button>
 
@@ -296,22 +296,19 @@ export function AnalyticsDashboard() {
                   if (range === 'custom') {
                     return (
                       <DialogTrigger key={range} asChild>
-                        <TabsTrigger 
-                          value={range}
-                          data-state={timeRange === range ? "active" : ""}
-                        >
+                        <TabsTrigger value={range} data-state={timeRange === range ? 'active' : ''}>
                           {timeRange === 'custom' ? formatDateRange() : timeRangeLabels[range]}
                         </TabsTrigger>
                       </DialogTrigger>
                     );
                   }
-                  
+
                   return (
                     <TabsTrigger
                       key={range}
                       value={range}
                       onClick={() => changeTimeRange(range)}
-                      data-state={timeRange === range ? "active" : ""}
+                      data-state={timeRange === range ? 'active' : ''}
                     >
                       {timeRangeLabels[range]}
                     </TabsTrigger>
@@ -319,7 +316,7 @@ export function AnalyticsDashboard() {
                 })}
               </TabsList>
             </Tabs>
-            
+
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Select Date Range</DialogTitle>
@@ -354,7 +351,9 @@ export function AnalyticsDashboard() {
                     />
                   </div>
                 </div>
-                <Button onClick={applyDateRange} className="w-full">Apply Range</Button>
+                <Button onClick={applyDateRange} className="w-full">
+                  Apply Range
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -370,7 +369,7 @@ export function AnalyticsDashboard() {
             title="Unique Visitors"
             value={stats.surveyFunnel.uniqueUsers}
             description="Total unique users"
-            onRefresh={() => refreshMetric("visitors")}
+            onRefresh={() => refreshMetric('visitors')}
           />
         )}
 
@@ -382,7 +381,7 @@ export function AnalyticsDashboard() {
             title="Survey Started"
             value={stats.surveyFunnel.started}
             description="Users who started the questionnaire"
-            onRefresh={() => refreshMetric("surveyStarted")}
+            onRefresh={() => refreshMetric('surveyStarted')}
           />
         )}
 
@@ -394,7 +393,7 @@ export function AnalyticsDashboard() {
             title="Survey Completed"
             value={stats.surveyFunnel.completed}
             description="Users who completed the questionnaire"
-            onRefresh={() => refreshMetric("surveyCompleted")}
+            onRefresh={() => refreshMetric('surveyCompleted')}
           />
         )}
 
@@ -406,7 +405,7 @@ export function AnalyticsDashboard() {
             title="Signups"
             value={stats.signups.uniqueTotalSignups}
             description="Total unique account signups"
-            onRefresh={() => refreshMetric("uniqueSignups")}
+            onRefresh={() => refreshMetric('uniqueSignups')}
           />
         )}
       </div>
@@ -428,10 +427,8 @@ export function AnalyticsDashboard() {
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-sm font-medium">
-                Signup Dialog Metrics
-              </CardTitle>
-              <RefreshButton onClick={() => refreshMetric("dialogCloses")} />
+              <CardTitle className="text-sm font-medium">Signup Dialog Metrics</CardTitle>
+              <RefreshButton onClick={() => refreshMetric('dialogCloses')} />
             </div>
           </CardHeader>
           <CardContent>
@@ -440,24 +437,18 @@ export function AnalyticsDashboard() {
                 <h3 className="text-sm font-medium mb-2">Dialog Closes</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">
-                    {stats.dialogCloses}
-                  </span>
+                  <span className="font-medium">{stats.dialogCloses}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">
-                    {stats.uniqueDialogCloses}
-                  </span>
+                  <span className="font-medium">{stats.uniqueDialogCloses}</span>
                 </div>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <h3 className="text-sm font-medium mb-2">Conversion Rate</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Rate</span>
-                  <span className="font-medium">
-                    {stats.dialogCloseConversionRate}
-                  </span>
+                  <span className="font-medium">{stats.dialogCloseConversionRate}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">From Unique Visitors</span>
@@ -473,10 +464,10 @@ export function AnalyticsDashboard() {
                 </div>
                 {stats.dialogCloseConversionRate}
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-primary"
-                    style={{ 
-                      width: `${Math.min(100, parseInt(stats.dialogCloseConversionRate))}%` 
+                    style={{
+                      width: `${Math.min(100, parseInt(stats.dialogCloseConversionRate))}%`,
                     }}
                   />
                 </div>
@@ -495,11 +486,11 @@ export function AnalyticsDashboard() {
             title="Questionnaire Funnel"
             steps={[
               {
-                name: "Visits",
+                name: 'Visits',
                 value: stats.surveyFunnel.uniqueUsers,
               },
               {
-                name: "Started",
+                name: 'Started',
                 value: stats.surveyFunnel.started,
                 breakdown: {
                   anonymous: stats.surveyFunnel.anonymousStarts,
@@ -507,22 +498,22 @@ export function AnalyticsDashboard() {
                 },
               },
               {
-                name: "Completed",
+                name: 'Completed',
                 value: stats.surveyFunnel.completed,
               },
             ]}
             rates={[
-              {name: "Start Rate", value: stats.surveyFunnel.startRate},
+              { name: 'Start Rate', value: stats.surveyFunnel.startRate },
               {
-                name: "Completion Rate",
+                name: 'Completion Rate',
                 value: stats.surveyFunnel.completionRate,
               },
               {
-                name: "Overall",
+                name: 'Overall',
                 value: stats.surveyFunnel.overallConversionRate,
               },
             ]}
-            onRefresh={() => refreshMetric("surveyFunnel")}
+            onRefresh={() => refreshMetric('surveyFunnel')}
           />
         )}
 
@@ -533,11 +524,11 @@ export function AnalyticsDashboard() {
           <SplitMetric
             title="Questionnaire Types"
             metrics={[
-              {name: "Text Based", value: stats.surveyTypes.text},
-              {name: "Image Based", value: stats.surveyTypes.image},
+              { name: 'Text Based', value: stats.surveyTypes.text },
+              { name: 'Image Based', value: stats.surveyTypes.image },
             ]}
             total={stats.surveyTypes.total}
-            onRefresh={() => refreshMetric("surveyTypes")}
+            onRefresh={() => refreshMetric('surveyTypes')}
           />
         )}
       </div>
@@ -583,7 +574,7 @@ export function AnalyticsDashboard() {
           title="A/B Test Results: Anonymous Mode"
           description="Comparison of anonymous vs non-anonymous user behavior"
           data={stats.abTestComparison}
-          onRefresh={() => refreshMetric("abTestComparison")}
+          onRefresh={() => refreshMetric('abTestComparison')}
         />
       )}
 
@@ -594,10 +585,8 @@ export function AnalyticsDashboard() {
         <Card className="mt-4">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-sm font-medium">
-                Unique Signup Clicks
-              </CardTitle>
-              <RefreshButton onClick={() => refreshMetric("uniqueSignups")} />
+              <CardTitle className="text-sm font-medium">Unique Signup Clicks</CardTitle>
+              <RefreshButton onClick={() => refreshMetric('uniqueSignups')} />
             </div>
           </CardHeader>
           <CardContent>
@@ -606,15 +595,11 @@ export function AnalyticsDashboard() {
                 <h3 className="text-sm font-medium mb-2">Email Signups</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">
-                    {stats.signups.emailSignups}
-                  </span>
+                  <span className="font-medium">{stats.signups.emailSignups}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">
-                    {stats.signups.uniqueEmailSignups}
-                  </span>
+                  <span className="font-medium">{stats.signups.uniqueEmailSignups}</span>
                 </div>
                 <div className="mt-2 pt-2 border-t border-border">
                   <h4 className="text-xs font-medium mb-1">Unique User Breakdown</h4>
@@ -636,15 +621,11 @@ export function AnalyticsDashboard() {
                 <h3 className="text-sm font-medium mb-2">Google Signups</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">
-                    {stats.signups.googleSignups}
-                  </span>
+                  <span className="font-medium">{stats.signups.googleSignups}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">
-                    {stats.signups.uniqueGoogleSignups}
-                  </span>
+                  <span className="font-medium">{stats.signups.uniqueGoogleSignups}</span>
                 </div>
                 <div className="mt-2 pt-2 border-t border-border">
                   <h4 className="text-xs font-medium mb-1">Unique User Breakdown</h4>
@@ -666,15 +647,11 @@ export function AnalyticsDashboard() {
                 <h3 className="text-sm font-medium mb-2">Total Signups</h3>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Total</span>
-                  <span className="font-medium">
-                    {stats.signups.totalSignups}
-                  </span>
+                  <span className="font-medium">{stats.signups.totalSignups}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Unique</span>
-                  <span className="font-medium">
-                    {stats.signups.uniqueTotalSignups}
-                  </span>
+                  <span className="font-medium">{stats.signups.uniqueTotalSignups}</span>
                 </div>
                 <div className="mt-2 pt-2 border-t border-border">
                   <h4 className="text-xs font-medium mb-1">Unique User Breakdown</h4>
@@ -705,7 +682,7 @@ export function AnalyticsDashboard() {
           title="Survey Step Completion"
           steps={stepsWithLabels}
           totalStarts={stats.surveyFunnel.started}
-          onRefresh={() => refreshMetric("surveySteps")}
+          onRefresh={() => refreshMetric('surveySteps')}
         />
       )}
 
@@ -728,10 +705,8 @@ export function AnalyticsDashboard() {
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-sm font-medium">
-                Recommendations
-              </CardTitle>
-              <RefreshButton onClick={() => refreshMetric("recommendations")} />
+              <CardTitle className="text-sm font-medium">Recommendations</CardTitle>
+              <RefreshButton onClick={() => refreshMetric('recommendations')} />
             </div>
           </CardHeader>
           <CardContent>
@@ -739,15 +714,11 @@ export function AnalyticsDashboard() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Page Visits</span>
-                  <span className="font-medium">
-                    {stats.recommendations.pageVisits}
-                  </span>
+                  <span className="font-medium">{stats.recommendations.pageVisits}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Interest Clicks</span>
-                  <span className="font-medium">
-                    {stats.recommendations.companyInterestClicks}
-                  </span>
+                  <span className="font-medium">{stats.recommendations.companyInterestClicks}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Interest Clicks Unique Users</span>
@@ -779,9 +750,7 @@ export function AnalyticsDashboard() {
               <div className="space-y-2 pt-2 border-t">
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Rate of Users who Clicked Interest</span>
-                  <span className="font-medium">
-                    {stats.recommendations.companyInterestRate}
-                  </span>
+                  <span className="font-medium">{stats.recommendations.companyInterestRate}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Avg. Companies/User</span>

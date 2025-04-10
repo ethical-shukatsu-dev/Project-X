@@ -13,6 +13,7 @@ bun deduplicate-companies
 ```
 
 This script:
+
 1. Identifies duplicate companies based on their name (case-insensitive)
 2. For each set of duplicates, keeps the most complete record and removes others
 3. Does not update any recommendation references, so use with caution if you have recommendations
@@ -26,6 +27,7 @@ bun deduplicate-companies-with-refs
 ```
 
 This script:
+
 1. Identifies duplicate companies based on their name (case-insensitive)
 2. For each set of duplicates, keeps the most complete record
 3. Updates any recommendation references from the duplicates to the retained company
@@ -40,6 +42,7 @@ bun deduplicate-companies-interactive
 ```
 
 This script:
+
 1. Identifies duplicate companies based on their name (case-insensitive)
 2. For each set of duplicates, displays all options with details
 3. Lets you choose which record to keep or use "auto" for automatic selection

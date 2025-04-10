@@ -119,13 +119,13 @@ This association helps the system understand user preferences based on their ima
 const response = await fetch('/api/value-images', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
     action: 'fetch_pexels',
     category: 'work_values', // Optional, leave empty for all categories
-    count: 10 // Number of images to fetch
-  })
+    count: 10, // Number of images to fetch
+  }),
 });
 
 const data = await response.json();
@@ -137,13 +137,13 @@ const data = await response.json();
 const response = await fetch('/api/value-images', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
     action: 'fetch_unsplash',
     category: 'work_values', // Optional, leave empty for all categories
-    count: 10 // Number of images to fetch
-  })
+    count: 10, // Number of images to fetch
+  }),
 });
 
 const data = await response.json();
@@ -170,9 +170,11 @@ The value images can be used in the questionnaire to create image-based question
 The system stores metadata for each image depending on its source:
 
 ### Pexels Images
+
 - **pexels_id**: Unique identifier for the Pexels photo for attribution purposes
 
 ### Unsplash Images
+
 - **unsplash_id**: Unique identifier for the Unsplash photo
 - **attribution**: JSONB object containing photographer name, photographer URL, and photo URL
 - **image_sizes**: JSONB object with different size variants of the image for responsive usage
@@ -183,4 +185,4 @@ When displaying images sourced from Pexels or Unsplash, make sure to include pro
 
 - **API Key Issues**: Make sure your Pexels and Unsplash API keys are correctly set in the `.env.local` file
 - **Storage Issues**: Check that your Supabase storage bucket exists and has the correct permissions
-- **Image Upload Failures**: Ensure the image file is valid and not too large (recommended max size: 5MB) 
+- **Image Upload Failures**: Ensure the image file is valid and not too large (recommended max size: 5MB)

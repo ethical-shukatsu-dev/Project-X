@@ -1,30 +1,26 @@
-"use client";
+'use client';
 
-import React, {useEffect, useState} from "react";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {useTranslation} from "@/i18n-client";
-import BounceCards from "@/components/ui/Components/BounceCards/BounceCards";
-import CompanyCard from "@/components/ui/Components/BounceCards/CompanyCard";
-import {RecommendationResult} from "@/lib/openai/client";
-import {Button} from "../ui/button";
+import React, { useEffect, useState } from 'react';
+import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { useTranslation } from '@/i18n-client';
+import BounceCards from '@/components/ui/Components/BounceCards/BounceCards';
+import CompanyCard from '@/components/ui/Components/BounceCards/CompanyCard';
+import { RecommendationResult } from '@/lib/openai/client';
+import { Button } from '../ui/button';
 import {
   trackSignupClick,
   trackEvent,
   trackEmailSignupClick,
-} from "@/lib/analytics";
-import {useIsMobile} from "../../hooks/useIsMobile";
-import {useRouter} from "next/navigation";
-import {BASE_URL} from "@/lib/constants/domain";
-import { LOCALSTORAGE_KEYS } from "@/lib/constants/localStorage";
+  trackGoogleSignupClick,
+} from '@/lib/analytics';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { useRouter } from 'next/navigation';
+import { BASE_URL } from '@/lib/constants/domain';
+import { LOCALSTORAGE_KEYS } from '@/lib/constants/localStorage';
 
 // Extend the RecommendationResult type to include the feedback property
 interface ExtendedRecommendationResult extends RecommendationResult {
-  feedback?: "interested" | "not_interested";
+  feedback?: 'interested' | 'not_interested';
 }
 
 interface SignupDialogProps {
@@ -44,18 +40,16 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   showInPage = false,
   showRevealedOnly = false,
 }) => {
-  const {t} = useTranslation(lng, "ai");
+  const { t } = useTranslation(lng, 'ai');
   const isMobile = useIsMobile();
   const router = useRouter();
   const [isAnonymous, setIsAnonymous] = useState(false);
 
   // Check if we're in a browser environment before accessing localStorage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedValue = localStorage.getItem(
-        LOCALSTORAGE_KEYS.ANONYMOUS_COMPANIES
-      );
-      setIsAnonymous(storedValue === "true");
+    if (typeof window !== 'undefined') {
+      const storedValue = localStorage.getItem(LOCALSTORAGE_KEYS.ANONYMOUS_COMPANIES);
+      setIsAnonymous(storedValue === 'true');
     }
   }, []);
 
@@ -84,15 +78,13 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
       await trackEmailSignupClick();
 
       // Also track the legacy signup click event
-      await trackSignupClick("signup_dialog", {
-        dialog_type: showInPage ? "in_page" : "modal",
-        revealed_companies: filteredRecommendations.filter(
-          (rec) => rec.feedback
-        ).length,
+      await trackSignupClick('signup_dialog', {
+        dialog_type: showInPage ? 'in_page' : 'modal',
+        revealed_companies: filteredRecommendations.filter((rec) => rec.feedback).length,
         total_companies: recommendations.length,
       });
     } catch (error) {
-      console.error("Error tracking signup click:", error);
+      console.error('Error tracking signup click:', error);
     }
 
     // Get current URL search params
@@ -100,12 +92,12 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
     const searchParams = new URLSearchParams(currentUrl.search);
 
     // Remove userId and locale params if they exist
-    searchParams.delete("userId");
-    searchParams.delete("locale");
+    searchParams.delete('userId');
+    searchParams.delete('locale');
 
     // Generate the query string
     const queryString = searchParams.toString();
-    const queryPrefix = queryString ? "?" : "";
+    const queryPrefix = queryString ? '?' : '';
 
     // Navigate to signup page with preserved query params
     router.push(`${BASE_URL}/auth/students/signup${queryPrefix}${queryString}`);
@@ -124,14 +116,12 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   const handleDialogClose = () => {
     // Only track dismissal if not in in-page mode (since there's no close button in in-page mode)
     if (!showInPage) {
-      trackEvent("dialog_closes", {
-        dialog_type: "signup",
-        revealed_companies: filteredRecommendations.filter(
-          (rec) => rec.feedback
-        ).length,
+      trackEvent('dialog_closes', {
+        dialog_type: 'signup',
+        revealed_companies: filteredRecommendations.filter((rec) => rec.feedback).length,
         total_companies: recommendations.length,
       }).catch((error) => {
-        console.error("Error tracking dialog close:", error);
+        console.error('Error tracking dialog close:', error);
       });
     }
 
@@ -143,7 +133,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
   const content = (
     <>
       <div className="px-6 text-lg font-bold text-center text-white whitespace-pre-line md:text-2xl">
-        {t("cta.title") || "Ready to unlock your perfect career match?"}
+        {t('cta.title') || 'Ready to unlock your perfect career match?'}
       </div>
 
       {/* Company Cards */}
@@ -153,37 +143,29 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
             cards={companyCards}
             containerWidth={Math.min(
               600,
-              Math.max(
-                280,
-                typeof window !== "undefined"
-                  ? window.innerWidth * 0.6 - 48
-                  : 280
-              )
+              Math.max(280, typeof window !== 'undefined' ? window.innerWidth * 0.6 - 48 : 280)
             )}
             containerHeight={Math.min(
               300,
-              Math.max(
-                200,
-                typeof window !== "undefined" ? window.innerWidth * 0.35 : 200
-              )
+              Math.max(200, typeof window !== 'undefined' ? window.innerWidth * 0.35 : 200)
             )}
             className="mx-auto"
             enableHover={true}
             transformStyles={
               isMobile
                 ? [
-                    "rotate(5deg) translate(-130px, -10px)",
-                    "rotate(-10deg) translate(-80px, 10px)",
-                    "rotate(0deg) translate(0px, -40px)",
-                    "rotate(5deg) translate(60px, 30px)",
-                    "rotate(-15deg) translate(140px, 10px)",
+                    'rotate(5deg) translate(-130px, -10px)',
+                    'rotate(-10deg) translate(-80px, 10px)',
+                    'rotate(0deg) translate(0px, -40px)',
+                    'rotate(5deg) translate(60px, 30px)',
+                    'rotate(-15deg) translate(140px, 10px)',
                   ]
                 : [
-                    "rotate(5deg) translate(-180px)",
-                    "rotate(0deg) translate(-100px)",
-                    "rotate(-5deg)",
-                    "rotate(5deg) translate(100px)",
-                    "rotate(-5deg) translate(180px)",
+                    'rotate(5deg) translate(-180px)',
+                    'rotate(0deg) translate(-100px)',
+                    'rotate(-5deg)',
+                    'rotate(5deg) translate(100px)',
+                    'rotate(-5deg) translate(180px)',
                   ]
             }
           />
@@ -197,7 +179,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
           onClick={handleSignupClick}
           className="w-full p-4 font-bold border border-white text-white transition-all rounded-md sm:w-auto bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
         >
-          {t("cta.primaryButton") || "Sign up with Email"}
+          {t('cta.primaryButton') || 'Sign up with Email'}
         </Button>
 
         {/* <GoogleSignUpButton t={t} onClick={handleGoogleSignupClick} /> */}
@@ -205,10 +187,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
 
       {/* Disclaimer */}
       <div className="px-6 mt-4 text-sm text-center text-white/60">
-        <p>
-          {t("cta.disclaimer") ||
-            "By signing up, you agree to our Terms and Privacy Policy."}
-        </p>
+        <p>{t('cta.disclaimer') || 'By signing up, you agree to our Terms and Privacy Policy.'}</p>
       </div>
     </>
   );
@@ -227,7 +206,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 py-6 px-0 shadow-xl shadow-blue-500/10 max-w-[90vw] md:max-w-[55vw] max-h-[90vh] overflow-y-auto">
         <DialogTitle className="sr-only">
-          {t("cta.title") || "Ready to unlock your perfect career match?"}
+          {t('cta.title') || 'Ready to unlock your perfect career match?'}
         </DialogTitle>
 
         {content}

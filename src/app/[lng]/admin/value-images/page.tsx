@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, {useState, useEffect} from "react";
-import {Button} from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -9,39 +9,39 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
-import {ValueImage} from "@/lib/supabase/client";
-import Image from "next/image";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {Loader2} from "lucide-react";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ValueImage } from '@/lib/supabase/client';
+import Image from 'next/image';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {FilteredGallery} from "@/components/admin/FilteredGallery";
+} from '@/components/ui/select';
+import { FilteredGallery } from '@/components/admin/FilteredGallery';
 
 // Define the categories for value images
 const VALUE_CATEGORIES = [
-  {value: "hobbies", label: "Hobbies & Interests"},
-  {value: "work_values", label: "Work Values"},
-  {value: "leadership_values", label: "Leadership Values"},
-  {value: "company_culture", label: "Company Culture"},
-  {value: "work_environment", label: "Work Environment"},
-  {value: "innovation", label: "Innovation"},
+  { value: 'hobbies', label: 'Hobbies & Interests' },
+  { value: 'work_values', label: 'Work Values' },
+  { value: 'leadership_values', label: 'Leadership Values' },
+  { value: 'company_culture', label: 'Company Culture' },
+  { value: 'work_environment', label: 'Work Environment' },
+  { value: 'innovation', label: 'Innovation' },
   {
-    value: "personal_professional_growth",
-    label: "Personal & Professional Growth",
+    value: 'personal_professional_growth',
+    label: 'Personal & Professional Growth',
   },
-  {value: "work_life_balance", label: "Work-Life Balance & Well-being"},
-  {value: "financial_job_security", label: "Financial & Job Security"},
-  {value: "impact_purpose", label: "Impact & Purpose"},
-  {value: "communication_transparency", label: "Communication & Transparency"},
-  {value: "recognition_appreciation", label: "Recognition & Appreciation"},
+  { value: 'work_life_balance', label: 'Work-Life Balance & Well-being' },
+  { value: 'financial_job_security', label: 'Financial & Job Security' },
+  { value: 'impact_purpose', label: 'Impact & Purpose' },
+  { value: 'communication_transparency', label: 'Communication & Transparency' },
+  { value: 'recognition_appreciation', label: 'Recognition & Appreciation' },
 ];
 
 export default function AdminValueImagesPage() {
@@ -52,17 +52,17 @@ export default function AdminValueImagesPage() {
   const [isFetchingUnsplash, setIsFetchingUnsplash] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [category, setCategory] = useState<string>("");
-  const [valueName, setValueName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [tags, setTags] = useState<string>("");
+  const [category, setCategory] = useState<string>('');
+  const [valueName, setValueName] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [tags, setTags] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [pexelsCategory, setPexelsCategory] = useState<string>("all");
+  const [pexelsCategory, setPexelsCategory] = useState<string>('all');
   const [pexelsCount, setPexelsCount] = useState<number>(10);
-  const [unsplashCategory, setUnsplashCategory] = useState<string>("all");
+  const [unsplashCategory, setUnsplashCategory] = useState<string>('all');
   const [unsplashCount, setUnsplashCount] = useState<number>(10);
-  const [activeTab, setActiveTab] = useState<string>("upload");
+  const [activeTab, setActiveTab] = useState<string>('upload');
 
   // Fetch existing images on component mount
   useEffect(() => {
@@ -72,15 +72,15 @@ export default function AdminValueImagesPage() {
   // Fetch images from the API
   const fetchImages = async () => {
     try {
-      const response = await fetch("/api/value-images");
+      const response = await fetch('/api/value-images');
       if (!response.ok) {
-        throw new Error("Failed to fetch images");
+        throw new Error('Failed to fetch images');
       }
       const data = await response.json();
       setImages(data);
     } catch (error) {
-      console.error("Error fetching images:", error);
-      setError("Failed to fetch images");
+      console.error('Error fetching images:', error);
+      setError('Failed to fetch images');
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +105,7 @@ export default function AdminValueImagesPage() {
 
     // Validate form
     if (!selectedFile || !category || !valueName) {
-      setError("Please fill in all required fields");
+      setError('Please fill in all required fields');
       return;
     }
 
@@ -115,48 +115,46 @@ export default function AdminValueImagesPage() {
 
     try {
       const formData = new FormData();
-      formData.append("image", selectedFile);
-      formData.append("category", category);
-      formData.append("value_name", valueName);
+      formData.append('image', selectedFile);
+      formData.append('category', category);
+      formData.append('value_name', valueName);
 
       if (description) {
-        formData.append("description", description);
+        formData.append('description', description);
       }
 
       if (tags) {
         // Parse tags as a comma-separated list
-        const tagArray = tags.split(",").map((tag) => tag.trim());
-        formData.append("tags", JSON.stringify(tagArray));
+        const tagArray = tags.split(',').map((tag) => tag.trim());
+        formData.append('tags', JSON.stringify(tagArray));
       }
 
-      const response = await fetch("/api/value-images", {
-        method: "POST",
+      const response = await fetch('/api/value-images', {
+        method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to upload image");
+        throw new Error(errorData.error || 'Failed to upload image');
       }
 
       // Reset form
       setSelectedFile(null);
       setPreviewUrl(null);
-      setCategory("");
-      setValueName("");
-      setDescription("");
-      setTags("");
+      setCategory('');
+      setValueName('');
+      setDescription('');
+      setTags('');
 
       // Show success message
-      setSuccess("Image uploaded successfully");
+      setSuccess('Image uploaded successfully');
 
       // Refresh images
       fetchImages();
     } catch (error) {
-      console.error("Error uploading image:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to upload image"
-      );
+      console.error('Error uploading image:', error);
+      setError(error instanceof Error ? error.message : 'Failed to upload image');
     } finally {
       setIsUploading(false);
     }
@@ -170,43 +168,34 @@ export default function AdminValueImagesPage() {
 
     try {
       const payload = {
-        action: "fetch_pexels",
-        category:
-          pexelsCategory && pexelsCategory !== "all"
-            ? pexelsCategory
-            : undefined,
+        action: 'fetch_pexels',
+        category: pexelsCategory && pexelsCategory !== 'all' ? pexelsCategory : undefined,
         count: pexelsCount,
       };
 
-      const response = await fetch("/api/value-images", {
-        method: "POST",
+      const response = await fetch('/api/value-images', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.error || "Failed to fetch images from Pexels"
-        );
+        throw new Error(errorData.error || 'Failed to fetch images from Pexels');
       }
 
       const data = await response.json();
 
       // Show success message
-      setSuccess(data.message || "Images fetched successfully from Pexels");
+      setSuccess(data.message || 'Images fetched successfully from Pexels');
 
       // Refresh images
       fetchImages();
     } catch (error) {
-      console.error("Error fetching Pexels images:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch images from Pexels"
-      );
+      console.error('Error fetching Pexels images:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch images from Pexels');
     } finally {
       setIsFetchingPexels(false);
     }
@@ -220,43 +209,34 @@ export default function AdminValueImagesPage() {
 
     try {
       const payload = {
-        action: "fetch_unsplash",
-        category:
-          unsplashCategory && unsplashCategory !== "all"
-            ? unsplashCategory
-            : undefined,
+        action: 'fetch_unsplash',
+        category: unsplashCategory && unsplashCategory !== 'all' ? unsplashCategory : undefined,
         count: unsplashCount,
       };
 
-      const response = await fetch("/api/value-images", {
-        method: "POST",
+      const response = await fetch('/api/value-images', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.error || "Failed to fetch images from Unsplash"
-        );
+        throw new Error(errorData.error || 'Failed to fetch images from Unsplash');
       }
 
       const data = await response.json();
 
       // Show success message
-      setSuccess(data.message || "Images fetched successfully from Unsplash");
+      setSuccess(data.message || 'Images fetched successfully from Unsplash');
 
       // Refresh images
       fetchImages();
     } catch (error) {
-      console.error("Error fetching Unsplash images:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch images from Unsplash"
-      );
+      console.error('Error fetching Unsplash images:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch images from Unsplash');
     } finally {
       setIsFetchingUnsplash(false);
     }
@@ -279,8 +259,7 @@ export default function AdminValueImagesPage() {
             <CardHeader>
               <CardTitle>Upload New Value Image</CardTitle>
               <CardDescription>
-                Upload images that represent different values for the
-                questionnaire.
+                Upload images that represent different values for the questionnaire.
               </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
@@ -310,12 +289,7 @@ export default function AdminValueImagesPage() {
 
                     {previewUrl && (
                       <div className="mt-2 relative aspect-square w-full max-w-[200px] rounded-md overflow-hidden">
-                        <Image
-                          src={previewUrl}
-                          alt="Preview"
-                          fill
-                          className="object-cover"
-                        />
+                        <Image src={previewUrl} alt="Preview" fill className="object-cover" />
                       </div>
                     )}
                   </div>
@@ -325,11 +299,7 @@ export default function AdminValueImagesPage() {
                       <Label htmlFor="category" className="block mb-2">
                         Category *
                       </Label>
-                      <Select
-                        value={category}
-                        onValueChange={setCategory}
-                        required
-                      >
+                      <Select value={category} onValueChange={setCategory} required>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
@@ -393,7 +363,7 @@ export default function AdminValueImagesPage() {
                       Uploading...
                     </>
                   ) : (
-                    "Upload Image"
+                    'Upload Image'
                   )}
                 </Button>
               </CardFooter>
@@ -407,8 +377,7 @@ export default function AdminValueImagesPage() {
             <CardHeader>
               <CardTitle>Fetch Images from Pexels</CardTitle>
               <CardDescription>
-                Automatically fetch and save images from Pexels API based on
-                value categories.
+                Automatically fetch and save images from Pexels API based on value categories.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -429,10 +398,7 @@ export default function AdminValueImagesPage() {
                   <Label htmlFor="pexels-category" className="block mb-2">
                     Category (optional)
                   </Label>
-                  <Select
-                    value={pexelsCategory}
-                    onValueChange={setPexelsCategory}
-                  >
+                  <Select value={pexelsCategory} onValueChange={setPexelsCategory}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
@@ -463,25 +429,22 @@ export default function AdminValueImagesPage() {
                     }
                   />
                   <p className="mt-1 text-sm text-gray-500">
-                    For a single category, this is the total number of images.
-                    For all categories, this is per category.
+                    For a single category, this is the total number of images. For all categories,
+                    this is per category.
                   </p>
                 </div>
               </div>
             </CardContent>
 
             <CardFooter>
-              <Button
-                onClick={handleFetchPexelsImages}
-                disabled={isFetchingPexels}
-              >
+              <Button onClick={handleFetchPexelsImages} disabled={isFetchingPexels}>
                 {isFetchingPexels ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Fetching Images...
                   </>
                 ) : (
-                  "Fetch Images from Pexels"
+                  'Fetch Images from Pexels'
                 )}
               </Button>
             </CardFooter>
@@ -494,8 +457,7 @@ export default function AdminValueImagesPage() {
             <CardHeader>
               <CardTitle>Fetch Images from Unsplash</CardTitle>
               <CardDescription>
-                Automatically fetch and save images from Unsplash API based on
-                value categories.
+                Automatically fetch and save images from Unsplash API based on value categories.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -516,10 +478,7 @@ export default function AdminValueImagesPage() {
                   <Label htmlFor="unsplash-category" className="block mb-2">
                     Category (optional)
                   </Label>
-                  <Select
-                    value={unsplashCategory}
-                    onValueChange={setUnsplashCategory}
-                  >
+                  <Select value={unsplashCategory} onValueChange={setUnsplashCategory}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
@@ -550,25 +509,22 @@ export default function AdminValueImagesPage() {
                     }
                   />
                   <p className="mt-1 text-sm text-gray-500">
-                    For a single category, this is the total number of images.
-                    For all categories, this is per category.
+                    For a single category, this is the total number of images. For all categories,
+                    this is per category.
                   </p>
                 </div>
               </div>
             </CardContent>
 
             <CardFooter>
-              <Button
-                onClick={handleFetchUnsplashImages}
-                disabled={isFetchingUnsplash}
-              >
+              <Button onClick={handleFetchUnsplashImages} disabled={isFetchingUnsplash}>
                 {isFetchingUnsplash ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Fetching Images...
                   </>
                 ) : (
-                  "Fetch Images from Unsplash"
+                  'Fetch Images from Unsplash'
                 )}
               </Button>
             </CardFooter>
@@ -576,11 +532,7 @@ export default function AdminValueImagesPage() {
         </TabsContent>
       </Tabs>
 
-      <FilteredGallery
-        images={images}
-        VALUE_CATEGORIES={VALUE_CATEGORIES}
-        isLoading={isLoading}
-      />
+      <FilteredGallery images={images} VALUE_CATEGORIES={VALUE_CATEGORIES} isLoading={isLoading} />
     </div>
   );
 }

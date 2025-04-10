@@ -1,10 +1,10 @@
-import OpenAI from "openai";
-import {Company, UserValues} from "../supabase/client";
-import {v4 as uuid} from "uuid";
-import {getOrCreateCompany} from "../companies/client";
-import fs from "fs";
-import path from "path";
-import {RECOMMENDATION_COUNT} from "../constants/recommendations";
+import OpenAI from 'openai';
+import { Company, UserValues } from '../supabase/client';
+import { v4 as uuid } from 'uuid';
+import { getOrCreateCompany } from '../companies/client';
+import fs from 'fs';
+import path from 'path';
+import { RECOMMENDATION_COUNT } from '../constants/recommendations';
 
 // Initialize the OpenAI client
 const openaiClient = new OpenAI({
@@ -55,14 +55,8 @@ type OpenAICompanyData = {
 // Function to load AI translations
 const loadAiTranslations = (locale: string) => {
   try {
-    const filePath = path.join(
-      process.cwd(),
-      "public",
-      "locales",
-      locale,
-      "ai.json"
-    );
-    const fileContent = fs.readFileSync(filePath, "utf8");
+    const filePath = path.join(process.cwd(), 'public', 'locales', locale, 'ai.json');
+    const fileContent = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(fileContent);
   } catch (error) {
     console.error(`Failed to load AI translations for ${locale}`, error);
@@ -75,26 +69,26 @@ const loadAiTranslations = (locale: string) => {
  */
 export async function streamRecommendations(
   userData: UserValues,
-  locale: string = "en",
+  locale: string = 'en',
   onRecommendation: (recommendation: RecommendationResult) => Promise<void>
 ): Promise<void> {
   // Load translations for the specified locale
-  const translations = loadAiTranslations(locale) || loadAiTranslations("en");
+  const translations = loadAiTranslations(locale) || loadAiTranslations('en');
 
   // Get the appropriate system prompt from translations
   const systemPrompt =
     translations?.systemPrompt?.recommendations?.replace(
-      "{{language}}",
-      locale === "ja" ? "日本語" : "English"
+      '{{language}}',
+      locale === 'ja' ? '日本語' : 'English'
     ) ||
     `You are a helpful assistant that recommends Japanese companies to university students based on their values and interests. Please respond in ${
-      locale === "ja" ? "Japanese" : "English"
+      locale === 'ja' ? 'Japanese' : 'English'
     }.`;
 
   // Add expertise in image-based value interpretation and company data analysis
   const enhancedSystemPrompt =
     systemPrompt +
-    (locale === "ja"
+    (locale === 'ja'
       ? `\n\nあなたは画像ベースの価値観評価の専門家でもあります。ユーザーが選択した画像から価値観を抽出し、
 それを企業の推薦に活用できます。\n\nまた、企業データの分析の専門家でもあります。企業の公式情報（ミッショ ン、ビジョン、価値観）だけでなく、社員レビューや実際の職場環境も考慮して、ユーザーの価値観と企業の価
 値観 の間の真の適合性を評価してください。表面的なマッチングではなく、企業文化と実際の職場環境に基づいた深い分 析を提供してください。\n\n特に重要なのは、ユーザーの価値観と企業の価値観の間の具体的な一致点を
@@ -104,12 +98,12 @@ export async function streamRecommendations(
 
   // For streaming, we'll modify the prompt to instruct the model to provide recommendations one by one
   const streamingInstructions =
-    locale === "ja"
-      ? "\n\n重要: 企業の推薦を1つずつ提供してください。各企業の完全な情報を提供した後、必ず 「NEXT_RECOMMENDATION」 というテキストマーカーを含めてください。これにより、スムーズなストリーミング体験が確保されます。最後の企業の後には 「END_OF_RECOMMENDATIONS」 というテキストマーカーを含めてください。各企業のJSONはマークダウンなどのフォーマットを使わずに、純粋なJSONのみを提供してください。"
+    locale === 'ja'
+      ? '\n\n重要: 企業の推薦を1つずつ提供してください。各企業の完全な情報を提供した後、必ず 「NEXT_RECOMMENDATION」 というテキストマーカーを含めてください。これにより、スムーズなストリーミング体験が確保されます。最後の企業の後には 「END_OF_RECOMMENDATIONS」 というテキストマーカーを含めてください。各企業のJSONはマークダウンなどのフォーマットを使わずに、純粋なJSONのみを提供してください。'
       : "\n\nIMPORTANT: Provide the company recommendations one by one. After providing the complete information for each company, include the text marker 'NEXT_RECOMMENDATION'. This ensures a smooth streaming experience. After the last company, include the text marker 'END_OF_RECOMMENDATIONS'. For each company, provide pure JSON without markdown formatting or code blocks. Do not use backticks (`) or any other formatting - just provide the raw JSON.";
 
   const promptTemplate =
-    locale === "ja"
+    locale === 'ja'
       ? `
     ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を
 推薦してください。
@@ -128,7 +122,7 @@ export async function streamRecommendations(
     
     これらの画像ベースの価値観は、ユーザーが視覚的に選択した価値観を表しています。テキストベースの価値観
 と同様に重要視してください。                                                                                 `
-        : ""
+        : ''
     }
 
     ${
@@ -137,7 +131,7 @@ export async function streamRecommendations(
     ユーザーの強み:
     ${JSON.stringify(userData.strengths)}
     `
-        : ""
+        : ''
     }
     
     ${
@@ -146,7 +140,7 @@ export async function streamRecommendations(
     ユーザーの興味のある業種・業界:
     ${JSON.stringify(userData.interests)}
     `
-        : ""
+        : ''
     }
     
     各企業について、以下の情報を提供してください:
@@ -275,7 +269,7 @@ export async function streamRecommendations(
     
     These image-based values represent the values that the user selected visually. Please consider them as important as the text-based values.
     `
-        : ""
+        : ''
     }
     
     ${
@@ -284,7 +278,7 @@ export async function streamRecommendations(
     User's strengths:
     ${JSON.stringify(userData.strengths)}
     `
-        : ""
+        : ''
     }
 
     ${
@@ -293,7 +287,7 @@ export async function streamRecommendations(
     User's interests:
     ${JSON.stringify(userData.interests)}
     `
-        : ""
+        : ''
     }
     
     For each company, provide:
@@ -410,86 +404,68 @@ export async function streamRecommendations(
     `;
 
   try {
-    console.log("Starting OpenAI streaming request...");
+    console.log('Starting OpenAI streaming request...');
     const response = await openaiClient.chat.completions.create({
-      model: "gpt-4o",
+      model: 'gpt-4o',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: enhancedSystemPrompt + streamingInstructions,
         },
-        {role: "user", content: promptTemplate},
+        { role: 'user', content: promptTemplate },
       ],
       stream: true,
       // temperature: 0.7, // Adding temperature to control randomness
       // max_tokens: 4000, // Ensure we have enough tokens for the response
     });
 
-    let currentJson = "";
+    let currentJson = '';
     let recommendationsProcessed = 0;
 
-    console.log("Stream connected, awaiting chunks...");
+    console.log('Stream connected, awaiting chunks...');
 
     for await (const chunk of response) {
-      const content = chunk.choices[0]?.delta?.content || "";
+      const content = chunk.choices[0]?.delta?.content || '';
       if (content) {
         currentJson += content;
-        console.log("Received chunk:", content);
+        console.log('Received chunk:', content);
 
         // Check if we've reached a marker for the next recommendation
-        if (currentJson.includes("NEXT_RECOMMENDATION")) {
-          console.log("Found NEXT_RECOMMENDATION marker");
+        if (currentJson.includes('NEXT_RECOMMENDATION')) {
+          console.log('Found NEXT_RECOMMENDATION marker');
           // Extract the JSON part before the marker
-          const jsonPart = currentJson.split("NEXT_RECOMMENDATION")[0].trim();
-          currentJson = currentJson.split("NEXT_RECOMMENDATION")[1] || "";
-          console.log(
-            "JSON part to parse:",
-            jsonPart.substring(0, 100) + "..."
-          );
-          console.log("Full JSON to parse:", jsonPart);
+          const jsonPart = currentJson.split('NEXT_RECOMMENDATION')[0].trim();
+          currentJson = currentJson.split('NEXT_RECOMMENDATION')[1] || '';
+          console.log('JSON part to parse:', jsonPart.substring(0, 100) + '...');
+          console.log('Full JSON to parse:', jsonPart);
 
           try {
             // Clean the JSON string - remove markdown formatting characters and ensure valid JSON
             const cleanedJsonPart = jsonPart
-              .replace(/```json/g, "") // Remove JSON code block markers
-              .replace(/```/g, "") // Remove any remaining code block markers
-              .replace(/`/g, "") // Remove backticks
+              .replace(/```json/g, '') // Remove JSON code block markers
+              .replace(/```/g, '') // Remove any remaining code block markers
+              .replace(/`/g, '') // Remove backticks
               .trim();
 
-            console.log(
-              "Cleaned JSON:",
-              cleanedJsonPart.substring(0, 100) + "..."
-            );
+            console.log('Cleaned JSON:', cleanedJsonPart.substring(0, 100) + '...');
 
             // Only try to parse if the string looks like valid JSON
-            if (
-              cleanedJsonPart.startsWith("{") &&
-              cleanedJsonPart.includes("}")
-            ) {
+            if (cleanedJsonPart.startsWith('{') && cleanedJsonPart.includes('}')) {
               // Try to parse the JSON
-              console.log("Attempting to parse JSON...");
-              const recommendationData = JSON.parse(
-                cleanedJsonPart
-              ) as OpenAIRecommendation;
-              console.log("Successfully parsed JSON:", recommendationData.name);
+              console.log('Attempting to parse JSON...');
+              const recommendationData = JSON.parse(cleanedJsonPart) as OpenAIRecommendation;
+              console.log('Successfully parsed JSON:', recommendationData.name);
 
               // Only proceed if we have valid required data
-              if (
-                recommendationData &&
-                recommendationData.name &&
-                recommendationData.industry
-              ) {
-                console.log(
-                  "Creating company from recommendation:",
-                  recommendationData.name
-                );
+              if (recommendationData && recommendationData.name && recommendationData.industry) {
+                console.log('Creating company from recommendation:', recommendationData.name);
                 // Create a company from the recommendation
                 const company = await getOrCreateCompany(
                   recommendationData.name,
                   recommendationData.industry,
                   locale
                 );
-                console.log("Company created:", company.name);
+                console.log('Company created:', company.name);
 
                 // Create the recommendation result
                 const recommendationResult: RecommendationResult = {
@@ -497,23 +473,18 @@ export async function streamRecommendations(
                   company,
                   matching_points: recommendationData.matching_points || [],
                   value_match_ratings: recommendationData.value_match_ratings,
-                  strength_match_ratings:
-                    recommendationData.strength_match_ratings,
-                  value_matching_details:
-                    recommendationData.value_matching_details,
-                  strength_matching_details:
-                    recommendationData.strength_matching_details,
+                  strength_match_ratings: recommendationData.strength_match_ratings,
+                  value_matching_details: recommendationData.value_matching_details,
+                  strength_matching_details: recommendationData.strength_matching_details,
                   company_values: recommendationData.company_values,
                 };
 
                 // Send the recommendation to the callback
-                console.log("Sending recommendation to callback...");
+                console.log('Sending recommendation to callback...');
                 await onRecommendation(recommendationResult);
-                console.log("Recommendation sent to callback successfully");
+                console.log('Recommendation sent to callback successfully');
                 recommendationsProcessed++;
-                console.log(
-                  `Processed ${recommendationsProcessed} recommendations so far`
-                );
+                console.log(`Processed ${recommendationsProcessed} recommendations so far`);
 
                 // If we've reached the desired number of recommendations, we can stop
                 if (recommendationsProcessed >= RECOMMENDATION_COUNT) {
@@ -523,15 +494,12 @@ export async function streamRecommendations(
                   break;
                 }
               } else {
-                console.warn(
-                  "Parsed JSON is missing required fields:",
-                  recommendationData
-                );
+                console.warn('Parsed JSON is missing required fields:', recommendationData);
               }
             } else {
               console.warn(
                 "JSON doesn't appear to be valid:",
-                cleanedJsonPart.substring(0, 100) + "..."
+                cleanedJsonPart.substring(0, 100) + '...'
               );
 
               // Try a more aggressive approach to extract valid JSON
@@ -541,21 +509,15 @@ export async function streamRecommendations(
                 if (jsonMatch && jsonMatch[0]) {
                   const extractedJson = jsonMatch[0];
                   console.log(
-                    "Attempting fallback JSON extraction with regex:",
-                    extractedJson.substring(0, 100) + "..."
+                    'Attempting fallback JSON extraction with regex:',
+                    extractedJson.substring(0, 100) + '...'
                   );
-                  const fallbackData = JSON.parse(
-                    extractedJson
-                  ) as OpenAIRecommendation;
+                  const fallbackData = JSON.parse(extractedJson) as OpenAIRecommendation;
 
                   // Only proceed if we have valid required data
-                  if (
-                    fallbackData &&
-                    fallbackData.name &&
-                    fallbackData.industry
-                  ) {
+                  if (fallbackData && fallbackData.name && fallbackData.industry) {
                     console.log(
-                      "Successfully extracted JSON with fallback method:",
+                      'Successfully extracted JSON with fallback method:',
                       fallbackData.name
                     );
 
@@ -572,25 +534,18 @@ export async function streamRecommendations(
                       company,
                       matching_points: fallbackData.matching_points || [],
                       value_match_ratings: fallbackData.value_match_ratings,
-                      strength_match_ratings:
-                        fallbackData.strength_match_ratings,
-                      value_matching_details:
-                        fallbackData.value_matching_details,
-                      strength_matching_details:
-                        fallbackData.strength_matching_details,
+                      strength_match_ratings: fallbackData.strength_match_ratings,
+                      value_matching_details: fallbackData.value_matching_details,
+                      strength_matching_details: fallbackData.strength_matching_details,
                       company_values: fallbackData.company_values,
                     };
 
                     // Send the recommendation to the callback
-                    console.log(
-                      "Sending fallback recommendation to callback..."
-                    );
+                    console.log('Sending fallback recommendation to callback...');
                     await onRecommendation(recommendationResult);
-                    console.log("Fallback recommendation sent successfully");
+                    console.log('Fallback recommendation sent successfully');
                     recommendationsProcessed++;
-                    console.log(
-                      `Processed ${recommendationsProcessed} recommendations so far`
-                    );
+                    console.log(`Processed ${recommendationsProcessed} recommendations so far`);
 
                     // If we've reached the desired number of recommendations, we can stop
                     if (recommendationsProcessed >= RECOMMENDATION_COUNT) {
@@ -602,38 +557,33 @@ export async function streamRecommendations(
                   }
                 }
               } catch (fallbackError) {
-                console.error(
-                  "Fallback JSON extraction also failed:",
-                  fallbackError
-                );
+                console.error('Fallback JSON extraction also failed:', fallbackError);
               }
             }
           } catch (error) {
-            console.error("Error parsing recommendation JSON:", error);
-            console.error("Raw JSON that failed parsing:", jsonPart);
+            console.error('Error parsing recommendation JSON:', error);
+            console.error('Raw JSON that failed parsing:', jsonPart);
             // Continue to collect more content if the JSON is incomplete
           }
         }
 
         // Check if we've reached the end marker
-        if (currentJson.includes("END_OF_RECOMMENDATIONS")) {
-          console.log("Found END_OF_RECOMMENDATIONS marker, ending stream");
+        if (currentJson.includes('END_OF_RECOMMENDATIONS')) {
+          console.log('Found END_OF_RECOMMENDATIONS marker, ending stream');
           break;
         }
       }
 
       console.log(
-        "Current accumulated JSON:",
-        currentJson.substring(0, 100) + (currentJson.length > 100 ? "..." : "")
+        'Current accumulated JSON:',
+        currentJson.substring(0, 100) + (currentJson.length > 100 ? '...' : '')
       );
     }
 
-    console.log(
-      `Stream completed. Processed ${recommendationsProcessed} recommendations total.`
-    );
+    console.log(`Stream completed. Processed ${recommendationsProcessed} recommendations total.`);
   } catch (error) {
-    console.error("Error streaming recommendations:", error);
-    throw new Error("Failed to stream recommendations");
+    console.error('Error streaming recommendations:', error);
+    throw new Error('Failed to stream recommendations');
   }
 }
 
@@ -642,30 +592,30 @@ export async function streamRecommendations(
  */
 export async function generateRecommendations(
   userData: UserValues,
-  locale: string = "en"
+  locale: string = 'en'
 ): Promise<RecommendationResult[]> {
   // Load translations for the specified locale
-  const translations = loadAiTranslations(locale) || loadAiTranslations("en");
+  const translations = loadAiTranslations(locale) || loadAiTranslations('en');
 
   // Get the appropriate system prompt from translations
   const systemPrompt =
     translations?.systemPrompt?.recommendations?.replace(
-      "{{language}}",
-      locale === "ja" ? "日本語" : "English"
+      '{{language}}',
+      locale === 'ja' ? '日本語' : 'English'
     ) ||
     `You are a helpful assistant that recommends Japanese companies to university students based on their values and interests. Please respond in ${
-      locale === "ja" ? "Japanese" : "English"
+      locale === 'ja' ? 'Japanese' : 'English'
     }.`;
 
   // Add expertise in image-based value interpretation and company data analysis
   const enhancedSystemPrompt =
     systemPrompt +
-    (locale === "ja"
+    (locale === 'ja'
       ? `\n\nあなたは画像ベースの価値観評価の専門家でもあります。ユーザーが選択した画像から価値観を抽出し、それを企業の推薦に活用できます。\n\nまた、企業データの分析の専門家でもあります。企業の公式情報（ミッション、ビジョン、価値観）だけでなく、社員レビューや実際の職場環境も考慮して、ユーザーの価値観と企業の価値観の間の真の適合性を評価してください。表面的なマッチングではなく、企業文化と実際の職場環境に基づいた深い分析を提供してください。\n\n特に重要なのは、ユーザーの価値観と企業の価値観の間の具体的な一致点を明確に示すことです。この企業はあなたと同じように...という形式で、具体的な例や証拠を含めた詳細な説明を提供してください。\n\n重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。`
       : `\n\nYou are also an expert in image-based value assessment. You can extract values from images selected by users and incorporate them into company recommendations.\n\nYou are also an expert in company data analysis. Consider not just official company information (mission, vision, values) but also employee reviews and actual workplace environment to evaluate the true fit between user values and company values. Provide deep analysis based on company culture and actual workplace environment, not just surface-level matching.\n\nIt is especially important to clearly show the specific connections between the user's values and the company's values. Use a "This company, like you, values..." format and provide detailed explanations with specific examples or evidence.\n\nImportant: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.`);
 
   const promptTemplate =
-    locale === "ja"
+    locale === 'ja'
       ? `
     ユーザーの価値観と強みに基づいて、就職を考えている大学生に適した日本の企業${RECOMMENDATION_COUNT}社を推薦してください。様々な企業を含めるようにしてください。
 
@@ -683,7 +633,7 @@ export async function generateRecommendations(
     これらの画像ベースの価値観は、ユーザーが視覚的に選択した価値観を表しています。テキストベースの価値観
 と同様に重要視してください。
     `
-        : ""
+        : ''
     }
 
     ${
@@ -692,7 +642,7 @@ export async function generateRecommendations(
     ユーザーの強み:
     ${JSON.stringify(userData.strengths)}
     `
-        : ""
+        : ''
     }
     
     ${
@@ -701,7 +651,7 @@ export async function generateRecommendations(
     ユーザーの興味のある業種・業界:
     ${JSON.stringify(userData.interests)}
     `
-        : ""
+        : ''
     }
     
     各企業について、以下の情報を提供してください:
@@ -836,7 +786,7 @@ export async function generateRecommendations(
     
     These image-based values represent the values that the user selected visually. Please consider them as important as the text-based values.
     `
-        : ""
+        : ''
     }
     
     ${
@@ -845,7 +795,7 @@ export async function generateRecommendations(
     User's strengths:
     ${JSON.stringify(userData.strengths)}
     `
-        : ""
+        : ''
     }
 
     ${
@@ -854,7 +804,7 @@ export async function generateRecommendations(
     User's interests:
     ${JSON.stringify(userData.interests)}
     `
-        : ""
+        : ''
     }
     
     For each company, provide:
@@ -976,20 +926,20 @@ export async function generateRecommendations(
 
   try {
     const response = await openaiClient.chat.completions.create({
-      model: "gpt-4o",
+      model: 'gpt-4o',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: enhancedSystemPrompt,
         },
-        {role: "user", content: promptTemplate},
+        { role: 'user', content: promptTemplate },
       ],
-      response_format: {type: "json_object"},
+      response_format: { type: 'json_object' },
     });
 
     const content = response.choices[0].message.content;
     if (!content) {
-      throw new Error("Empty response from OpenAI");
+      throw new Error('Empty response from OpenAI');
     }
 
     const parsedResponse = JSON.parse(content) as OpenAIRecommendationResponse;
@@ -998,11 +948,7 @@ export async function generateRecommendations(
     // Fetch or create company data for each recommendation
     const enhancedRecommendations = await Promise.all(
       recommendations.map(async (rec) => {
-        const company = await getOrCreateCompany(
-          rec.name,
-          rec.industry,
-          locale
-        );
+        const company = await getOrCreateCompany(rec.name, rec.industry, locale);
 
         return {
           id: rec.id || uuid(),
@@ -1019,8 +965,8 @@ export async function generateRecommendations(
 
     return enhancedRecommendations;
   } catch (error) {
-    console.error("Error processing recommendations:", error);
-    throw new Error("Failed to generate recommendations");
+    console.error('Error processing recommendations:', error);
+    throw new Error('Failed to generate recommendations');
   }
 }
 
@@ -1039,7 +985,7 @@ export async function fetchCompanyLogo(
     const clientId = process.env.BRANDFETCH_CLIENT_ID;
 
     if (!clientId) {
-      console.warn("BRANDFETCH_CLIENT_ID is not set in environment variables");
+      console.warn('BRANDFETCH_CLIENT_ID is not set in environment variables');
       return generateFallbackLogo(companyName);
     }
 
@@ -1050,16 +996,11 @@ export async function fetchCompanyLogo(
       try {
         // Extract domain from URL
         const url = new URL(
-          companySiteUrl.startsWith("http")
-            ? companySiteUrl
-            : `https://${companySiteUrl}`
+          companySiteUrl.startsWith('http') ? companySiteUrl : `https://${companySiteUrl}`
         );
         domains = [url.hostname];
       } catch (error) {
-        console.warn(
-          `Invalid URL format for companySiteUrl: ${companySiteUrl}`,
-          error
-        );
+        console.warn(`Invalid URL format for companySiteUrl: ${companySiteUrl}`, error);
         // Fall back to domain generation logic
       }
     }
@@ -1069,8 +1010,8 @@ export async function fetchCompanyLogo(
       // Format company name for domain (remove spaces, special chars)
       const formattedName = companyName
         .toLowerCase()
-        .replace(/[^\w\s]/gi, "")
-        .replace(/\s+/g, "-");
+        .replace(/[^\w\s]/gi, '')
+        .replace(/\s+/g, '-');
 
       // Try common domain extensions
       domains = [
@@ -1090,7 +1031,7 @@ export async function fetchCompanyLogo(
 
       // Check if the logo exists by making a HEAD request
       try {
-        const response = await fetch(logoUrl, {method: "HEAD"});
+        const response = await fetch(logoUrl, { method: 'HEAD' });
 
         if (response.ok) {
           return logoUrl;
@@ -1104,7 +1045,7 @@ export async function fetchCompanyLogo(
     // If no logo found from BrandFetch, use fallback
     return generateFallbackLogo(companyName);
   } catch (error) {
-    console.error("Error fetching company logo:", error);
+    console.error('Error fetching company logo:', error);
 
     // Even if there's an error, still return a generated avatar
     return generateFallbackLogo(companyName);
@@ -1119,21 +1060,21 @@ export async function fetchCompanyLogo(
 function generateFallbackLogo(companyName: string): string {
   // Get initials from company name
   const initials = companyName
-    .split(" ")
+    .split(' ')
     .map((word) => word[0])
-    .join("")
+    .join('')
     .substring(0, 2)
     .toUpperCase();
 
   // Generate a consistent color based on company name
   const colorHash =
     Math.abs(
-      companyName.split("").reduce((acc, char) => {
+      companyName.split('').reduce((acc, char) => {
         return acc + char.charCodeAt(0);
       }, 0)
     ) % 16777215; // 16777215 is FFFFFF in decimal
 
-  const colorHex = colorHash.toString(16).padStart(6, "0");
+  const colorHex = colorHash.toString(16).padStart(6, '0');
 
   // Use UI Avatars to generate a placeholder with the company's initials
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -1144,20 +1085,18 @@ function generateFallbackLogo(companyName: string): string {
 export async function fetchCompanyData(
   companyName: string,
   industry?: string,
-  locale: string = "en"
+  locale: string = 'en'
 ): Promise<Company> {
   // Get the appropriate system prompt based on locale
   const systemPrompt =
-    locale === "ja"
-      ? "あなたは日本の就職活動をしている大学生向けに、企業に関する正確な情報を提供する役立つアシスタントです。企業の公式情報、ミッション、ビジョン、価値観、社員レビュー、および職場文化に基づいて、正確で詳細な企業プロファイルを作成してください。各企業の価値観を評価する際は、公式声明だけでなく、実際の職場環境や社員の経験も考慮してください。情報はJSONフォーマットでのみ提供してください。重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。"
-      : "You are a helpful assistant that provides accurate information about companies in Japan for university students seeking employment. Create accurate and detailed company profiles based on official company information, mission statements, vision, values, employee reviews, and workplace culture. When evaluating company values, consider not just official statements but also the actual work environment and employee experiences. Provide information in JSON format only. Important: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.";
+    locale === 'ja'
+      ? 'あなたは日本の就職活動をしている大学生向けに、企業に関する正確な情報を提供する役立つアシスタントです。企業の公式情報、ミッション、ビジョン、価値観、社員レビュー、および職場文化に基づいて、正確で詳細な企業プロファイルを作成してください。各企業の価値観を評価する際は、公式声明だけでなく、実際の職場環境や社員の経験も考慮してください。情報はJSONフォーマットでのみ提供してください。重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。'
+      : 'You are a helpful assistant that provides accurate information about companies in Japan for university students seeking employment. Create accurate and detailed company profiles based on official company information, mission statements, vision, values, employee reviews, and workplace culture. When evaluating company values, consider not just official statements but also the actual work environment and employee experiences. Provide information in JSON format only. Important: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.';
 
   const promptTemplate =
-    locale === "ja"
+    locale === 'ja'
       ? `
-    "${companyName}" ${
-          industry ? `（${industry}業界）` : ""
-        } に関する詳細情報を提供してください。
+    "${companyName}" ${industry ? `（${industry}業界）` : ''} に関する詳細情報を提供してください。
     この情報は日本で就職活動をしている大学生に関連するものであるべきです。
 
     重要: すべての回答は必ず日本語のみで提供してください。企業名や業界名も含め、英語の単語や文を混在させないでください。
@@ -1198,8 +1137,8 @@ export async function fetchCompanyData(
     `
       : `
     Provide detailed information about "${companyName}" ${
-          industry ? `in the ${industry} industry` : ""
-        } 
+      industry ? `in the ${industry} industry` : ''
+    } 
     that would be relevant for university students in Japan seeking employment.
 
     Important: All responses must be in English only. Do not mix Japanese words or sentences, including company names and industry names.
@@ -1241,20 +1180,20 @@ export async function fetchCompanyData(
 
   try {
     const response = await openaiClient.chat.completions.create({
-      model: "gpt-4o",
+      model: 'gpt-4o',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: systemPrompt,
         },
-        {role: "user", content: promptTemplate},
+        { role: 'user', content: promptTemplate },
       ],
-      response_format: {type: "json_object"},
+      response_format: { type: 'json_object' },
     });
 
     const content = response.choices[0].message.content;
     if (!content) {
-      throw new Error("Empty response from OpenAI");
+      throw new Error('Empty response from OpenAI');
     }
 
     const companyData = JSON.parse(content) as OpenAICompanyData;
@@ -1262,15 +1201,11 @@ export async function fetchCompanyData(
     // Ensure values are numbers
     const numericValues: Record<string, number> = {};
     Object.entries(companyData.values).forEach(([key, value]) => {
-      numericValues[key] =
-        typeof value === "number" ? value : parseInt(value as string, 10);
+      numericValues[key] = typeof value === 'number' ? value : parseInt(value as string, 10);
     });
 
     // Fetch company logo
-    const logoUrl = await fetchCompanyLogo(
-      companyData.name,
-      companyData.site_url
-    );
+    const logoUrl = await fetchCompanyLogo(companyData.name, companyData.site_url);
 
     return {
       id: uuid(), // Generate a UUID for the new company
@@ -1282,11 +1217,11 @@ export async function fetchCompanyData(
       logo_url: logoUrl, // Use the fetched logo URL instead of null
       site_url: companyData.site_url || null, // Include domain URL if available
       company_values: companyData.company_values || undefined,
-      data_source: "openai",
+      data_source: 'openai',
       last_updated: new Date().toISOString(),
     };
   } catch (error) {
-    console.error("Error parsing OpenAI response:", error);
-    throw new Error("Failed to parse company data from OpenAI");
+    console.error('Error parsing OpenAI response:', error);
+    throw new Error('Failed to parse company data from OpenAI');
   }
 }

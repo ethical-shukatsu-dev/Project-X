@@ -10,7 +10,7 @@ const loadResources = (language: string, namespace: string) => {
       return import(`../public/locales/${language}/${namespace}.json`);
     }
     // For client-side
-    return fetch(`/locales/${language}/${namespace}.json`).then(res => res.json());
+    return fetch(`/locales/${language}/${namespace}.json`).then((res) => res.json());
   } catch (error) {
     console.error(`Failed to load ${language}/${namespace}`, error);
     return {};
@@ -19,23 +19,25 @@ const loadResources = (language: string, namespace: string) => {
 
 const initI18next = async (lng: string, ns: string) => {
   const i18nInstance = createInstance();
-  await i18nInstance
-    .use(initReactI18next)
-    .init({
-      ...getOptions(lng, ns),
-      resources: {
-        [lng]: {
-          [ns]: await loadResources(lng, ns)
-        }
-      }
-    });
+  await i18nInstance.use(initReactI18next).init({
+    ...getOptions(lng, ns),
+    resources: {
+      [lng]: {
+        [ns]: await loadResources(lng, ns),
+      },
+    },
+  });
   return i18nInstance;
 };
 
-export async function useTranslation(lng: string, ns: string, options: { keyPrefix?: string } = {}) {
+export async function useTranslation(
+  lng: string,
+  ns: string,
+  options: { keyPrefix?: string } = {}
+) {
   const i18nextInstance = await initI18next(lng, ns);
   return {
     t: i18nextInstance.getFixedT(lng, ns, options.keyPrefix),
-    i18n: i18nextInstance
+    i18n: i18nextInstance,
   };
-} 
+}

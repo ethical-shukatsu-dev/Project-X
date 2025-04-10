@@ -1,5 +1,4 @@
-import { supabase } from '../supabase/client';
-import type { ImageAttribution, ImageSizes } from '../supabase/client';
+import { supabase, type ImageAttribution, type ImageSizes } from '../supabase/client';
 import { VALUE_CATEGORY_QUERIES } from '../constants/category-queries';
 
 // Define the Pexels API response types
@@ -55,23 +54,21 @@ async function doesPexelsImageExist(pexelsId: number): Promise<boolean> {
     .select('id')
     .eq('pexels_id', pexelsId)
     .limit(1);
-    
+
   if (dbEntries && dbEntries.length > 0) {
     return true;
   }
-  
+
   // For backward compatibility, also check for images stored with the old method
   const fileName = `pexels_${pexelsId}.jpg`;
-  const { data: fileExists } = await supabase.storage
-    .from('images')
-    .list('value_images', {
-      search: fileName
-    });
-    
+  const { data: fileExists } = await supabase.storage.from('images').list('value_images', {
+    search: fileName,
+  });
+
   if (fileExists && fileExists.length > 0) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -88,26 +85,26 @@ export async function searchPexelsImages(
   page: number = 1
 ): Promise<PexelsSearchResponse> {
   const apiKey = process.env.PEXELS_API_KEY;
-  
+
   if (!apiKey) {
     throw new Error('PEXELS_API_KEY is not set in environment variables');
   }
-  
+
   const url = new URL('https://api.pexels.com/v1/search');
   url.searchParams.append('query', query);
   url.searchParams.append('per_page', perPage.toString());
   url.searchParams.append('page', page.toString());
-  
+
   const response = await fetch(url.toString(), {
     headers: {
-      'Authorization': apiKey
-    }
+      Authorization: apiKey,
+    },
   });
-  
+
   if (!response.ok) {
     throw new Error(`Pexels API error: ${response.status} ${response.statusText}`);
   }
-  
+
   return await response.json();
 }
 
@@ -123,25 +120,25 @@ export async function fetchAndSaveImagesForCategory(
 ): Promise<ImageFetchResult> {
   // Get search queries for the category
   const queries = VALUE_CATEGORY_QUERIES[category];
-  
+
   if (!queries || queries.length === 0) {
     throw new Error(`No search queries defined for category: ${category}`);
   }
-  
+
   // Calculate how many images to fetch per query
   const imagesPerQuery = Math.ceil(count / queries.length);
-  
+
   // Fetch and save images for each query
   const result: ImageFetchResult = {
     added: 0,
     skipped: 0,
-    failed: 0
+    failed: 0,
   };
-  
+
   // Keep track of how many images we've successfully saved
   let savedCount = 0;
   let queryIndex = 0;
-  
+
   // Continue fetching until we reach the desired count or run out of queries
   while (savedCount < count && queryIndex < queries.length) {
     const query = queries[queryIndex];
@@ -149,36 +146,36 @@ export async function fetchAndSaveImagesForCategory(
       // Determine page size based on remaining images needed
       const remainingNeeded = count - savedCount;
       const fetchCount = Math.min(remainingNeeded + 5, imagesPerQuery);
-      
+
       // Search for images, requesting a few extra to account for potential duplicates
       const searchResults = await searchPexelsImages(query, fetchCount);
-      
+
       // Process each photo
       for (const photo of searchResults.photos) {
         // Stop if we've reached the target count
         if (savedCount >= count) break;
-        
+
         // Check if this image already exists
         const imageExists = await doesPexelsImageExist(photo.id);
-        
+
         if (imageExists) {
           result.skipped++;
           continue;
         }
-        
+
         // Create value name from query
         const valueName = query.charAt(0).toUpperCase() + query.slice(1);
-        
+
         // Create the attribution text and links
         const photographerName = photo.photographer;
         const photographerUrl = photo.photographer_url;
         const pexelsPhotoUrl = photo.url;
-        
+
         // Create attribution object
         const attribution: ImageAttribution = {
           photographer_name: photographerName,
           photographer_url: photographerUrl,
-          photo_url: pexelsPhotoUrl
+          photo_url: pexelsPhotoUrl,
         };
 
         // Create image sizes object
@@ -187,7 +184,7 @@ export async function fetchAndSaveImagesForCategory(
           small: photo.src.small,
           regular: photo.src.medium,
           full: photo.src.large,
-          raw: photo.src.original
+          raw: photo.src.original,
         };
 
         // Insert the image into the database
@@ -199,7 +196,7 @@ export async function fetchAndSaveImagesForCategory(
           tags: [query, category, `by ${photo.photographer}`, `pexels_${photo.id}`],
           pexels_id: photo.id.toString(),
           attribution,
-          image_sizes: imageSizes
+          image_sizes: imageSizes,
         });
 
         if (error) {
@@ -207,7 +204,7 @@ export async function fetchAndSaveImagesForCategory(
           result.failed++;
           continue;
         }
-        
+
         result.added++;
         savedCount++;
       }
@@ -215,11 +212,11 @@ export async function fetchAndSaveImagesForCategory(
       console.error(`Error fetching images for query "${query}":`, error);
       result.failed++;
     }
-    
+
     // Move to the next query
     queryIndex++;
   }
-  
+
   return result;
 }
 
@@ -232,7 +229,7 @@ export async function fetchAndSaveImagesForAllCategories(
   imagesPerCategory: number = 20
 ): Promise<Record<string, ImageFetchResult>> {
   const result: Record<string, ImageFetchResult> = {};
-  
+
   for (const category of Object.keys(VALUE_CATEGORY_QUERIES)) {
     try {
       const categoryResult = await fetchAndSaveImagesForCategory(category, imagesPerCategory);
@@ -242,6 +239,6 @@ export async function fetchAndSaveImagesForAllCategories(
       result[category] = { added: 0, skipped: 0, failed: 0 };
     }
   }
-  
+
   return result;
-} 
+}

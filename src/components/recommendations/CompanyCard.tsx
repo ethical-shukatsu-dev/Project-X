@@ -1,24 +1,19 @@
-import React, {useState, useEffect} from "react";
-import {Card, CardContent, CardFooter, CardHeader} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {Company} from "@/lib/supabase/client";
-import {useTranslation} from "@/i18n-client";
-import {EyeOff, Loader2, PartyPopper, ThumbsDown} from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
-import Link from "next/link";
-import {LOCALSTORAGE_KEYS} from "@/lib/constants/localStorage";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Company } from '@/lib/supabase/client';
+import { useTranslation } from '@/i18n-client';
+import { EyeOff, Loader2, PartyPopper, ThumbsDown } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import Link from 'next/link';
+import { LOCALSTORAGE_KEYS } from '@/lib/constants/localStorage';
 
 interface CompanyCardProps {
   company: Company;
   matchingPoints: string[];
-  onFeedback: (feedback: "interested" | "not_interested") => void;
-  feedback?: "interested" | "not_interested";
+  onFeedback: (feedback: 'interested' | 'not_interested') => void;
+  feedback?: 'interested' | 'not_interested';
   lng: string;
 }
 
@@ -29,7 +24,7 @@ export default function CompanyCard({
   feedback,
   lng,
 }: CompanyCardProps) {
-  const {t, loaded} = useTranslation(lng, "ai");
+  const { t, loaded } = useTranslation(lng, 'ai');
   const [logoError, setLogoError] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [isRevealing, setIsRevealing] = useState<boolean>(false);
@@ -38,11 +33,9 @@ export default function CompanyCard({
 
   // Check if we're in a browser environment before accessing localStorage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedValue = localStorage.getItem(
-        LOCALSTORAGE_KEYS.ANONYMOUS_COMPANIES
-      );
-      setIsAnonymous(storedValue === "true");
+    if (typeof window !== 'undefined') {
+      const storedValue = localStorage.getItem(LOCALSTORAGE_KEYS.ANONYMOUS_COMPANIES);
+      setIsAnonymous(storedValue === 'true');
     }
   }, []);
 
@@ -63,7 +56,7 @@ export default function CompanyCard({
   }, [feedback, isAnonymous]);
 
   // Handle providing feedback with animations
-  const handleFeedback = (type: "interested" | "not_interested") => {
+  const handleFeedback = (type: 'interested' | 'not_interested') => {
     setIsSendingFeedback(true);
     // If in anonymous mode, add a small delay to make the reveal more dramatic
     if (isAnonymous) {
@@ -81,15 +74,15 @@ export default function CompanyCard({
   // Get company initials for avatar fallback
   const getInitials = (name: string) => {
     // Remove Japanese corporation designator "株式会社" before getting initials
-    const cleanName = name.replace(/株式会社/g, "").trim();
+    const cleanName = name.replace(/株式会社/g, '').trim();
 
     // If the name is empty after removing "株式会社", use the original name
     const nameToUse = cleanName || name;
 
     return nameToUse
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .substring(0, 2);
   };
@@ -108,19 +101,16 @@ export default function CompanyCard({
   };
 
   // Sanitize company description to remove mentions of company name
-  const getSanitizedDescription = (
-    description: string,
-    companyName: string
-  ) => {
+  const getSanitizedDescription = (description: string, companyName: string) => {
     if (!description || !companyName) return description;
 
     // Get the localized replacement text for "this company"
-    const replacementText = t("recommendations.thisCompany");
+    const replacementText = t('recommendations.thisCompany');
 
     // Create a safe version of the company name to use in a regex
     // Escape special regex characters and handle potential Japanese characters
     const safeCompanyName = companyName
-      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // Escape special regex chars
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape special regex chars
       .trim();
 
     // Split the company name by spaces and common separators to handle partial matches
@@ -134,13 +124,13 @@ export default function CompanyCard({
     let sanitized = description;
 
     // Replace the full company name
-    const fullNameRegex = new RegExp(safeCompanyName, "gi");
+    const fullNameRegex = new RegExp(safeCompanyName, 'gi');
     sanitized = sanitized.replace(fullNameRegex, replacementText);
 
     // For Japanese company names with 株式会社 (Corporation), also check without it
-    if (companyName.includes("株式会社")) {
-      const nameWithoutCorp = companyName.replace("株式会社", "").trim();
-      const corpRegex = new RegExp(nameWithoutCorp, "gi");
+    if (companyName.includes('株式会社')) {
+      const nameWithoutCorp = companyName.replace('株式会社', '').trim();
+      const corpRegex = new RegExp(nameWithoutCorp, 'gi');
       sanitized = sanitized.replace(corpRegex, replacementText);
     }
 
@@ -149,11 +139,8 @@ export default function CompanyCard({
       if (part.length > 2) {
         // Only replace parts with more than 2 characters
         // Use word boundaries for latin characters
-        const wordBoundary = /^[a-zA-Z0-9]/.test(part) ? "\\b" : "";
-        const partRegex = new RegExp(
-          `${wordBoundary}${part}${wordBoundary}`,
-          "gi"
-        );
+        const wordBoundary = /^[a-zA-Z0-9]/.test(part) ? '\\b' : '';
+        const partRegex = new RegExp(`${wordBoundary}${part}${wordBoundary}`, 'gi');
         sanitized = sanitized.replace(partRegex, replacementText);
       }
     });
@@ -163,17 +150,17 @@ export default function CompanyCard({
 
   // Animation states and classes
   const cardClasses = `w-full transition-all duration-500 bg-gradient-to-b from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 hover:shadow-xl hover:shadow-blue-500/10 ${
-    isRevealing ? "shadow-lg" : ""
-  } ${wasAnonymous && feedback ? "revealed-card" : ""}`;
+    isRevealing ? 'shadow-lg' : ''
+  } ${wasAnonymous && feedback ? 'revealed-card' : ''}`;
 
   const revealOverlayClasses = `fixed inset-0 z-50 flex items-center justify-center bg-primary/10 backdrop-blur-sm transition-opacity duration-700 ${
-    isRevealing ? "opacity-100" : "opacity-0 pointer-events-none"
+    isRevealing ? 'opacity-100' : 'opacity-0 pointer-events-none'
   }`;
 
   // Determine icon for feedback type
   const getFeedbackIcon = () => {
     if (!feedback) return null;
-    return feedback === "interested" ? (
+    return feedback === 'interested' ? (
       <PartyPopper className="text-green-500 animate-bounce" size={24} />
     ) : (
       <ThumbsDown className="text-red-500" size={24} />
@@ -188,23 +175,18 @@ export default function CompanyCard({
           <div className="flex flex-col items-center justify-center p-6 text-center rounded-lg shadow-lg bg-background/80">
             {company.logo_url && !logoError ? (
               <Avatar className="mb-2 w-14 h-14 ring-1 ring-white">
-                <AvatarImage
-                  src={company.logo_url}
-                  onError={() => setLogoError(true)}
-                />
+                <AvatarImage src={company.logo_url} onError={() => setLogoError(true)} />
                 <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
               </Avatar>
             ) : null}
 
-            <div className="mb-2 text-2xl font-bold text-black/80 reveal-text">
-              {company.name}
-            </div>
+            <div className="mb-2 text-2xl font-bold text-black/80 reveal-text">{company.name}</div>
 
             <p className="text-sm text-muted-foreground reveal-text-delay">
               {t(
-                feedback === "interested"
-                  ? "recommendations.feedback.companyRevealed.interested"
-                  : "recommendations.feedback.companyRevealed.notInterested"
+                feedback === 'interested'
+                  ? 'recommendations.feedback.companyRevealed.interested'
+                  : 'recommendations.feedback.companyRevealed.notInterested'
               )}
             </p>
           </div>
@@ -216,11 +198,11 @@ export default function CompanyCard({
           {!shouldAnonymize ? (
             <Avatar
               className={`h-10 w-10 sm:h-14 sm:w-14 ring-1 ring-white ${
-                wasAnonymous && feedback ? "reveal-avatar" : ""
+                wasAnonymous && feedback ? 'reveal-avatar' : ''
               }`}
             >
               {company.logo_url && !logoError ? (
-                <Link href={company.site_url || "/"} target="_blank">
+                <Link href={company.site_url || '/'} target="_blank">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -231,7 +213,7 @@ export default function CompanyCard({
                         />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{t("recommendations.visitWebsite")}</p>
+                        <p>{t('recommendations.visitWebsite')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -251,7 +233,7 @@ export default function CompanyCard({
             <div className="flex items-center gap-2">
               <span
                 className={`font-medium text-white ${
-                  wasAnonymous && feedback ? "reveal-text" : ""
+                  wasAnonymous && feedback ? 'reveal-text' : ''
                 }`}
               >
                 {shouldAnonymize ? getAnonymousName() : company.name}
@@ -260,12 +242,10 @@ export default function CompanyCard({
 
             <span
               className={`text-xs text-white/70 ${
-                wasAnonymous && feedback ? "reveal-text-delay" : ""
+                wasAnonymous && feedback ? 'reveal-text-delay' : ''
               }`}
             >
-              {shouldAnonymize
-                ? t("recommendations.anonymized")
-                : company.industry}
+              {shouldAnonymize ? t('recommendations.anonymized') : company.industry}
             </span>
           </div>
         </CardHeader>
@@ -277,11 +257,11 @@ export default function CompanyCard({
             <div className="w-full">
               <div className="mb-3 sm:mb-4">
                 <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
-                  {t("recommendations.about")}
+                  {t('recommendations.about')}
                 </h3>
                 <p
                   className={`text-xs sm:text-sm text-white/80 ${
-                    wasAnonymous && feedback ? "reveal-text-delay" : ""
+                    wasAnonymous && feedback ? 'reveal-text-delay' : ''
                   }`}
                 >
                   {shouldAnonymize
@@ -291,7 +271,7 @@ export default function CompanyCard({
               </div>
               <div>
                 <h3 className="mb-1 text-sm font-medium text-white sm:mb-2">
-                  {t("recommendations.whyMatch")}
+                  {t('recommendations.whyMatch')}
                 </h3>
                 <ul className="pl-4 text-xs list-disc sm:pl-5 sm:text-sm text-white/80">
                   {matchingPoints && matchingPoints.length > 0 ? (
@@ -299,18 +279,14 @@ export default function CompanyCard({
                       <li
                         key={index}
                         className={
-                          wasAnonymous && feedback
-                            ? `reveal-text-delay-${(index % 3) + 2}`
-                            : ""
+                          wasAnonymous && feedback ? `reveal-text-delay-${(index % 3) + 2}` : ''
                         }
                       >
-                        {shouldAnonymize
-                          ? getSanitizedDescription(point, company.name)
-                          : point}
+                        {shouldAnonymize ? getSanitizedDescription(point, company.name) : point}
                       </li>
                     ))
                   ) : (
-                    <li>{t("recommendations.noMatchingPoints")}</li>
+                    <li>{t('recommendations.noMatchingPoints')}</li>
                   )}
                 </ul>
               </div>
@@ -323,9 +299,9 @@ export default function CompanyCard({
             <div className="flex items-center justify-center w-full gap-2 text-sm text-white">
               {getFeedbackIcon()}
               <span>
-                {feedback === "interested"
-                  ? t("recommendations.feedback.markedInterested")
-                  : t("recommendations.feedback.markedNotInterested")}
+                {feedback === 'interested'
+                  ? t('recommendations.feedback.markedInterested')
+                  : t('recommendations.feedback.markedNotInterested')}
               </span>
             </div>
           ) : (
@@ -340,7 +316,7 @@ export default function CompanyCard({
               </Button> */}
 
               <Button
-                onClick={() => handleFeedback("interested")}
+                onClick={() => handleFeedback('interested')}
                 disabled={isSendingFeedback}
                 className="w-full font-bold transition-all sm:w-fit bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 active:scale-95"
               >
@@ -350,8 +326,8 @@ export default function CompanyCard({
                   <PartyPopper className="w-4 h-4 mr-2 text-white" />
                 )}
                 {isAnonymous
-                  ? t("recommendations.viewDetails")
-                  : t("recommendations.feedback.interested")}
+                  ? t('recommendations.viewDetails')
+                  : t('recommendations.feedback.interested')}
               </Button>
             </>
           )}

@@ -45,4 +45,4 @@ export function useClarity() {
   }, []);
 
   return { setTag, identifyUser, setConsent };
-} 
+}

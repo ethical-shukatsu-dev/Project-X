@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase/client';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
     // Validate the request body
     if (!body.recommendationId || !body.feedback) {
       return NextResponse.json(
@@ -38,9 +38,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error processing request:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

@@ -10,13 +10,13 @@ const openaiClient = new OpenAI({
 /**
  * Updates existing companies in the database with domain URLs if they don't have one
  */
-async function updateCompanyDomains(): Promise<{ updated: number, failed: number }> {
+async function updateCompanyDomains(): Promise<{ updated: number; failed: number }> {
   try {
     // Get companies without domain URLs
     const { data: companies, error } = await supabase
       .from('companies')
       .select('*')
-      .is('site_url', null)
+      .is('site_url', null);
 
     if (error) {
       console.error('Error fetching companies without domain URLs:', error);
@@ -38,42 +38,48 @@ async function updateCompanyDomains(): Promise<{ updated: number, failed: number
       try {
         // Use OpenAI to get the domain URL
         const response = await openaiClient.chat.completions.create({
-          model: "gpt-3.5-turbo",
+          model: 'gpt-3.5-turbo',
           messages: [
             {
-              role: "system",
-              content: "You are a helpful assistant that provides accurate information about company websites. Respond with only the domain URL in the format 'domain.com' without any additional text, explanation, or formatting. If you don't know or aren't sure, respond with null."
+              role: 'system',
+              content:
+                "You are a helpful assistant that provides accurate information about company websites. Respond with only the domain URL in the format 'domain.com' without any additional text, explanation, or formatting. If you don't know or aren't sure, respond with null.",
             },
             {
-              role: "user",
-              content: `What is the official website domain for ${company.name} (${company.industry})? Respond with only the domain in the format 'domain.com' without any additional text.`
-            }
-          ]
+              role: 'user',
+              content: `What is the official website domain for ${company.name} (${company.industry})? Respond with only the domain in the format 'domain.com' without any additional text.`,
+            },
+          ],
         });
 
         const content = response.choices[0].message.content?.trim();
-        
+
         // Check if the response is valid
         let domainUrl = null;
-        if (content && content.toLowerCase() !== 'null' && content !== 'unknown' && content !== 'n/a') {
+        if (
+          content &&
+          content.toLowerCase() !== 'null' &&
+          content !== 'unknown' &&
+          content !== 'n/a'
+        ) {
           // Clean up the domain (remove http://, https://, www. if present)
           domainUrl = content.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
-          
+
           // Add https:// prefix for consistency
           if (!domainUrl.startsWith('http')) {
             domainUrl = `https://${domainUrl}`;
           }
         }
-        
+
         // Update the company in the database
         const { error: updateError } = await supabase
           .from('companies')
-          .update({ 
+          .update({
             site_url: domainUrl,
-            last_updated: new Date().toISOString()
+            last_updated: new Date().toISOString(),
           })
           .eq('id', company.id);
-        
+
         if (updateError) {
           console.error(`Error updating domain URL for company ${company.name}:`, updateError);
           failedCount++;
@@ -87,7 +93,9 @@ async function updateCompanyDomains(): Promise<{ updated: number, failed: number
       }
     }
 
-    console.log(`Finished updating company domain URLs. Updated: ${updatedCount}, Failed: ${failedCount}`);
+    console.log(
+      `Finished updating company domain URLs. Updated: ${updatedCount}, Failed: ${failedCount}`
+    );
     return { updated: updatedCount, failed: failedCount };
   } catch (error) {
     console.error('Error updating company domain URLs:', error);
@@ -100,31 +108,25 @@ export async function GET(request: NextRequest) {
     // Check for a secret key to prevent unauthorized access
     const authHeader = request.headers.get('authorization');
     const apiKey = process.env.API_SECRET_KEY;
-    
+
     if (!apiKey || authHeader !== `Bearer ${apiKey}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     // Update company domain URLs
     const result = await updateCompanyDomains();
-    
+
     return NextResponse.json(
-      { 
-        success: true, 
+      {
+        success: true,
         message: 'Company domain URLs update process completed',
         updated: result.updated,
-        failed: result.failed
+        failed: result.failed,
       },
       { status: 200 }
     );
   } catch (error) {
     console.error('Error in update-domains API route:', error);
-    return NextResponse.json(
-      { error: 'Failed to update company domain URLs' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update company domain URLs' }, { status: 500 });
   }
-} 
+}

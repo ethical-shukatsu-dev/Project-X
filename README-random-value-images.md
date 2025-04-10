@@ -48,7 +48,7 @@ useEffect(() => {
       const images = await getImageQuestions();
       setImageQuestions(images);
     } catch (error) {
-      console.error("Error fetching image questions:", error);
+      console.error('Error fetching image questions:', error);
     } finally {
       setIsLoadingImages(false);
     }
@@ -75,7 +75,7 @@ CREATE OR REPLACE FUNCTION get_random_value_images_by_category(category_param TE
 RETURNS SETOF value_images
 LANGUAGE SQL
 AS $$
-  SELECT * FROM value_images 
+  SELECT * FROM value_images
   WHERE category = category_param
   ORDER BY RANDOM()
   LIMIT limit_param;
@@ -85,12 +85,14 @@ $$;
 ### Client Implementation
 
 ```typescript
-export async function getRandomValueImagesByCategory(category: string, limit: number = 4): Promise<ValueImage[]> {
-  const { data, error } = await supabase
-    .rpc('get_random_value_images_by_category', {
-      category_param: category,
-      limit_param: limit
-    });
+export async function getRandomValueImagesByCategory(
+  category: string,
+  limit: number = 4
+): Promise<ValueImage[]> {
+  const { data, error } = await supabase.rpc('get_random_value_images_by_category', {
+    category_param: category,
+    limit_param: limit,
+  });
 
   if (error) {
     console.error('Error fetching random value images:', error);
@@ -104,4 +106,4 @@ export async function getRandomValueImagesByCategory(category: string, limit: nu
 ## Notes
 
 - The `ORDER BY RANDOM()` approach is efficient for small to medium-sized tables. For very large tables, consider alternative randomization methods.
-- The default limit is set to 4, but you can specify a different number if needed. 
+- The default limit is set to 4, but you can specify a different number if needed.

@@ -1,0 +1,64 @@
+name: PR Build Check
+
+on:
+  pull_request:
+    branches: [main, master]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Print Node and Bun versions
+        run: |
+          echo "Node version: $(node -v)"
+          echo "Bun version: $(bun -v)"
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          bun install
+
+      - name: Create dummy env file
+        run: |
+          cat > .env.local << EOL
+          NEXT_PUBLIC_SUPABASE_URL=https://dummy-project.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYyMDY2MjYwMywiZXhwIjoxOTM2MjM4NjAzfQ.ZgqKDu_ZSpPJJxZT_PkixY5OG4UyKycD4_Ja0ZQD4Vo
+          OPENAI_API_KEY=sk-dummy-key-for-build-test
+          NEXT_PUBLIC_SITE_URL=http://localhost:3000
+          NEXT_PUBLIC_VERCEL_URL=localhost:3000
+          SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjIwNjYyNjAzLCJleHAiOjE5MzYyMzg2MDN9.zZJz3RDxHHHCPQqN9kBXEGtRXrHN4rjQCxkj_zUyGXc
+          EOL
+
+      - name: Build project with debug
+        run: |
+          echo "Starting build..."
+          export NODE_ENV=production
+          export SKIP_ENV_VALIDATION=1
+          export NEXT_TELEMETRY_DISABLED=1
+          bun --bun next build --debug
+        env:
+          CI: true
+
+      - name: Report status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Build successful! PR can be merged."
+          else
+            echo "❌ Build failed. Please fix the issues before merging."
+            echo "Debug information:"
+            echo "Environment variables (sanitized):"
+            env | grep -i next_ || true
+            echo "Package versions:"
+            bun pm ls
+            exit 1
+          fi

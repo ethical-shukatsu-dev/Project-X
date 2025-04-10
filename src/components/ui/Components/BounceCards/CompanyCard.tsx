@@ -1,6 +1,6 @@
-import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar";
-import {useEffect, useRef, useState} from "react";
-import {EyeOff} from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useEffect, useRef, useState } from 'react';
+import { EyeOff } from 'lucide-react';
 
 interface CompanyCardProps {
   name: string;
@@ -8,7 +8,7 @@ interface CompanyCardProps {
   shouldAnonymize?: boolean;
 }
 
-export default function CompanyCard({name, logoUrl, shouldAnonymize = false}: CompanyCardProps) {
+export default function CompanyCard({ name, logoUrl, shouldAnonymize = false }: CompanyCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [avatarSize, setAvatarSize] = useState(96); // Default 24 * 4 = 96px
 
@@ -64,16 +64,16 @@ export default function CompanyCard({name, logoUrl, shouldAnonymize = false}: Co
             height: avatarSize,
           }}
         >
-          <AvatarImage src={logoUrl || ""} alt={name} />
+          <AvatarImage src={logoUrl || ''} alt={name} />
           <AvatarFallback
             className="text-[length:calc(var(--avatar-size)*0.4)]"
-            style={{"--avatar-size": `${avatarSize}px`} as React.CSSProperties}
+            style={{ '--avatar-size': `${avatarSize}px` } as React.CSSProperties}
           >
             {name.substring(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       )}
-      
+
       <h3
         className="hidden w-full font-semibold text-center truncate text-black/80 sm:block drop-shadow-lg"
         style={{

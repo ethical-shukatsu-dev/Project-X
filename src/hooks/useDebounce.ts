@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * A hook that delays updating a value until a specified timeout
@@ -43,4 +43,4 @@ export function useDebounce<T>(value: T, delay: number, immediate = false): T {
   return debouncedValue;
 }
 
-export default useDebounce; 
+export default useDebounce;

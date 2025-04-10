@@ -26,4 +26,4 @@ export default function useAnonymousMode() {
   };
 
   return { isAnonymous, toggleAnonymousMode, isLoaded };
-} 
+}

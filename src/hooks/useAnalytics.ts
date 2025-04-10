@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
-import { 
-  AnalyticsData, 
-  TimeRange,
-  DateRange
-} from '@/types/analytics';
+import { AnalyticsData, TimeRange, DateRange } from '@/types/analytics';
 
 export function useAnalytics(initialTimeRange: TimeRange = 'all') {
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -13,13 +9,17 @@ export function useAnalytics(initialTimeRange: TimeRange = 'all') {
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
   // Fetch analytics data
-  const fetchAnalytics = async (selectedTimeRange: TimeRange = timeRange, metricKey?: string, customDateRange?: DateRange) => {
+  const fetchAnalytics = async (
+    selectedTimeRange: TimeRange = timeRange,
+    metricKey?: string,
+    customDateRange?: DateRange
+  ) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       let url = `/api/admin/analytics?timeRange=${selectedTimeRange}${metricKey ? `&metric=${metricKey}` : ''}`;
-      
+
       // If it's a custom date range, append the date parameters
       if (selectedTimeRange === 'custom' && (customDateRange || dateRange)) {
         const dates = customDateRange || dateRange;
@@ -27,15 +27,15 @@ export function useAnalytics(initialTimeRange: TimeRange = 'all') {
           url += `&startDate=${dates.startDate}&endDate=${dates.endDate}`;
         }
       }
-      
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch analytics: ${response.status} ${response.statusText}`);
       }
-      
+
       const analyticsData = await response.json();
-      
+
       // If fetching a specific metric, merge with existing data
       if (metricKey && data) {
         // For specific metrics, the API returns partial data
@@ -46,7 +46,7 @@ export function useAnalytics(initialTimeRange: TimeRange = 'all') {
             ...data.stats,
             ...analyticsData.stats,
             // Handle nested objects that might be partial
-            surveyFunnel: analyticsData.stats.surveyFunnel 
+            surveyFunnel: analyticsData.stats.surveyFunnel
               ? { ...data.stats.surveyFunnel, ...analyticsData.stats.surveyFunnel }
               : data.stats.surveyFunnel,
             surveyTypes: analyticsData.stats.surveyTypes
@@ -66,20 +66,29 @@ export function useAnalytics(initialTimeRange: TimeRange = 'all') {
                   ...data.stats.abTestComparison,
                   ...analyticsData.stats.abTestComparison,
                   anonymous: analyticsData.stats.abTestComparison.anonymous
-                    ? { ...data.stats.abTestComparison.anonymous, ...analyticsData.stats.abTestComparison.anonymous }
+                    ? {
+                        ...data.stats.abTestComparison.anonymous,
+                        ...analyticsData.stats.abTestComparison.anonymous,
+                      }
                     : data.stats.abTestComparison.anonymous,
                   nonAnonymous: analyticsData.stats.abTestComparison.nonAnonymous
-                    ? { ...data.stats.abTestComparison.nonAnonymous, ...analyticsData.stats.abTestComparison.nonAnonymous }
+                    ? {
+                        ...data.stats.abTestComparison.nonAnonymous,
+                        ...analyticsData.stats.abTestComparison.nonAnonymous,
+                      }
                     : data.stats.abTestComparison.nonAnonymous,
                   difference: analyticsData.stats.abTestComparison.difference
-                    ? { ...data.stats.abTestComparison.difference, ...analyticsData.stats.abTestComparison.difference }
+                    ? {
+                        ...data.stats.abTestComparison.difference,
+                        ...analyticsData.stats.abTestComparison.difference,
+                      }
                     : data.stats.abTestComparison.difference,
                 }
               : data.stats.abTestComparison,
             // Arrays can be replaced if present
             surveySteps: analyticsData.stats.surveySteps || data.stats.surveySteps,
             dropoffAnalysis: analyticsData.stats.dropoffAnalysis || data.stats.dropoffAnalysis,
-          }
+          },
         });
       } else {
         // If fetching all data, replace the entire state
@@ -96,7 +105,7 @@ export function useAnalytics(initialTimeRange: TimeRange = 'all') {
   // Change time range and refetch data
   const changeTimeRange = (newTimeRange: TimeRange, customDateRange?: DateRange) => {
     setTimeRange(newTimeRange);
-    
+
     if (newTimeRange === 'custom' && customDateRange) {
       setDateRange(customDateRange);
       fetchAnalytics(newTimeRange, undefined, customDateRange);
@@ -105,7 +114,7 @@ export function useAnalytics(initialTimeRange: TimeRange = 'all') {
       fetchAnalytics(newTimeRange);
     }
   };
-  
+
   // Fetch data on initial load
   useEffect(() => {
     fetchAnalytics();
@@ -120,4 +129,4 @@ export function useAnalytics(initialTimeRange: TimeRange = 'all') {
     changeTimeRange,
     refreshData: fetchAnalytics,
   };
-} 
+}
