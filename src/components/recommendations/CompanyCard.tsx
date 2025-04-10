@@ -73,7 +73,9 @@ export default function CompanyCard({
     } else {
       onFeedback(type);
     }
-    setIsSendingFeedback(false);
+    setTimeout(() => {
+      setIsSendingFeedback(false);
+    }, 500);
   };
 
   // Get company initials for avatar fallback
