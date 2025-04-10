@@ -22,6 +22,7 @@ import {
   trackSurveyStepAbandoned,
 } from "@/lib/analytics";
 import {createUrlWithParams} from "@/lib/utils";
+import {trackSurveyStartClick} from "@/lib/analytics";
 
 // A/B Testing Toggle - This will be overridden by the questionnaireType prop if provided
 const DEFAULT_QUESTIONNAIRE_TYPE = "text"; // "text" or "image"
@@ -870,7 +871,12 @@ export default function ValuesQuestionnaire({
   const {trackStepChange, setAnswerSelected, initializeFirstStep} =
     useStepTracking(QUESTIONS.length);
 
-  useEffect(() => {
+  useEffect(function logSurveyStart() {
+    trackSurveyStartClick();
+  }, []);
+
+  // Scroll to top of page
+  useEffect(function setUpSurvey() {
     // Scroll to top of page
     window.scrollTo({top: 0, behavior: "smooth"});
 
@@ -910,7 +916,7 @@ export default function ValuesQuestionnaire({
     : totalTextQuestions;
 
   // Load the hardcoded image data instead of fetching from the database
-  useEffect(() => {
+  useEffect(function setUpImages() {
     // Convert hardcoded image data to match ValueImage type
     const processedImageData: Record<string, ValueImage[]> = {};
 
