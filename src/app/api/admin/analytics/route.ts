@@ -59,6 +59,9 @@ export async function GET(
       startDate = new Date(startDateParam);
       endDate = new Date(endDateParam);
 
+      // Set end date to end of day (23:59:59.999)
+      endDate.setHours(23, 59, 59, 999);
+
       // Validate dates
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
