@@ -32,6 +32,16 @@ const formatStepLabel = (stepId: string): string => {
   return stepId.charAt(0).toUpperCase() + stepId.slice(1);
 };
 
+// Utility function to convert date to JST
+function toJST(date: Date): Date {
+  return new Date(date.getTime() + 9 * 60 * 60 * 1000); // Add 9 hours for JST
+}
+
+// Utility function to convert JST to UTC
+function toUTC(date: Date): Date {
+  return new Date(date.getTime() - 9 * 60 * 60 * 1000); // Subtract 9 hours for UTC
+}
+
 /**
  * GET handler for fetching analytics data
  */
@@ -52,14 +62,14 @@ export async function GET(
     // Calculate the start date based on the time range
     let startDate: Date | null = null;
     let endDate: Date | null = null;
-    const now = new Date();
+    const now = toJST(new Date()); // Convert current time to JST
 
     // Handle custom date range
     if (timeRange === 'custom' && startDateParam && endDateParam) {
-      startDate = new Date(startDateParam);
-      endDate = new Date(endDateParam);
+      startDate = toJST(new Date(startDateParam));
+      endDate = toJST(new Date(endDateParam));
 
-      // Set end date to end of day (23:59:59.999)
+      // Set end date to end of day (23:59:59.999) in JST
       endDate.setHours(23, 59, 59, 999);
 
       // Validate dates
@@ -67,33 +77,37 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
       }
     } else {
-      // Standard time ranges
+      // Standard time ranges in JST
       if (timeRange === '24h') {
-        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago in JST
       } else if (timeRange === '7d') {
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago in JST
       } else if (timeRange === '30d') {
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago in JST
       }
       // For "all" time range, startDate remains null
     }
 
     // If a specific metric is requested, only fetch the data needed for that metric
     if (metricKey) {
-      return await getSpecificMetric(metricKey, startDate, endDate);
+      return await getSpecificMetric(
+        metricKey,
+        startDate ? toUTC(startDate) : null,
+        endDate ? toUTC(endDate) : null
+      );
     }
 
     // Build the query for all data
     let query = supabaseAdmin.from('analytics_events').select('*');
 
-    // Apply filters
+    // Apply filters - convert JST dates back to UTC for database query
     if (startDate) {
-      query = query.gte('timestamp', startDate.toISOString());
+      query = query.gte('timestamp', toUTC(startDate).toISOString());
     }
 
     // Apply end date filter if provided
     if (endDate) {
-      query = query.lte('timestamp', endDate.toISOString());
+      query = query.lte('timestamp', toUTC(endDate).toISOString());
     }
 
     if (eventType) {
@@ -108,10 +122,10 @@ export async function GET(
       return NextResponse.json({ error: 'Failed to fetch analytics data' }, { status: 500 });
     }
 
-    // Get event counts by type using raw SQL, passing in the date parameters
+    // Get event counts by type using raw SQL, passing in the date parameters in UTC
     const { data: eventCounts, error: countError } = await supabaseAdmin.rpc('get_event_counts', {
-      start_date: startDate ? startDate.toISOString() : '1970-01-01',
-      end_date: endDate ? endDate.toISOString() : now.toISOString(),
+      start_date: startDate ? toUTC(startDate).toISOString() : '1970-01-01',
+      end_date: endDate ? toUTC(endDate).toISOString() : toUTC(now).toISOString(),
     });
 
     if (countError) {
@@ -123,9 +137,9 @@ export async function GET(
       'get_multiple_event_counts',
       {
         start_date: startDate
-          ? startDate.toISOString()
+          ? toUTC(startDate).toISOString()
           : new Date('1970-01-01T00:00:00.000Z').toISOString(),
-        end_date: endDate ? endDate.toISOString() : now.toISOString(),
+        end_date: endDate ? toUTC(endDate).toISOString() : toUTC(now).toISOString(),
       }
     );
 
@@ -353,16 +367,16 @@ async function getSpecificMetric(
   endDate: Date | null
 ): Promise<NextResponse<PartialAnalyticsData | ErrorResponse>> {
   try {
-    const now = new Date();
+    const now = toJST(new Date());
 
     // Get the minimum required data from uniqueCounts for the requested metric
     const { data: uniqueCounts, error: uniqueError } = await supabaseAdmin.rpc(
       'get_multiple_event_counts',
       {
         start_date: startDate
-          ? startDate.toISOString()
+          ? toUTC(startDate).toISOString()
           : new Date('1970-01-01T00:00:00.000Z').toISOString(),
-        end_date: endDate ? endDate.toISOString() : now.toISOString(),
+        end_date: endDate ? toUTC(endDate).toISOString() : toUTC(now).toISOString(),
       }
     );
 

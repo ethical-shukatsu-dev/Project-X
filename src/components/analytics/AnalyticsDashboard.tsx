@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { formatInTimeZone } from 'date-fns-tz';
 
 const timeRangeLabels: Record<TimeRange, string> = {
   '24h': 'Last 24 Hours',
@@ -62,6 +63,11 @@ export function AnalyticsDashboard() {
   );
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Custom date formatter for JST
+  const formatDateJST = (date: Date) => {
+    return formatInTimeZone(date, 'Asia/Tokyo', 'MMM d, yyyy');
+  };
 
   const refreshMetric = async (metricKey: string) => {
     // Set the specific metric loading state
@@ -101,7 +107,7 @@ export function AnalyticsDashboard() {
     if (timeRange === 'custom' && dateRange) {
       const start = new Date(dateRange.startDate);
       const end = new Date(dateRange.endDate);
-      return `${format(start, 'MMM d, yyyy')} - ${format(end, 'MMM d, yyyy')}`;
+      return `${formatInTimeZone(start, 'Asia/Tokyo', 'MMM d, yyyy')} - ${formatInTimeZone(end, 'Asia/Tokyo', 'MMM d, yyyy')}`;
     }
     return timeRangeLabels[timeRange];
   };
@@ -334,6 +340,12 @@ export function AnalyticsDashboard() {
                       maxDate={new Date()}
                       className="w-full border rounded-md p-2"
                       dateFormat="MMM d, yyyy"
+                      customInput={
+                        <input
+                          className="w-full border rounded-md p-2"
+                          value={startDate ? formatDateJST(startDate) : ''}
+                        />
+                      }
                     />
                   </div>
                   <div className="space-y-2">
@@ -348,6 +360,12 @@ export function AnalyticsDashboard() {
                       maxDate={new Date()}
                       className="w-full border rounded-md p-2"
                       dateFormat="MMM d, yyyy"
+                      customInput={
+                        <input
+                          className="w-full border rounded-md p-2"
+                          value={endDate ? formatDateJST(endDate) : ''}
+                        />
+                      }
                     />
                   </div>
                 </div>
