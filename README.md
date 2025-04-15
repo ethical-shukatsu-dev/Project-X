@@ -68,6 +68,22 @@ Optional environment variables:
 
 Refer to `.env.example` for all available configuration options and their descriptions.
 
+5. Verify your environment setup:
+
+```bash
+# Test environment configuration
+bun scripts/setup/test-environments.mjs
+
+# Verify Supabase connection and tables
+bun scripts/setup/verify-supabase.mjs
+```
+
+Use the `--production` flag to test production environment:
+
+```bash
+bun scripts/setup/verify-supabase.mjs --production
+```
+
 ### Database Setup
 
 1. Install the Supabase CLI:
@@ -110,6 +126,17 @@ This will create all necessary tables and functions:
 - Analytics tables (`analytics_events`, `ab_testing`)
 - Analytics functions for tracking user behavior and generating reports
 - Value images functions for managing and retrieving value-based images
+
+### Database Maintenance
+
+The project includes several database maintenance scripts in `scripts/db-maintenance/`:
+
+- Company deduplication tools:
+  - Basic deduplication: `bun scripts/db-maintenance/deduplicate-companies.ts`
+  - Safe deduplication with reference handling: `bun scripts/db-maintenance/deduplicate-companies-with-refs.ts`
+  - Interactive deduplication: `bun scripts/db-maintenance/deduplicate-companies-interactive.ts`
+
+For detailed information about these scripts, see `scripts/db-maintenance/README.md`.
 
 5. Start the development server:
 
