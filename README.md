@@ -42,13 +42,31 @@ cd project-x
 bun install
 ```
 
-3. Create a `.env.local` file in the root directory with the following variables:
+3. Create a `.env.local` file by copying the `.env.example` file:
 
+```bash
+cp .env.example .env.local
 ```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-OPENAI_API_KEY=your_openai_api_key
-```
+
+4. Update the `.env.local` file with your configuration values:
+
+Required environment variables:
+
+- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+- `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `API_SECRET_KEY`: Your admin API secret key
+
+Optional environment variables:
+
+- `GOOGLE_CLIENT_ID`: For Google Sign-In integration
+- `NEXT_PUBLIC_FB_PIXEL_ID`: For Facebook Pixel analytics
+- `NEXT_PUBLIC_CLARITY_PROJECT_ID`: For Microsoft Clarity analytics
+- `BRANDFETCH_CLIENT_ID`: For company branding information
+- `PEXELS_API_KEY`: For image assets
+
+Refer to `.env.example` for all available configuration options and their descriptions.
 
 ### Database Setup
 
