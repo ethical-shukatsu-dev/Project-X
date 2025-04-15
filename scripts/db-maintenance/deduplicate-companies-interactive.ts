@@ -1,4 +1,4 @@
-import { supabase, Company } from '../src/lib/supabase/client';
+import { supabase, Company } from '@/lib/supabase/client';
 import * as readline from 'readline';
 
 /**
