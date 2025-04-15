@@ -1,14 +1,44 @@
-import { supabase, Company } from '../src/lib/supabase/client';
+import { supabase, Company } from '@/lib/supabase/client';
+import * as readline from 'readline';
 
 /**
- * Script to identify and remove duplicate companies in the database
- * including handling references in the recommendations table
+ * Interactive script to identify and remove duplicate companies in the database
+ * with user prompts to choose which company to keep
  *
  * The approach:
  * 1. Group companies by normalized name (lowercase, trimmed)
- * 2. For each group with multiple companies, keep the most detailed one and update references to others
- * 3. Remove the duplicate companies after updating all references
+ * 2. For each group with multiple companies, display all options and let the user choose
+ * 3. Update recommendation references and remove the duplicates based on user selection
  */
+
+// Create readline interface for user input
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+// Helper to get user input asynchronously
+function prompt(question: string): Promise<string> {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      resolve(answer);
+    });
+  });
+}
+
+// Format company details for display
+function formatCompanyDetails(company: Company, index: number): string {
+  return `
+[${index}] ID: ${company.id}
+    Name: ${company.name}
+    Industry: ${company.industry}
+    Size: ${company.size}
+    Description: ${company.description.substring(0, 100)}${company.description.length > 100 ? '...' : ''}
+    Logo URL: ${company.logo_url || 'None'}
+    Site URL: ${company.site_url || 'None'}
+    Last Updated: ${company.last_updated}
+  `;
+}
 
 // Function to update recommendation references from one company ID to another
 async function updateRecommendationReferences(
@@ -49,8 +79,8 @@ async function updateRecommendationReferences(
   }
 }
 
-async function deduplicateCompanies() {
-  console.log('Starting company deduplication process...');
+async function deduplicateCompaniesInteractive() {
+  console.log('Starting interactive company deduplication process...');
 
   try {
     // Fetch all companies
@@ -96,36 +126,56 @@ async function deduplicateCompanies() {
 
     // Process each group with duplicates
     for (const [companyName, group] of duplicateGroups) {
-      console.log(`\nProcessing duplicates for: ${companyName}`);
+      console.log(`\n======================================================`);
+      console.log(`Processing duplicates for: ${companyName}`);
       console.log(`Found ${group.length} duplicate entries.`);
+      console.log(`======================================================\n`);
 
-      // Sort companies by quality metrics - higher score is better
-      const scoredCompanies = group.map((company) => {
-        // Calculate a quality score for each company
-        let score = 0;
-
-        // Prefer longer, more detailed descriptions
-        score += company.description.length / 100;
-
-        // Prefer companies with logo URLs
-        if (company.logo_url) score += 5;
-
-        // Prefer companies with site URLs
-        if (company.site_url) score += 5;
-
-        // Prefer more recent updates (convert to timestamp)
-        const updateTime = new Date(company.last_updated).getTime();
-        score += updateTime / 1000000000000; // Normalize to be in same range as other scores
-
-        return { company, score };
+      // Display all options with details
+      console.log('Choose which company record to keep:');
+      group.forEach((company, index) => {
+        console.log(formatCompanyDetails(company, index + 1));
       });
 
-      // Sort by score descending (highest score first)
-      scoredCompanies.sort((a, b) => b.score - a.score);
+      // Get user choice
+      const answer = await prompt(
+        'Enter the number of the company to keep (or "auto" to use automatic selection): '
+      );
 
-      // Keep the highest-scoring company, update references to others then remove them
-      const keepCompany = scoredCompanies[0].company;
-      const removeCompanies = scoredCompanies.slice(1).map((item) => item.company);
+      let keepCompanyIndex = -1;
+
+      if (answer.toLowerCase() === 'auto') {
+        // Use automatic scoring system
+        const scoredCompanies = group.map((company, index) => {
+          let score = 0;
+          score += company.description.length / 100;
+          if (company.logo_url) score += 5;
+          if (company.site_url) score += 5;
+          const updateTime = new Date(company.last_updated).getTime();
+          score += updateTime / 1000000000000;
+          return { index, score };
+        });
+
+        // Sort by score descending
+        scoredCompanies.sort((a, b) => b.score - a.score);
+        keepCompanyIndex = scoredCompanies[0].index;
+
+        console.log(`Auto-selected company #${keepCompanyIndex + 1}.`);
+      } else {
+        // User selection
+        const selectedIndex = parseInt(answer, 10);
+
+        if (isNaN(selectedIndex) || selectedIndex < 1 || selectedIndex > group.length) {
+          console.log('Invalid selection. Skipping this company group.');
+          continue;
+        }
+
+        keepCompanyIndex = selectedIndex - 1;
+      }
+
+      // Process the user's choice
+      const keepCompany = group[keepCompanyIndex];
+      const removeCompanies = group.filter((_, index) => index !== keepCompanyIndex);
 
       console.log(`Keeping: ${keepCompany.id} (${keepCompany.name})`);
 
@@ -160,13 +210,16 @@ async function deduplicateCompanies() {
     console.log(`- Updated ${totalReferencesUpdated} recommendation references`);
   } catch (error) {
     console.error('Error during deduplication process:', error);
+  } finally {
+    // Close the readline interface
+    rl.close();
   }
 }
 
 // Run the script
 async function main() {
-  // Run the deduplication with reference handling
-  await deduplicateCompanies();
+  // Run the interactive deduplication
+  await deduplicateCompaniesInteractive();
 }
 
 // Execute the script

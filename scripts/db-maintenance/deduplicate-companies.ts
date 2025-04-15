@@ -1,4 +1,4 @@
-import { supabase, Company } from '../src/lib/supabase/client';
+import { supabase, Company } from '@/lib/supabase/client';
 
 /**
  * Script to identify and remove duplicate companies in the database
