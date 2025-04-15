@@ -27,9 +27,22 @@ Project X is a web application that helps job-seeking students find companies th
 - Supabase account
 - OpenAI API key
 
-### Environment Setup
+### Installation
 
-Create a `.env.local` file in the root directory with the following variables:
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/project-x.git
+cd project-x
+```
+
+2. Install dependencies:
+
+```bash
+bun install
+```
+
+3. Create a `.env.local` file in the root directory with the following variables:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -39,389 +52,73 @@ OPENAI_API_KEY=your_openai_api_key
 
 ### Database Setup
 
-1. Create a new Supabase project
-2. Create the necessary tables by following the instructions in `SUPABASE_SETUP.md`
-3. Run the SQL script in `setup-tables.sql` to create tables and add sample data
-4. Verify your Supabase setup by running:
+1. Install the Supabase CLI:
+
+Using Homebrew (recommended):
 
 ```bash
-bun run verify-supabase
+brew install supabase/tap/supabase
 ```
 
-This will check if your Supabase connection is working and if all required tables are set up correctly.
-
-### Database Schema
-
-**user_values**
-
-```sql
-CREATE TABLE user_values (
-  id UUID PRIMARY KEY,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  values JSONB NOT NULL,
-  interests TEXT[] NOT NULL,
-  selected_image_values JSONB
-);
-```
-
-**companies**
-
-```sql
-CREATE TABLE companies (
-  id UUID PRIMARY KEY,
-  name TEXT NOT NULL,
-  industry TEXT NOT NULL,
-  description TEXT NOT NULL,
-  size TEXT NOT NULL,
-  values JSONB NOT NULL,
-  logo_url TEXT,
-  site_url TEXT,
-  data_source TEXT DEFAULT 'manual',
-  last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-**recommendations**
-
-```sql
-CREATE TABLE recommendations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES user_values(id),
-  company_id UUID REFERENCES companies(id),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  matching_points TEXT[] NOT NULL,
-  feedback TEXT
-);
-```
-
-**value_images**
-
-```sql
-CREATE TABLE value_images (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  category VARCHAR(255) NOT NULL, -- e.g., 'work_environment', 'leadership_style'
-  value_name VARCHAR(255) NOT NULL, -- e.g., 'collaborative', 'mentorship'
-  image_url TEXT NOT NULL,
-  description TEXT, -- Description of what the image represents
-  tags TEXT[], -- Array of tags for better categorization and searching
-  pexels_id TEXT, -- The Pexels photo ID for proper attribution
-  unsplash_id TEXT, -- The Unsplash photo ID for proper attribution
-  attribution JSONB, -- Attribution information including photographer name, photographer URL, and photo URL
-  image_sizes JSONB -- Different size variants of the image for responsive usage
-);
-```
-
-5. Create the required database functions:
-
-```sql
--- Analytics function for counting unique visitors and actions
-create or replace function get_unique_visitor_counts(start_date timestamp, event_type_param text)
-returns json
-language plpgsql
-security definer
-as $$
-declare
-  result json;
-begin
-  select json_build_object(
-    'unique_sessions', (
-      select count(distinct session_id)
-      from analytics_events
-      where analytics_events.event_type = event_type_param
-      and session_id is not null
-      and timestamp >= start_date
-    ),
-    'unique_users', (
-      select count(distinct user_id)
-      from analytics_events
-      where analytics_events.event_type = event_type_param
-      and user_id is not null
-      and timestamp >= start_date
-    )
-  ) into result;
-
-  return result;
-end;
-$$;
-
--- Function to get unique counts for multiple event types
-CREATE OR REPLACE FUNCTION get_multiple_event_counts(
-  start_date TIMESTAMP WITH TIME ZONE,
-  end_date TIMESTAMP WITH TIME ZONE DEFAULT NULL
-)
-RETURNS jsonb
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  home_visits jsonb;
-  survey_start jsonb;
-  survey_complete jsonb;
-  rec_visits jsonb;
-  company_int jsonb;
-  signup_stats jsonb;
-  survey_type_stats jsonb;
-  step_stats jsonb;
-  dropoff_stats jsonb;
-  anon_stats jsonb;
-  dialog_closes jsonb;
-  email_signups bigint;
-  google_signups bigint;
-  unique_email_users bigint;
-  unique_google_users bigint;
-  total_signups bigint;
-  total_anon_users bigint;
-  completed_anon_surveys bigint;
-  anon_survey_starts bigint;
-  non_anon_survey_starts bigint;
-BEGIN
-  IF end_date IS NULL THEN
-    end_date := NOW(); -- Default to current time if not provided
-  END IF;
-
-  -- Get unique home page visits
-  SELECT jsonb_build_object(
-    'unique_users', count(distinct user_id)
-  )
-  INTO home_visits
-  FROM analytics_events
-  WHERE event_type = 'home_page_visit'
-  AND created_at >= start_date
-  AND created_at <= end_date;
-
-  -- Get unique survey starts with anonymous breakdown
-  SELECT
-    count(distinct case when properties->>'isAnonymous' = 'true' then user_id end) as anon_starts,
-    count(distinct case when properties->>'isAnonymous' = 'false' then user_id end) as non_anon_starts,
-    count(distinct user_id) as total_starts
-  INTO
-    anon_survey_starts,
-    non_anon_survey_starts,
-    survey_start
-  FROM analytics_events
-  WHERE event_type = 'survey_start_click'
-  AND created_at >= start_date
-  AND created_at <= end_date;
-
-  survey_start := jsonb_build_object(
-    'unique_users', survey_start,
-    'anonymous_starts', anon_survey_starts,
-    'non_anonymous_starts', non_anon_survey_starts
-  );
-
-  -- Get unique survey completions
-  SELECT jsonb_build_object(
-    'unique_users', count(distinct user_id)
-  )
-  INTO survey_complete
-  FROM analytics_events
-  WHERE event_type = 'survey_completed'
-  AND created_at >= start_date
-  AND created_at <= end_date;
-
-  -- Get unique recommendations page visits
-  SELECT jsonb_build_object(
-    'unique_users', count(distinct user_id)
-  )
-  INTO rec_visits
-  FROM analytics_events
-  WHERE event_type = 'recommendations_page_visit'
-  AND created_at >= start_date
-  AND created_at <= end_date;
-
-  -- Get unique company interested clicks and total clicks with anonymous breakdown
-  SELECT jsonb_build_object(
-    'unique_users', count(distinct user_id),
-    'total_clicks', count(*),
-    'anonymous_clicks', count(distinct case when properties->>'isAnonymous' = 'true' then user_id end),
-    'non_anonymous_clicks', count(distinct case when properties->>'isAnonymous' = 'false' then user_id end)
-  )
-  INTO company_int
-  FROM analytics_events
-  WHERE event_type = 'company_interested_click'
-  AND created_at >= start_date
-  AND created_at <= end_date;
-
-  -- Get signup counts
-  SELECT
-    count(*) FILTER (WHERE event_type = 'signup_email'),
-    count(*) FILTER (WHERE event_type = 'signup_google'),
-    count(distinct user_id) FILTER (WHERE event_type = 'signup_email'),
-    count(distinct user_id) FILTER (WHERE event_type = 'signup_google'),
-    count(distinct user_id)
-  INTO
-    email_signups,
-    google_signups,
-    unique_email_users,
-    unique_google_users,
-    total_signups
-  FROM analytics_events
-  WHERE event_type IN ('signup_email', 'signup_google')
-  AND created_at >= start_date
-  AND created_at <= end_date;
-
-  signup_stats := jsonb_build_object(
-    'email_signups', email_signups,
-    'google_signups', google_signups,
-    'unique_email_users', unique_email_users,
-    'unique_google_users', unique_google_users,
-    'unique_users', total_signups,
-    'anonymous_email_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events
-      WHERE event_type = 'signup_email'
-      AND properties->>'isAnonymous' = 'true'
-      AND user_id IS NOT NULL
-      AND created_at >= start_date
-      AND created_at <= end_date),
-    'non_anonymous_email_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events
-      WHERE event_type = 'signup_email'
-      AND (properties->>'isAnonymous' = 'false' OR properties->>'isAnonymous' IS NULL)
-      AND user_id IS NOT NULL
-      AND created_at >= start_date
-      AND created_at <= end_date),
-    'anonymous_google_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events
-      WHERE event_type = 'signup_google'
-      AND properties->>'isAnonymous' = 'true'
-      AND user_id IS NOT NULL
-      AND created_at >= start_date
-      AND created_at <= end_date),
-    'non_anonymous_google_signups', (SELECT COUNT(DISTINCT user_id) FROM analytics_events
-      WHERE event_type = 'signup_google'
-      AND (properties->>'isAnonymous' = 'false' OR properties->>'isAnonymous' IS NULL)
-      AND user_id IS NOT NULL
-      AND created_at >= start_date
-      AND created_at <= end_date)
-  );
-
-  -- Get survey type stats
-  SELECT jsonb_object_agg(
-    coalesce(survey_type, 'unknown'),
-    jsonb_build_object('unique_users', unique_users)
-  )
-  INTO survey_type_stats
-  FROM (
-    SELECT
-      lower(properties->>'surveyType') as survey_type,
-      count(distinct user_id) as unique_users
-    FROM analytics_events
-    WHERE event_type = 'survey_completed'
-    AND created_at >= start_date
-    AND created_at <= end_date
-    AND properties->>'surveyType' is not null
-    GROUP BY lower(properties->>'surveyType')
-  ) survey_types;
-
-  -- Get step stats - FIXED to use the correct event type 'survey_step_completed'
-  SELECT jsonb_agg(
-    jsonb_build_object(
-      'step_id', step,
-      'unique_users', unique_users
-    )
-  )
-  INTO step_stats
-  FROM (
-    SELECT
-      properties->>'stepId' as step,
-      count(distinct user_id) as unique_users
-    FROM analytics_events
-    WHERE event_type = 'survey_step_completed'
-    AND created_at >= start_date
-    AND created_at <= end_date
-    GROUP BY properties->>'stepId'
-  ) step_counts;
-
-  -- Get dropoff stats - Using 'survey_step_abandoned'
-  SELECT jsonb_agg(
-    jsonb_build_object(
-      'step_id', step,
-      'unique_users', unique_users,
-      'avg_time_spent', avg_time_spent
-    )
-  )
-  INTO dropoff_stats
-  FROM (
-    SELECT
-      properties->>'stepId' as step,
-      count(distinct user_id) as unique_users,
-      avg((properties->>'timeSpentSeconds')::numeric) as avg_time_spent
-    FROM analytics_events
-    WHERE event_type = 'survey_step_abandoned'
-    AND created_at >= start_date
-    AND created_at <= end_date
-    GROUP BY properties->>'stepId'
-  ) dropoff_counts;
-
-  -- Get anonymous user stats with starts included
-  SELECT
-    count(distinct user_id),
-    count(distinct case when event_type = 'survey_completed' then user_id end),
-    count(distinct case when event_type = 'survey_start_click' then user_id end)
-  INTO
-    total_anon_users,
-    completed_anon_surveys,
-    anon_survey_starts
-  FROM analytics_events
-  WHERE properties->>'isAnonymous' = 'true'
-  AND created_at >= start_date
-  AND created_at <= end_date;
-
-  anon_stats := jsonb_build_object(
-    'total_unique_users', total_anon_users,
-    'completed_surveys', completed_anon_surveys,
-    'started_surveys', anon_survey_starts
-  );
-
-  -- Get dialog closes stats
-  SELECT jsonb_build_object(
-    'unique_users', count(distinct user_id),
-    'total_clicks', count(*)
-  )
-  INTO dialog_closes
-  FROM analytics_events
-  WHERE event_type = 'dialog_closes'
-  AND created_at >= start_date
-  AND created_at <= end_date;
-
-  -- Return combined stats
-  RETURN jsonb_build_object(
-    'home_page_visits', home_visits,
-    'survey_starts', survey_start,
-    'survey_completions', survey_complete,
-    'recommendations_page_visits', rec_visits,
-    'company_interests', company_int,
-    'signups', signup_stats,
-    'survey_types', survey_type_stats,
-    'survey_steps', step_stats,
-    'survey_dropoffs', dropoff_stats,
-    'anonymous_users', anon_stats,
-    'dialog_closes', dialog_closes
-  );
-END;
-$$;
-```
-
-### Installation
-
-1. Clone the repository
+Or using Bun:
 
 ```bash
-git clone https://github.com/yourusername/project-x.git
-cd project-x
+bun add -D supabase
 ```
 
-2. Install dependencies
+Note: For Bun versions below v1.0.17, you must add `supabase` as a trusted dependency before installation.
+
+2. Initialize Supabase in your project:
 
 ```bash
-bun install
+supabase init
 ```
 
-3. Run the development server
+3. Link your project:
+
+```bash
+supabase link --project-ref your-project-ref
+```
+
+4. Run the migrations:
+
+```bash
+supabase db push
+```
+
+This will create all necessary tables and functions:
+
+- Core tables (`user_values`, `companies`, `recommendations`, `value_images`)
+- Analytics tables (`analytics_events`, `ab_testing`)
+- Analytics functions for tracking user behavior and generating reports
+- Value images functions for managing and retrieving value-based images
+
+5. Start the development server:
 
 ```bash
 bun run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Documentation
+
+Detailed documentation is organized in the following sections:
+
+### Features
+
+- [Analytics Custom Date Range](docs/features/analytics-custom-date-range.md)
+- [Random Value Images](docs/features/random-value-images.md)
+- [Value Images Management](docs/features/value-images.md)
+
+### Setup & Configuration
+
+- [Database Schema](docs/database-schema.md)
+- [Supabase Setup Guide](docs/setup/supabase.md)
+
+### Testing
+
+- [Supabase Integration Testing](docs/testing/supabase-integration.md)
 
 ## Deployment
 
