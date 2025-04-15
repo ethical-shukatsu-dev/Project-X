@@ -2,7 +2,7 @@
 // Run with: bun test-environments.mjs
 
 import dotenv from 'dotenv';
-import { getSupabaseConfig, getEnvironmentName } from './src/lib/supabase/config.js';
+import { getSupabaseConfig, getEnvironmentName } from '../../src/lib/supabase/config.ts';
 import fs from 'fs';
 
 // First load environment variables from .env.local

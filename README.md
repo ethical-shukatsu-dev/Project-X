@@ -71,18 +71,23 @@ Refer to `.env.example` for all available configuration options and their descri
 5. Verify your environment setup:
 
 ```bash
-# Test environment configuration
-bun scripts/setup/test-environments.mjs
+# First, verify your environment configuration (no database connection required)
+bun verify-test-environments
 
-# Verify Supabase connection and tables
-bun scripts/setup/verify-supabase.mjs
+# Then, verify database connection and table setup
+bun verify-db-connection
 ```
 
 Use the `--production` flag to test production environment:
 
 ```bash
-bun scripts/setup/verify-supabase.mjs --production
+bun verify-db-connection:prod
 ```
+
+The verification scripts serve different purposes:
+
+- `verify-env-config.mjs`: Checks environment variables and configuration files
+- `verify-db-connection.mjs`: Tests actual database connection and table setup
 
 ### Database Setup
 
