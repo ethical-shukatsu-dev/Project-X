@@ -73,21 +73,7 @@ Refer to `.env.example` for all available configuration options and their descri
 ```bash
 # First, verify your environment configuration (no database connection required)
 bun verify-test-environments
-
-# Then, verify database connection and table setup
-bun verify-db-connection
 ```
-
-Use the `--production` flag to test production environment:
-
-```bash
-bun verify-db-connection:prod
-```
-
-The verification scripts serve different purposes:
-
-- `verify-env-config.mjs`: Checks environment variables and configuration files
-- `verify-db-connection.mjs`: Tests actual database connection and table setup
 
 ### Database Setup
 
@@ -131,6 +117,19 @@ This will create all necessary tables and functions:
 - Analytics tables (`analytics_events`, `ab_testing`)
 - Analytics functions for tracking user behavior and generating reports
 - Value images functions for managing and retrieving value-based images
+
+5. Verify database connection and table setup
+
+```bash
+# Then, verify database connection and table setup
+bun verify-db-connection
+```
+
+Use the `--production` flag to test production environment:
+
+```bash
+bun verify-db-connection:prod
+```
 
 ### Database Maintenance
 
