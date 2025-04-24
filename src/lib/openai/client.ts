@@ -90,8 +90,7 @@ export async function streamRecommendations(
     systemPrompt +
     (locale === 'ja'
       ? `\n\nあなたは画像ベースの価値観評価の専門家でもあります。ユーザーが選択した画像から価値観を抽出し、
-それを企業の推薦に活用できます。\n\nまた、企業データの分析の専門家でもあります。企業の公式情報（ミッショ ン、ビジョン、価値観）だけでなく、社員レビューや実際の職場環境も考慮して、ユーザーの価値観と企業の価
-値観 の間の真の適合性を評価してください。表面的なマッチングではなく、企業文化と実際の職場環境に基づいた深い分 析を提供してください。\n\n特に重要なのは、ユーザーの価値観と企業の価値観の間の具体的な一致点を
+それを企業の推薦に活用できます。\n\nまた、企業データの分析の専門家でもあります。企業の公式情報（ミッション、ビジョン、価値観）だけでなく、社員レビューや実際の職場環境も考慮して、ユーザーの価値観と企業の価値観の間の真の適合性を評価してください。表面的なマッチングではなく、企業文化と実際の職場環境に基づいた深い分 析を提供してください。\n\n特に重要なのは、ユーザーの価値観と企業の価値観の間の具体的な一致点を
 明確に示す ことです。この企業はあなたと同じように...という形式で、具体的な例や証拠を含めた詳細な説明を提供してください。\n\n重要: すべての出力は必ず日本語のみで提供してください。企業名や業界名も含め、
 英語の単語や文を混在 させないでください。`
       : `\n\nYou are also an expert in image-based value assessment. You can extract values from images selected by users and incorporate them into company recommendations.\n\nYou are also an expert in company data analysis. Consider not just official company information (mission, vision, values) but also employee reviews and actual workplace environment to evaluate the true fit between user values and company values. Provide deep analysis based on company culture and actual workplace environment, not just surface-level matching.\n\nIt is especially important to clearly show the specific connections between the user's values and the company's values. Use a "This company, like you, values..." format and provide detailed explanations with specific examples or evidence.\n\nImportant: All output must be provided in English only. Do not mix Japanese words or sentences, including company names and industry names.`);
@@ -666,7 +665,7 @@ export async function generateRecommendations(
     - 「富士通ではイノベーションを生み出す環境を大事にしており、フレックスタイム制度や在宅勤務制度を積極的に導入しています。」
     - 「楽天ではストレス耐性が高い人材を求めています。流れの早いオンラインコマースの業界において、顧客のニーズに合わせて柔軟にソリューションを変えていくため、色々な変化が起きやすくストレス耐性のある人材を求めています。」
     - 「資生堂ではチームワークを重視しています。新規商品開発も一人の天才が生み出すより、チームで話し合って出てきたアイディアを大事にしています。」
-
+    
     マッチングポイントの悪い例:
     - 「この企業はイノベーションを重視しています」（ユーザーとの具体的な関連性が示されていない）
     - 「良い職場環境を提供しています」（具体性に欠ける）
@@ -679,7 +678,6 @@ export async function generateRecommendations(
     - 「大規模（10000人以上）」: 少なくとも1社
     
     また、該当企業の業界は下記のカテゴリとサブカテゴリから選んで表示してください。提示する企業は同じ業界にならないようにしてください。
-
     - メーカー
     食品・農林・水産
     建設・住宅・インテリア
@@ -761,7 +759,7 @@ export async function generateRecommendations(
             ...
             // ユーザーの各強みに対する詳細な説明
           },
-          "matching_points": ["総合的なマッチングポイント1（日本語のみ）", "総合的なマッチングポイント2（日本語のみ）", ...] 
+          "matching_points": ["総合的なマッチングポイント1（日本語のみ）", "総合的なマッチングポイント2（日本語のみ）", ...]
         },
         // 他の企業...
       ]
@@ -915,7 +913,7 @@ export async function generateRecommendations(
             ...
             // Detailed explanation for each user strength
           },
-          "matching_points": ["Overall matching point 1 (English only)", "Overall matching point 2 (English only)", ...] 
+          "matching_points": ["Overall matching point 1 (English only)", "Overall matching point 2 (English only)", ...]
         },
         // more companies...
       ]
