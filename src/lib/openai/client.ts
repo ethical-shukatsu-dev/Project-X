@@ -1,15 +1,11 @@
-import OpenAI from 'openai';
+import { openai as openaiClient } from './config';
 import { Company, UserValues } from '../supabase/client';
 import { v4 as uuid } from 'uuid';
 import { getOrCreateCompany } from '../companies/client';
 import fs from 'fs';
 import path from 'path';
 import { RECOMMENDATION_COUNT } from '../constants/recommendations';
-
-// Initialize the OpenAI client
-const openaiClient = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import OpenAI from 'openai';
 
 export type RecommendationResult = {
   id: string;
@@ -63,6 +59,19 @@ const loadAiTranslations = (locale: string) => {
     return null;
   }
 };
+
+// Helper function to get the appropriate model based on which provider is being used
+function getModelForProvider(
+  client: OpenAI,
+  openaiModel = 'gpt-4o',
+  geminiModel = 'gemini-2.0-flash'
+) {
+  // Use optional chaining and type assertion for accessing baseURL which is a private property
+  const baseURL = client.baseURL;
+  const isGemini = baseURL?.includes('generativelanguage.googleapis.com');
+  console.log('isGemini', isGemini);
+  return isGemini ? geminiModel : openaiModel;
+}
 
 /**
  * Stream company recommendations to the client one by one
@@ -405,7 +414,7 @@ export async function streamRecommendations(
   try {
     console.log('Starting OpenAI streaming request...');
     const response = await openaiClient.chat.completions.create({
-      model: 'gpt-4o',
+      model: getModelForProvider(openaiClient),
       messages: [
         {
           role: 'system',
@@ -924,7 +933,7 @@ export async function generateRecommendations(
 
   try {
     const response = await openaiClient.chat.completions.create({
-      model: 'gpt-4o',
+      model: getModelForProvider(openaiClient),
       messages: [
         {
           role: 'system',
@@ -1178,7 +1187,7 @@ export async function fetchCompanyData(
 
   try {
     const response = await openaiClient.chat.completions.create({
-      model: 'gpt-4o',
+      model: getModelForProvider(openaiClient),
       messages: [
         {
           role: 'system',
