@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
-import { streamRecommendations, RecommendationResult } from '@/lib/openai/client';
+import { streamRecommendations, RecommendationResult } from '@/lib/recommendations/client';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);

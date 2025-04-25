@@ -3,7 +3,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from '@/i18n-client';
-import { RecommendationResult } from '@/lib/openai/client';
+import { RecommendationResult } from '@/lib/recommendations/client';
 import AnimatedContent from '@/components/ui/Animations/AnimatedContent/AnimatedContent';
 import { useMemo } from 'react';
 

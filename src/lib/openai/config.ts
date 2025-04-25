@@ -3,9 +3,9 @@ import OpenAI from 'openai';
 // Determine which API to use based on available API keys
 function determineApiProvider(): 'openai' | 'gemini' {
   // If GOOGLE_API_KEY is set and valid, use Gemini
-  if (process.env.GOOGLE_API_KEY && process.env.GOOGLE_API_KEY.trim() !== '') {
-    return 'gemini';
-  }
+  // if (process.env.GOOGLE_API_KEY && process.env.GOOGLE_API_KEY.trim() !== '') {
+  //   return 'gemini';
+  // }
   // Otherwise default to OpenAI
   return 'openai';
 }
@@ -28,3 +28,16 @@ export function createOpenAIClient() {
 
 // Initialize the default OpenAI client
 export const openai = createOpenAIClient();
+
+// Helper function to get the appropriate model based on which provider is being used
+export function getModelForProvider(
+  client: OpenAI,
+  openaiModel = 'gpt-4o',
+  geminiModel = 'gemini-2.0-flash'
+) {
+  // Use optional chaining and type assertion for accessing baseURL which is a private property
+  const baseURL = client.baseURL;
+  const isGemini = baseURL?.includes('generativelanguage.googleapis.com');
+  console.log('isGemini', isGemini);
+  return isGemini ? geminiModel : openaiModel;
+}

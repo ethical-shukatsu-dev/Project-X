@@ -6,7 +6,7 @@ import CompanyCard from '@/components/recommendations/CompanyCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { RecommendationResult } from '@/lib/openai/client';
+import { RecommendationResult } from '@/lib/recommendations/client';
 import { Company } from '@/lib/supabase/client';
 import { useTranslation } from '@/i18n-client';
 import SignupDialog from '@/components/recommendations/SignupDialog';
