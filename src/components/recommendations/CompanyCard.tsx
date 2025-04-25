@@ -5,8 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Company } from '@/lib/supabase/client';
 import { useTranslation } from '@/i18n-client';
 import { EyeOff, Loader2, PartyPopper, ThumbsDown } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import Link from 'next/link';
 import { LOCALSTORAGE_KEYS } from '@/lib/constants/localStorage';
 
 interface CompanyCardProps {
@@ -202,22 +200,11 @@ export default function CompanyCard({
               }`}
             >
               {company.logo_url && !logoError ? (
-                <Link href={company.site_url || '/'} target="_blank">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <AvatarImage
-                          src={company.logo_url}
-                          alt={company.name}
-                          onError={() => setLogoError(true)}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{t('recommendations.visitWebsite')}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Link>
+                <AvatarImage
+                  src={company.logo_url}
+                  alt={company.name}
+                  onError={() => setLogoError(true)}
+                />
               ) : null}
               <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
             </Avatar>
