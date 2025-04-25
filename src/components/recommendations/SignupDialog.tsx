@@ -5,7 +5,7 @@ import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui
 import { useTranslation } from '@/i18n-client';
 import BounceCards from '@/components/ui/Components/BounceCards/BounceCards';
 import CompanyCard from '@/components/ui/Components/BounceCards/CompanyCard';
-import { RecommendationResult } from '@/lib/openai/client';
+import { RecommendationResult } from '@/lib/recommendations/client';
 import { Button } from '../ui/button';
 import {
   trackSignupClick,

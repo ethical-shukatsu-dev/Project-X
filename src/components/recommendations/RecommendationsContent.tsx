@@ -6,7 +6,7 @@ import CompanyCard from '@/components/recommendations/CompanyCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { RecommendationResult } from '@/lib/openai/client';
+import { RecommendationResult } from '@/lib/recommendations/client';
 import { Company } from '@/lib/supabase/client';
 import { useTranslation } from '@/i18n-client';
 import SignupDialog from '@/components/recommendations/SignupDialog';
@@ -37,7 +37,120 @@ export default function RecommendationsContent({ lng }: RecommendationsContentPr
   const [isSignupDialogOpen, setSignupDialogOpen] = useState(false);
   const [, setFeedbackCount] = useState(0);
   const [hasClosedDialog, setHasClosedDialog] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(true);
+
+  // Function to fetch recommendations with streaming
+  const fetchRecommendations = async (refresh = false) => {
+    if (!userId) {
+      setError(t('recommendations.errors.missing_user_id'));
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
+    // Set loading state based on context
+    if (!refresh) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
+
+    try {
+      setIsStreaming(true);
+      setRecommendations([]); // Clear existing recommendations
+
+      // Set up fetch for streaming response
+      const response = await fetch(
+        `/api/recommendations/stream?userId=${userId}&locale=${lng}${
+          refresh ? '&refresh=true' : ''
+        }`
+      );
+
+      if (!response.ok) {
+        throw new Error(t('recommendations.errors.fetch_failed'));
+      }
+
+      if (!response.body) {
+        throw new Error('ReadableStream not supported');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      let done = false;
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+
+        if (done) {
+          // Streaming finished
+          setIsStreaming(false);
+          setLoading(false);
+          setRefreshing(false);
+          break;
+        }
+
+        const chunk = decoder.decode(value, { stream: true });
+        // Split the chunk into lines (each line is a JSON object)
+        const lines = chunk.split('\n').filter((line) => line.trim() !== '');
+
+        console.log('Stream received:', { chunk, lineCount: lines.length });
+
+        for (const line of lines) {
+          try {
+            console.log(
+              'Processing line:',
+              line.substring(0, 100) + (line.length > 100 ? '...' : '')
+            );
+
+            // Make sure the line is valid JSON
+            if (!line.trim().startsWith('{') || !line.trim().endsWith('}')) {
+              console.warn("Line doesn't appear to be valid JSON:", line);
+              continue;
+            }
+
+            const data = JSON.parse(line);
+            console.log('Parsed data:', data);
+
+            if (data.recommendation) {
+              console.log(
+                'Found recommendation for:',
+                data.recommendation.company?.name || 'Unknown company'
+              );
+              console.log('Recommendation details:', {
+                id: data.recommendation.id,
+                companyId: data.recommendation.company?.id,
+                matchingPoints: data.recommendation.matching_points?.length || 0,
+              });
+
+              // Add the new recommendation to the state
+              setRecommendations((prev) => {
+                // Check if we already have this recommendation
+                const exists = prev.some((r) => r.id === data.recommendation.id);
+                if (exists) {
+                  console.log('Recommendation already exists, skipping');
+                  return prev;
+                }
+
+                console.log('Adding new recommendation to state');
+                return [...prev, data.recommendation];
+              });
+            } else {
+              console.warn('Parsed JSON does not contain a recommendation property:', data);
+            }
+          } catch (e) {
+            console.error('Error parsing JSON from stream:', e, 'Line:', line);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching recommendations:', err);
+      setError(t('recommendations.errors.general'));
+      setLoading(false);
+      setRefreshing(false);
+      setIsStreaming(false);
+    }
+  };
 
   useEffect(() => {
     // Scroll to top of page
@@ -48,246 +161,14 @@ export default function RecommendationsContent({ lng }: RecommendationsContentPr
       console.error('Error tracking recommendations page visit:', error);
     });
 
-    const fetchRecommendations = async (refresh = false) => {
-      if (!userId) {
-        setError(t('recommendations.errors.missing_user_id'));
-        setLoading(false);
-        return;
-      }
-
-      // Set loading state if not refreshing
-      if (!refresh) {
-        setLoading(true);
-      } else {
-        setRefreshing(true);
-      }
-
-      // Check if we should use streaming or not
-      const useStreaming = true; // Can be made configurable if needed
-
-      try {
-        if (useStreaming) {
-          // Use streaming API
-          setIsStreaming(true);
-          setRecommendations([]); // Clear existing recommendations
-
-          // Set up fetch for streaming response
-          const response = await fetch(
-            `/api/recommendations/stream?userId=${userId}&locale=${lng}${
-              refresh ? '&refresh=true' : ''
-            }`
-          );
-
-          if (!response.ok) {
-            throw new Error(t('recommendations.errors.fetch_failed'));
-          }
-
-          if (!response.body) {
-            throw new Error('ReadableStream not supported');
-          }
-
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-
-          let done = false;
-          while (!done) {
-            const { value, done: readerDone } = await reader.read();
-            done = readerDone;
-
-            if (done) {
-              // Streaming finished
-              setIsStreaming(false);
-              setLoading(false);
-              setRefreshing(false);
-              break;
-            }
-
-            const chunk = decoder.decode(value, { stream: true });
-            // Split the chunk into lines (each line is a JSON object)
-            const lines = chunk.split('\n').filter((line) => line.trim() !== '');
-
-            console.log('Stream received:', { chunk, lineCount: lines.length });
-
-            for (const line of lines) {
-              try {
-                console.log(
-                  'Processing line:',
-                  line.substring(0, 100) + (line.length > 100 ? '...' : '')
-                );
-
-                // Make sure the line is valid JSON
-                if (!line.trim().startsWith('{') || !line.trim().endsWith('}')) {
-                  console.warn("Line doesn't appear to be valid JSON:", line);
-                  continue;
-                }
-
-                const data = JSON.parse(line);
-                console.log('Parsed data:', data);
-
-                if (data.recommendation) {
-                  console.log(
-                    'Found recommendation for:',
-                    data.recommendation.company?.name || 'Unknown company'
-                  );
-                  console.log('Recommendation details:', {
-                    id: data.recommendation.id,
-                    companyId: data.recommendation.company?.id,
-                    matchingPoints: data.recommendation.matching_points?.length || 0,
-                  });
-
-                  // Add the new recommendation to the state
-                  setRecommendations((prev) => {
-                    // Check if we already have this recommendation
-                    const exists = prev.some((r) => r.id === data.recommendation.id);
-                    if (exists) {
-                      console.log('Recommendation already exists, skipping');
-                      return prev;
-                    }
-
-                    console.log('Adding new recommendation to state');
-                    return [...prev, data.recommendation];
-                  });
-                } else {
-                  console.warn('Parsed JSON does not contain a recommendation property:', data);
-                }
-              } catch (e) {
-                console.error('Error parsing JSON from stream:', e, 'Line:', line);
-              }
-            }
-          }
-        } else {
-          // Use regular API
-          const response = await fetch(
-            `/api/recommendations?userId=${userId}&locale=${lng}${refresh ? '&refresh=true' : ''}`
-          );
-
-          if (!response.ok) {
-            throw new Error(t('recommendations.errors.fetch_failed'));
-          }
-
-          const data = await response.json();
-          setRecommendations(data.recommendations);
-          setLoading(false);
-          setRefreshing(false);
-        }
-      } catch (err) {
-        console.error('Error fetching recommendations:', err);
-        setError(t('recommendations.errors.general'));
-        setLoading(false);
-        setRefreshing(false);
-        setIsStreaming(false);
-      }
-    };
-
     if (loaded) {
       fetchRecommendations();
     }
   }, [userId, t, loaded, lng]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = () => {
     setRefreshing(true);
-    const fetchRecommendations = async () => {
-      if (!userId) {
-        setError(t('recommendations.errors.missing_user_id'));
-        setRefreshing(false);
-        return;
-      }
-
-      try {
-        // Always use streaming for refresh
-        setIsStreaming(true);
-        setRecommendations([]); // Clear existing recommendations
-
-        // Set up fetch for streaming response
-        const response = await fetch(
-          `/api/recommendations/stream?userId=${userId}&locale=${lng}&refresh=true`
-        );
-
-        if (!response.ok) {
-          throw new Error(t('recommendations.errors.fetch_failed'));
-        }
-
-        if (!response.body) {
-          throw new Error('ReadableStream not supported');
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        let done = false;
-        while (!done) {
-          const { value, done: readerDone } = await reader.read();
-          done = readerDone;
-
-          if (done) {
-            // Streaming finished
-            setIsStreaming(false);
-            setRefreshing(false);
-            break;
-          }
-
-          const chunk = decoder.decode(value, { stream: true });
-          // Split the chunk into lines (each line is a JSON object)
-          const lines = chunk.split('\n').filter((line) => line.trim() !== '');
-
-          console.log('Stream received:', { chunk, lineCount: lines.length });
-
-          for (const line of lines) {
-            try {
-              console.log(
-                'Processing line:',
-                line.substring(0, 100) + (line.length > 100 ? '...' : '')
-              );
-
-              // Make sure the line is valid JSON
-              if (!line.trim().startsWith('{') || !line.trim().endsWith('}')) {
-                console.warn("Line doesn't appear to be valid JSON:", line);
-                continue;
-              }
-
-              const data = JSON.parse(line);
-              console.log('Parsed data:', data);
-
-              if (data.recommendation) {
-                console.log(
-                  'Found recommendation for:',
-                  data.recommendation.company?.name || 'Unknown company'
-                );
-                console.log('Recommendation details:', {
-                  id: data.recommendation.id,
-                  companyId: data.recommendation.company?.id,
-                  matchingPoints: data.recommendation.matching_points?.length || 0,
-                });
-
-                // Add the new recommendation to the state
-                setRecommendations((prev) => {
-                  // Check if we already have this recommendation
-                  const exists = prev.some((r) => r.id === data.recommendation.id);
-                  if (exists) {
-                    console.log('Recommendation already exists, skipping');
-                    return prev;
-                  }
-
-                  console.log('Adding new recommendation to state');
-                  return [...prev, data.recommendation];
-                });
-              } else {
-                console.warn('Parsed JSON does not contain a recommendation property:', data);
-              }
-            } catch (e) {
-              console.error('Error parsing JSON from stream:', e, 'Line:', line);
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching recommendations:', err);
-        setError(t('recommendations.errors.general'));
-        setRefreshing(false);
-        setIsStreaming(false);
-      }
-    };
-
-    fetchRecommendations();
+    fetchRecommendations(true);
   };
 
   const handleFeedback = async (
